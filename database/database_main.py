@@ -1,7 +1,7 @@
 # database_main.py
 
 import mysql.connector
-from db_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
+from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 # Function to connect to the MySQL database
 def connect_to_database():

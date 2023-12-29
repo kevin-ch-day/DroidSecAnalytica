@@ -1,5 +1,10 @@
+# main.py
+
+# Python libraries
 import os
 import logging
+
+# Custom libraries
 from static_analysis.static_main import execute_static_analysis
 from dynamic_analysis.dynamic_main import execute_dynamic_analysis
 from utils.utils_main import create_output_directory, save_results
@@ -8,39 +13,82 @@ from database.database_main import connect_to_database, store_analysis_result, r
 # Configure logging
 logging.basicConfig(filename='droidsecanalytica.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
-def display_menu():
-    print("\nDroidSecAnalytica")
-    print("1. Static Analysis")
-    print("2. Dynamic Analysis")
-    print("3. Utility Functions")
-    print("4. Database Operations")
-    print("0. Exit")
+# Display menu
+def display_menu(app_name="DroidSecAnalytica"):
+    """
+    Display the main menu options.
 
+    Args:
+        app_name (str): The name of the application.
+    """
+    print(f"\n Main Menu")
+    print("=" * 24)
+    print(" 1. Static Analysis")
+    print(" 2. Dynamic Analysis")
+    print(" 3. Utility Functions")
+    print(" 4. Database Operations")
+    print(" 0. Exit")
+    print("=" * 24)
+
+# Display application name
+def display_app_name(app_name="DroidSecAnalytica"):
+    """
+    Display the name of the application in a stylish header.
+
+    Args:
+        app_name (str): The name of the application.
+    """
+    app_name_length = len(app_name)
+    header_width = 40  # Adjust the width as needed
+
+    # Create the top border
+    top_border = "╔" + "═" * (header_width - 2) + "╗"
+    
+    # Create the centered header with the application name
+    app_name_header = "║" + app_name.center(header_width - 2) + "║"
+    
+    # Create the bottom border
+    bottom_border = "╚" + "═" * (header_width - 2) + "╝"
+
+    # Print the header
+    print("\n" + top_border)
+    print(app_name_header)
+    print(bottom_border)
+
+# Static analysis menu
 def static_analysis_menu():
-    print("\nStatic Analysis Menu")
-    print("1. Perform Static Analysis")
-    print("2. Back to Main Menu")
+    print("\n Static Analysis Menu")
+    print("=" * 24)
+    print(" 1. Perform Static Analysis")
+    print(" 2. Back to Main Menu")
 
+# Dynamic analysis menu
 def dynamic_analysis_menu():
-    print("\nDynamic Analysis Menu")
-    print("1. Perform Dynamic Analysis")
-    print("2. Back to Main Menu")
+    print("\n Dynamic Analysis Menu")
+    print(" 1. Perform Dynamic Analysis")
+    print(" 2. Back to Main Menu")
 
+# Utility functions menu
 def utility_functions_menu():
-    print("\nUtility Functions Menu")
-    print("1. Create Output Directory")
-    print("2. Save Results")
-    print("3. Back to Main Menu")
+    print("\n Utility Functions Menu")
+    print("=" * 24)
+    print(" 1. Create Output Directory")
+    print(" 2. Save Results")
+    print(" 3. Back to Main Menu")
 
+# Database operations menu
 def database_operations_menu():
-    print("\nDatabase Operations Menu")
-    print("1. Connect to Database")
-    print("2. Store Analysis Result")
-    print("3. Retrieve Data")
-    print("4. Back to Main Menu")
+    print("\n Database Operations Menu")
+    print("=" * 24)
+    print(" 1. Connect to Database")
+    print(" 2. Store Analysis Result")
+    print(" 3. Retrieve Data")
+    print(" 4. Back to Main Menu")
 
+# main
 def main():
     while True:
+        display_app_name()  # Display the name of the application
         display_menu()
         choice = input("\nEnter your choice: ")
 
@@ -50,7 +98,7 @@ def main():
 
         elif choice == '1':
             static_analysis_menu()
-            static_choice = input("Enter your choice: ")
+            static_choice = input("\nEnter your choice: ")
             if static_choice == '1':
                 print("\nStatic Analysis")
                 apk_path = input("Enter the path to the APK file for static analysis: ")
@@ -67,7 +115,7 @@ def main():
 
         elif choice == '2':
             dynamic_analysis_menu()
-            dynamic_choice = input("Enter your choice: ")
+            dynamic_choice = input("\nEnter your choice: ")
             if dynamic_choice == '1':
                 print("\nDynamic Analysis")
                 apk_path = input("Enter the path to the APK file for dynamic analysis: ")
@@ -84,7 +132,7 @@ def main():
 
         elif choice == '3':
             utility_functions_menu()
-            utility_choice = input("Enter your choice: ")
+            utility_choice = input("\nEnter your choice: ")
             if utility_choice == '1':
                 create_output_directory()
                 print("Output directory created successfully.")
@@ -106,7 +154,7 @@ def main():
 
         elif choice == '4':
             database_operations_menu()
-            db_choice = input("Enter your choice: ")
+            db_choice = input("\nEnter your choice: ")
             if db_choice == '1':
                 db_path = input("Enter database path: ")
                 db = connect_to_database(db_path)
@@ -149,5 +197,6 @@ def main():
         else:
             print("Invalid choice. Please select a valid option.")
 
+# CLI
 if __name__ == "__main__":
     main()

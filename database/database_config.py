@@ -1,4 +1,4 @@
-# db_config.py
+# database_config.py
 
 # Database configuration
 DB_HOST = "your_mysql_host"
