@@ -2,19 +2,17 @@
 import os
 import subprocess
 import logging
-import datetime
 
 # Constants
-LOG_DIR = '../logs'
-LOG_FILE = os.path.join(LOG_DIR, 'static_analysis.log')
-OUTPUT_DIR = 'static_analysis_results'
+LOG_FILE = 'logs/static_analysis.log'
+ANALYSIS_OUTPUT_DIR = 'analysis_results'
 
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def create_output_directory():
     """Create the output directory if it doesn't exist."""
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(ANALYSIS_OUTPUT_DIR, exist_ok=True)
 
 def decompile_apk(apk_path):
     """
@@ -24,7 +22,7 @@ def decompile_apk(apk_path):
         apk_path (str): The path to the APK file.
     """
     try:
-        output_directory = os.path.join(OUTPUT_DIR, os.path.splitext(os.path.basename(apk_path))[0])
+        output_directory = os.path.join(ANALYSIS_OUTPUT_DIR, os.path.splitext(os.path.basename(apk_path))[0])
         create_output_directory()
         subprocess.run(["apktool", "d", apk_path, "-o", output_directory], check=True)
         logging.info(f"APK decompiled successfully. Output directory: {output_directory}")
@@ -181,22 +179,36 @@ def save_results(apk_path, manifest_data):
     """
     try:
         create_output_directory()
-        output_file = os.path.join(OUTPUT_DIR, f"{os.path.splitext(os.path.basename(apk_path))[0]}_analysis_results.txt")
+        output_file = os.path.join(ANALYSIS_OUTPUT_DIR, f"{os.path.splitext(os.path.basename(apk_path))[0]}_analysis_results.txt")
         
         with open(output_file, "w") as f:
             f.write("Static Analysis Results:\n")
             f.write(f"APK Name: {os.path.basename(apk_path)}\n")
             f.write(f"Package Name: {manifest_data.get('package_name', 'N/A')}\n")
-            f.write(f"Permissions: {', '.join(manifest_data.get('permissions', ['N/A']))}\n")
-            f.write(f"Activities: {', '.join(manifest_data.get('activities', ['N/A']))}\n")
-            f.write(f"Services: {', '.join(manifest_data.get('services', ['N/A']))}\n")
-            f.write(f"Providers: {', '.join(manifest_data.get('providers', ['N/A']))}\n")
+            
+            # Permissions
+            permissions = manifest_data.get('permissions', ['N/A'])
+            if permissions:
+                f.write("\nPermissions:\n")
+                for index, permission in enumerate(permissions, start=1):
+                    f.write(f"[{index}] {permission}\n")
+            
+            # Activities
+            activities = manifest_data.get('activities', ['N/A'])
+            if activities:
+                f.write(f"\nActivities: {', '.join(activities)}\n")
+            
+            # Services
+            services = manifest_data.get('services', ['N/A'])
+            if services:
+                f.write(f"Services: {', '.join(services)}\n")
+            
+            # Providers
+            providers = manifest_data.get('providers', ['N/A'])
+            if providers:
+                f.write(f"Providers: {', '.join(providers)}\n")
         
         logging.info(f"Static analysis results saved to {output_file}")
 
     except Exception as e:
         logging.error(f"Error saving analysis results: {e}")
-
-if __name__ == "__main__":
-    apk_path = 'SharkBot-Nov-2021-signed.apk'
-    static_analysis_main(apk_path)
