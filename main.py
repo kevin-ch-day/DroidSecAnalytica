@@ -93,7 +93,7 @@ def exit_app():
             confirmation = input("\nAre you sure you want to exit? (yes/no): ").strip().lower()
             if confirmation == 'yes':
                 print("\nExiting. Goodbye!")
-                sys.exit(0)  # Exit with a successful status code
+                exit()
             
             elif confirmation == 'no':
                 return  # Return to the main menu

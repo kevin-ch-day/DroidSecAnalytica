@@ -1,11 +1,18 @@
-# static_analysis/static_analysis.py
 import os
 import subprocess
 import logging
+from xml.etree import ElementTree as ET
 
 # Constants
 LOG_FILE = 'logs/static_analysis.log'
 ANALYSIS_OUTPUT_DIR = 'analysis_results'
+
+# List of common and potentially risky permissions
+COMMON_PERMISSIONS = ["INTERNET", "ACCESS_NETWORK_STATE", "READ_PHONE_STATE", "WRITE_EXTERNAL_STORAGE"]
+POTENTIALLY_RISKY_PERMISSIONS = ["READ_SMS", "WRITE_SMS", "SEND_SMS", "RECEIVE_SMS", "ACCESS_FINE_LOCATION"]
+
+# Metadata elements to extract
+METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service", "provider"]
 
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -46,104 +53,81 @@ def analyze_android_manifest(decompiled_dir):
     manifest_data = {}
     
     try:
-        with open(manifest_path, "r", encoding="utf-8") as f:
-            manifest_content = f.read()
+        if not os.path.exists(manifest_path):
+            logging.error(f"AndroidManifest.xml not found at {manifest_path}")
+            return None
 
-        # Extract relevant data from the manifest (customize as needed)
-        package_name = extract_manifest_attribute(manifest_content, "package")
-        permissions = extract_permissions(manifest_content)
-        activities = extract_manifest_components(manifest_content, "activity")
-        services = extract_manifest_components(manifest_content, "service")
-        providers = extract_manifest_components(manifest_content, "provider")
+        tree = ET.parse(manifest_path)
+        root = tree.getroot()
+
+        # Extract package name
+        package_name = root.attrib.get("package", "N/A")
+
+        # Extract permissions and categorize them
+        permissions = [node.attrib.get("name", "N/A") for node in root.findall(".//uses-permission")]
+        categorized_permissions = categorize_permissions(permissions)
+
+        # Extract metadata for specified elements
+        metadata = {}
+        for element in METADATA_ELEMENTS:
+            metadata[element] = extract_metadata(root, element)
 
         manifest_data["package_name"] = package_name
-        manifest_data["permissions"] = permissions
-        manifest_data["activities"] = activities
-        manifest_data["services"] = services
-        manifest_data["providers"] = providers
+        manifest_data["permissions"] = categorized_permissions
+        manifest_data["metadata"] = metadata
 
         logging.info("AndroidManifest.xml analysis completed.")
         return manifest_data
 
-    except FileNotFoundError:
-        logging.error(f"Error: AndroidManifest.xml not found at {manifest_path}")
     except Exception as e:
         logging.error(f"Error analyzing AndroidManifest.xml: {e}")
-    
-    return None
+        return None
 
-def extract_manifest_attribute(manifest_content, attribute_name):
+def extract_metadata(root, element_name):
     """
-    Extract a specific attribute value from the AndroidManifest.xml content.
+    Extract metadata for a specified element from the AndroidManifest.xml.
 
     Args:
-        manifest_content (str): The content of the AndroidManifest.xml file.
-        attribute_name (str): The name of the attribute to extract.
+        root (Element): The root element of the AndroidManifest.xml.
+        element_name (str): The name of the element to extract metadata for.
 
     Returns:
-        str: The extracted attribute value, or None if not found.
+        list: A list of dictionaries containing metadata for the specified element.
     """
-    try:
-        start = manifest_content.find(f'{attribute_name}="')
-        if start != -1:
-            start += len(attribute_name) + 2  # Account for the attribute name and the equal sign
-            end = manifest_content.find('"', start)
-            return manifest_content[start:end]
-    except Exception as e:
-        logging.error(f"Error extracting {attribute_name}: {e}")
-    
-    return None
+    metadata = []
+    elements = root.findall(f".//{element_name}")
+    for elem in elements:
+        metadata_item = {}
+        metadata_item["name"] = elem.attrib.get("name", "N/A")
+        # Additional metadata attributes to extract can be added here
+        metadata.append(metadata_item)
+    return metadata
 
-def extract_permissions(manifest_content):
+def categorize_permissions(permissions):
     """
-    Extract permissions from the AndroidManifest.xml content.
+    Categorize permissions into common, potentially risky, and uncommon.
 
     Args:
-        manifest_content (str): The content of the AndroidManifest.xml file.
+        permissions (list): List of permissions requested by the app.
 
     Returns:
-        list: A list of extracted permissions.
+        dict: Categorized permissions.
     """
-    permissions = []
-    try:
-        permission_start = manifest_content.find("<uses-permission")
-        while permission_start != -1:
-            permission_end = manifest_content.find("/>", permission_start)
-            permission_line = manifest_content[permission_start:permission_end + 2]
-            permission = extract_manifest_attribute(permission_line, "android:name")
-            if permission:
-                permissions.append(permission)
-            permission_start = manifest_content.find("<uses-permission", permission_end)
-    except Exception as e:
-        logging.error(f"Error extracting permissions: {e}")
-    
-    return permissions
+    categorized_permissions = {
+        "common_permissions": [],
+        "uncommon_permissions": [],
+        "potentially_risky_permissions": []
+    }
 
-def extract_manifest_components(manifest_content, component_type):
-    """
-    Extract components (e.g., activities, services) from the AndroidManifest.xml content.
+    for permission in permissions:
+        if permission in COMMON_PERMISSIONS:
+            categorized_permissions["common_permissions"].append(permission)
+        elif permission in POTENTIALLY_RISKY_PERMISSIONS:
+            categorized_permissions["potentially_risky_permissions"].append(permission)
+        else:
+            categorized_permissions["uncommon_permissions"].append(permission)
 
-    Args:
-        manifest_content (str): The content of the AndroidManifest.xml file.
-        component_type (str): The type of component to extract (e.g., 'activity', 'service').
-
-    Returns:
-        list: A list of extracted components.
-    """
-    components = []
-    try:
-        start = manifest_content.find(f"<{component_type}")
-        while start != -1:
-            end = manifest_content.find("</{component_type}>", start)
-            component_line = manifest_content[start:end + len(component_type) + 3]
-            component_name = extract_manifest_attribute(component_line, "android:name")
-            if component_name:
-                components.append(component_name)
-            start = manifest_content.find(f"<{component_type}", end)
-    except Exception as e:
-        logging.error(f"Error extracting {component_type}s: {e}")
-    
-    return components
+    return categorized_permissions
 
 def execute_static_analysis(apk_path):
     """
@@ -158,8 +142,6 @@ def execute_static_analysis(apk_path):
         decompiled_dir = decompile_apk(apk_path)
         if decompiled_dir:
             manifest_data = analyze_android_manifest(decompiled_dir)
-            
-            # Add more static analysis steps as needed
             
             if manifest_data:
                 # Print or save the analyzed data
@@ -187,28 +169,24 @@ def save_results(apk_path, manifest_data):
             f.write(f"Package Name: {manifest_data.get('package_name', 'N/A')}\n")
             
             # Permissions
-            permissions = manifest_data.get('permissions', ['N/A'])
-            if permissions:
-                f.write("\nPermissions:\n")
-                for index, permission in enumerate(permissions, start=1):
-                    f.write(f"[{index}] {permission}\n")
-            
-            # Activities
-            activities = manifest_data.get('activities', ['N/A'])
-            if activities:
-                f.write(f"\nActivities: {', '.join(activities)}\n")
-            
-            # Services
-            services = manifest_data.get('services', ['N/A'])
-            if services:
-                f.write(f"Services: {', '.join(services)}\n")
-            
-            # Providers
-            providers = manifest_data.get('providers', ['N/A'])
-            if providers:
-                f.write(f"Providers: {', '.join(providers)}\n")
-        
+            f.write("\nPermissions:\n")
+            f.write("Common Permissions: {}\n".format(", ".join(manifest_data["permissions"]["common_permissions"])))
+            f.write("Potentially Risky Permissions: {}\n".format(", ".join(manifest_data["permissions"]["potentially_risky_permissions"])))
+            f.write("Uncommon Permissions: {}\n".format(", ".join(manifest_data["permissions"]["uncommon_permissions"])))
+
+            # Metadata
+            f.write("\nMetadata:\n")
+            for element, metadata_list in manifest_data["metadata"].items():
+                f.write(f"{element}:\n")
+                for index, metadata_item in enumerate(metadata_list, start=1):
+                    f.write(f"[{index}] Name: {metadata_item['name']}\n")
+
         logging.info(f"Static analysis results saved to {output_file}")
 
     except Exception as e:
         logging.error(f"Error saving analysis results: {e}")
+
+if __name__ == "__main__":
+    # Example usage:
+    apk_path = "path_to_your_apk.apk"
+    execute_static_analysis(apk_path)
