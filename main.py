@@ -3,6 +3,7 @@
 # Python libraries
 import os
 import logging
+import sys
 
 # Custom libraries
 from static_analysis.static_main import execute_static_analysis
@@ -85,17 +86,36 @@ def database_operations_menu():
     print(" 3. Retrieve Data")
     print(" 4. Back to Main Menu")
 
-# main
+# Exit the application
+def exit_app():
+    try:
+        while True:
+            confirmation = input("\nAre you sure you want to exit? (yes/no): ").strip().lower()
+            if confirmation == 'yes':
+                print("\nExiting. Goodbye!")
+                sys.exit(0)  # Exit with a successful status code
+            
+            elif confirmation == 'no':
+                return  # Return to the main menu
+            
+            else:
+                print("Please enter 'yes' or 'no'.")
+
+    except SystemExit:
+        pass  # Catch the exit call and continue gracefully
+
+# Main
 def main():
     while True:
         display_app_name()  # Display the name of the application
         display_menu()
         choice = input("\nEnter your choice: ")
 
+        # Exit
         if choice == '0':
-            print("\nExiting DroidSecAnalytica. Goodbye!")
-            exit()
+            exit_app()
 
+        # Static analysis
         elif choice == '1':
             static_analysis_menu()
             static_choice = input("\nEnter your choice: ")
@@ -113,6 +133,7 @@ def main():
                 print("Invalid choice. Please select a valid option.")
                 continue
 
+        # Dynamic analysis
         elif choice == '2':
             dynamic_analysis_menu()
             dynamic_choice = input("\nEnter your choice: ")
@@ -130,6 +151,7 @@ def main():
                 print("Invalid choice. Please select a valid option.")
                 continue
 
+        # Utility functions
         elif choice == '3':
             utility_functions_menu()
             utility_choice = input("\nEnter your choice: ")
@@ -152,6 +174,7 @@ def main():
                 print("Invalid choice. Please select a valid option.")
                 continue
 
+        # Database operations 
         elif choice == '4':
             database_operations_menu()
             db_choice = input("\nEnter your choice: ")
