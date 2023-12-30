@@ -12,7 +12,10 @@ from utils import apk_processing, ml_model
 from database import database_main
 
 # Configure logging
-logging.basicConfig(filename='droidsecanalytica.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+logging.basicConfig(
+        filename='droidsecanalytica.log',
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s: %(message)s')
 
 # Display menu
 def display_menu(app_name="DroidSecAnalytica"):
