@@ -37,7 +37,7 @@ def change_model():
     except (ValueError, IndexError):
         print("Invalid model selection. Please enter a valid number.")
 
-def analyze_apk(apk_path):
+def static_analysis_beta(apk_path):
     """
     Analyze an APK file to extract detailed information including permissions,
     manifest data, API usage, certificate information, and suspicious patterns.

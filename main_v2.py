@@ -7,7 +7,7 @@ import sys
 
 # Custom libraries
 from static_analysis.static_main import static_analysis_alpha
-from dynamic_analysis.dynamic_main import execute_dynamic_analysis
+from dynamic_analysis.dynamic_main import perform_dynamic_analysis
 from utils.utils_main import create_output_directory, save_results
 from database.database_main import connect_to_database, store_analysis_result, retrieve_data
 from apk_analyzer import static_analysis_beta, change_model
