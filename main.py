@@ -6,12 +6,10 @@ import logging
 import sys
 
 # Custom libraries
-from static_analysis.static_main import static_analysis_alpha
-from dynamic_analysis.dynamic_main import perform_dynamic_analysis
-from utils.utils_main import create_output_directory, save_results
-from database.database_main import connect_to_database, store_analysis_result, retrieve_data
-from apk_analyzer import static_analysis_beta, change_model
-from model import load_model
+import static_analysis.static_analysis as static_analysis
+import dynamic_analysis.dynamic_analysis as dynamic_analysis
+from utils import apk_processing, ml_model
+from database import database_main
 
 # Configure logging
 logging.basicConfig(filename='droidsecanalytica.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
@@ -64,14 +62,13 @@ def display_app_name(app_name="DroidSecAnalytica"):
 def static_analysis_menu():
     print("\n Static Analysis Menu")
     print("=" * 24)
-    print(" 1. Static Analysis Test Alpha")
-    print(" 2. Static Analysis Test Beta")
+    print(" 1. Run Static Analysis")
     print(" 0. Back to Main Menu")
 
 # Dynamic analysis menu
 def dynamic_analysis_menu():
     print("\n Dynamic Analysis Menu")
-    print(" 1. Perform Dynamic Analysis")
+    print(" 1. Run Dynamic Analysis")
     print(" 0. Back to Main Menu")
 
 # Utility functions menu
@@ -124,24 +121,15 @@ def main():
         elif choice == '1':
             static_analysis_menu()
             static_choice = input("\nEnter your choice: ")
-            apk_path = input("Enter the path to the APK file for static analysis: ")
-            if not os.path.exists(apk_path):
-                print("Invalid file path. Please provide a valid APK file path.")
-                continue
-            
-            # static test alpha
-            if static_choice == '1':
-                print("\nStatic Analysis")
-                static_analysis_alpha(apk_path)
-            
-            # static test beta
-            elif static_choice == '2':
-                results = static_analysis_beta(apk_path)
-                display_results_alpha(results)
-            
-            else:
-                print("Invalid choice. Please select a valid option.")
-                continue
+            if static_choice == "0":
+                pass
+
+            elif static_choice == "1":
+                apk_path = input("Enter the path to the APK file for static analysis: ")
+                if not os.path.exists(apk_path):
+                    print("Invalid file path. Please provide a valid APK file path.")
+                else:
+                    static_analysis.run_static_analysis(apk_path)
 
             input("\nPress Enter to continue...")
 
@@ -155,10 +143,9 @@ def main():
                 if not os.path.exists(apk_path):
                     print("Invalid file path. Please provide a valid APK file path.")
                     continue
-                execute_dynamic_analysis(apk_path)
+                dynamic_analysis.run_dynamic_analysis(apk_path)
                 input("\nPress Enter to continue...")
-            elif dynamic_choice == '2':
-                continue
+            
             else:
                 print("Invalid choice. Please select a valid option.")
                 continue
@@ -167,21 +154,24 @@ def main():
         elif choice == '3':
             utility_functions_menu()
             utility_choice = input("\nEnter your choice: ")
+
+            # Create Output Directory
             if utility_choice == '1':
-                create_output_directory()
+                apk_processing.create_output_directory()
                 print("Output directory created successfully.")
                 input("\nPress Enter to continue...")
+
+            # Save Results
             elif utility_choice == '2':
                 apk_path = input("Enter APK path: ")
                 result_data = {
                     "package_name": "com.example",
                     "permissions": ["permission1", "permission2"]
                 }
-                save_results(apk_path, result_data)
+                apk_processing.save_results(apk_path, result_data)
                 print("Results saved successfully.")
                 input("\nPress Enter to continue...")
-            elif utility_choice == '3':
-                continue
+
             else:
                 print("Invalid choice. Please select a valid option.")
                 continue
@@ -192,7 +182,7 @@ def main():
             db_choice = input("\nEnter your choice: ")
             if db_choice == '1':
                 db_path = input("Enter database path: ")
-                db = connect_to_database(db_path)
+                db = database_main.connect_to_database(db_path)
                 if db:
                     print("Connected to the database successfully.")
                 else:
@@ -205,7 +195,7 @@ def main():
                     continue
                 apk_name = input("Enter APK name: ")
                 analysis_result = {"apk_name": apk_name, "analysis_type": "static", "result": "success"}
-                store_analysis_result(db, analysis_result)
+                database_main.store_analysis_result(db, analysis_result)
                 print("Analysis result stored in the database.")
                 input("\nPress Enter to continue...")
 
@@ -214,7 +204,7 @@ def main():
                     print("Please connect to the database first.")
                     continue
                 apk_name = input("Enter APK name: ")
-                data = retrieve_data(db, apk_name)
+                data = database_main.retrieve_data(db, apk_name)
                 if data:
                     print("Retrieved data:")
                     print(data)
@@ -231,37 +221,17 @@ def main():
 
         # Choice model
         elif choice == '5':
-            change_model()
+            ml_model.change_model()
         
         # Load model
         elif choice == '6':
             model_path = input("Enter the path to the model file: ")
-            model = load_model(model_path)
+            model = ml_model.load_model(model_path)
             # Use the loaded model as needed
         
         # Invalid
         else:
             print("Invalid choice. Please select a valid option.")
-
-# Display results alpha
-def display_results_alpha(results):
-    print("\nAPK Analysis Results\n")
-    for key, value in results.items():
-        title = key.capitalize()
-        print(f"---------------- {title} ----------------")
-        
-        if isinstance(value, list):
-            for index in value:
-                    print(" " + index)
-        
-        elif isinstance(value, dict):
-            for x in value:
-                print(" " + x)
-                for i in value[x]:
-                    print("\t" + i)
-        else:
-            print(f"{key}: {value}")
-        print()
 
 # CLI
 if __name__ == "__main__":

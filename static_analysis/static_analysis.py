@@ -129,7 +129,7 @@ def categorize_permissions(permissions):
 
     return categorized_permissions
 
-def static_analysis_alpha(apk_path):
+def run_static_analysis(apk_path):
     """
     Main function for static analysis of an APK file.
 
@@ -185,8 +185,3 @@ def save_results(apk_path, manifest_data):
 
     except Exception as e:
         logging.error(f"Error saving analysis results: {e}")
-
-if __name__ == "__main__":
-    # Example usage:
-    apk_path = "path_to_your_apk.apk"
-    execute_static_analysis(apk_path)

@@ -105,7 +105,7 @@ def stop_emulator():
         logging.error(f"Error stopping emulator: {str(e)}")
         return False
 
-def perform_dynamic_analysis(apk_path):
+def run_dynamic_analysis(apk_path):
     """
     Perform dynamic analysis on an APK file.
 
