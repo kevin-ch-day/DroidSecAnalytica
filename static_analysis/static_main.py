@@ -129,7 +129,7 @@ def categorize_permissions(permissions):
 
     return categorized_permissions
 
-def execute_static_analysis(apk_path):
+def static_analysis_alpha(apk_path):
     """
     Main function for static analysis of an APK file.
 
