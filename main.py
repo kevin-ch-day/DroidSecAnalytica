@@ -127,7 +127,6 @@ def main():
                 pass
 
             elif static_choice == "1":
-                print(os.getcwd())
                 apk_path = input("Enter the path to the APK file for static analysis: ")
                 if not os.path.exists(apk_path):
                     print("Invalid file path. Please provide a valid APK file path.")
