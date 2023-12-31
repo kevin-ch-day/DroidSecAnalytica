@@ -1,15 +1,11 @@
 import os
 import subprocess
 import logging
-from xml.etree import ElementTree as ET
+import datetime
 
 # Constants
 LOG_FILE = 'logs/static_analysis.log'
-ANALYSIS_OUTPUT_DIR = 'analysis_results'
-
-# List of common and potentially risky permissions
-COMMON_PERMISSIONS = ["INTERNET", "ACCESS_NETWORK_STATE", "READ_PHONE_STATE", "WRITE_EXTERNAL_STORAGE"]
-POTENTIALLY_RISKY_PERMISSIONS = ["READ_SMS", "WRITE_SMS", "SEND_SMS", "RECEIVE_SMS", "ACCESS_FINE_LOCATION"]
+ANALYSIS_OUTPUT_DIR = 'results'
 
 # Metadata elements to extract
 METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service", "provider"]
@@ -57,24 +53,13 @@ def analyze_android_manifest(decompiled_dir):
             logging.error(f"AndroidManifest.xml not found at {manifest_path}")
             return None
 
-        tree = ET.parse(manifest_path)
-        root = tree.getroot()
+        print(manifest_path)
 
         # Extract package name
-        package_name = root.attrib.get("package", "N/A")
 
         # Extract permissions and categorize them
-        permissions = [node.attrib.get("name", "N/A") for node in root.findall(".//uses-permission")]
-        categorized_permissions = categorize_permissions(permissions)
 
         # Extract metadata for specified elements
-        metadata = {}
-        for element in METADATA_ELEMENTS:
-            metadata[element] = extract_metadata(root, element)
-
-        manifest_data["package_name"] = package_name
-        manifest_data["permissions"] = categorized_permissions
-        manifest_data["metadata"] = metadata
 
         logging.info("AndroidManifest.xml analysis completed.")
         return manifest_data
@@ -104,6 +89,8 @@ def extract_metadata(root, element_name):
     return metadata
 
 def categorize_permissions(permissions):
+    return
+
     """
     Categorize permissions into common, potentially risky, and uncommon.
 
@@ -185,3 +172,229 @@ def save_results(apk_path, manifest_data):
 
     except Exception as e:
         logging.error(f"Error saving analysis results: {e}")
+
+
+def read_android_manifest(manifest_path):
+    """
+    Read the contents of the AndroidManifest.xml file.
+
+    Args:
+        manifest_path (str): Path to the AndroidManifest.xml file.
+
+    Returns:
+        list or None: List of lines from the manifest or None on failure.
+    """
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            return f.readlines()
+        
+    except FileNotFoundError:
+        logging.error(f"Error: File not found - {manifest_path}")
+    except Exception as e:
+        logging.error(f"Error reading AndroidManifest.xml: {e}")
+
+    return None
+
+def manifest_to_txt(apk):
+    """
+    Copy AndroidManifest.xml contents to a text file.
+
+    Args:
+        apk (str): Path to the APK file.
+    """
+    manifest_path = f"./{apk[:-4]}/AndroidManifest.xml"
+    output_path = "Output/AndroidManifest.txt"
+    
+    try:
+        with open(manifest_path, "r") as manifest_file:
+            manifest_content = manifest_file.read()
+            
+        with open(output_path, "w") as output_file:
+            output_file.write(manifest_content)
+
+        print(f"AndroidManifest.xml successfully copied to {output_path}")
+
+    except FileNotFoundError:
+        logging.error(f"Error: {manifest_path} not found.")
+    except IOError as err:
+        logging.error(f"Error reading or writing file: {err}")
+
+def get_manifest_permissions(android_manifest):
+    """
+    Extract permissions from the AndroidManifest.xml.
+
+    Args:
+        android_manifest (list): List of lines from the manifest.
+
+    Returns:
+        list: List of detected permissions.
+    """
+    permissions_found = []
+
+    for line in android_manifest:
+        line = line.strip()
+
+        if "uses-permission" in line and "android:name=" in line:
+            permission = line.split("android:name=\"")[1].split("\"")[0]
+            permissions_found.append(permission)
+
+        elif "android.permission." in line:
+            permission = line.split("android.permission.")[1].split("\"")[0]
+            permissions_found.append(permission)
+
+    detected_permissions = sorted(set(permissions_found))
+    return detected_permissions
+
+def get_manifest_components(manifest, component_type):
+    """
+    Extract components (services, activities, providers) from the manifest.
+
+    Args:
+        manifest (list): List of lines from the manifest.
+        component_type (str): Type of component to extract.
+
+    Returns:
+        list: List of detected components.
+    """
+    components = [line.split(f"android:name=\"")[1].split("\"")[0] for line in manifest if f"<{component_type} " in line]
+    components.sort()
+    return components
+
+def find_manifest_attribute(manifest, attr):
+    """
+    Find the value of a specific attribute in the manifest.
+
+    Args:
+        manifest (list): List of lines from the manifest.
+        attr (str): Attribute to search for.
+
+    Returns:
+        str or None: Value of the attribute or None if not found.
+    """
+    for i in manifest:
+        x = i.find(attr + "=\"")
+        buffer = i[x:]
+
+        # check if at the end of the tag
+        if not buffer.find("\" ") == -1:
+            y = buffer.find("\" ")
+        else:
+            y = buffer.find("\">")
+
+        return buffer[(buffer.find("\"") + 1) : y]
+
+    return None
+
+def get_manifest_features_used(manifest):
+    """
+    Extract features used in the manifest.
+
+    Args:
+        manifest (list): List of lines from the manifest.
+
+    Returns:
+        dict: Dictionary of features and their status (True/False).
+    """
+    uses_features = dict()
+    unknown_features = []
+
+    for index in manifest:
+        if "<uses-feature " in index:
+            feature_name = ""
+            gl_es_version = ""
+
+            if "android:name=\"" in index:
+                feature_name = find_manifest_attribute([index], 'android:name')
+
+            elif "android:glEsVersion=\"" in index:
+                gl_es_version = find_manifest_attribute([index], 'android:glEsVersion')
+
+            else:
+                unknown_features.append(index.strip())
+                continue
+
+            key = feature_name if feature_name else f"glEsVersion={gl_es_version}"
+
+            if "android:required=\"" in index:
+                status = find_manifest_attribute([index], 'android:required').lower()
+
+                if status == "true":
+                    uses_features[key] = True
+                    continue
+
+            uses_features[key] = False
+
+    if unknown_features:
+        logging.warning("\nUnknown Features Found:")
+        for i, feature in enumerate(unknown_features, start=1):
+            logging.warning(f"[{i}] {feature}")
+
+    return uses_features
+
+def log_android_manifest_permissions(apk):
+    """
+    Log permissions from the AndroidManifest.xml to a file.
+
+    Args:
+        apk (str): Path to the APK file.
+    """
+    apk_name = apk[:-4]
+    permissions_log = "Output/ApkPermissionLog.txt"
+    android_manifest = read_android_manifest(f"./{apk_name}/AndroidManifest.xml")
+    detected_permissions = get_manifest_permissions(android_manifest)
+
+    with open(permissions_log, "w") as log:
+        log.write(f"APK NAME: {apk_name}\n")
+        log.write(f"Number of permissions: {len(detected_permissions)}\n\n")
+
+        log.write("Detected permissions:\n")
+        log.write("---------------------\n")
+        for index, permission in enumerate(detected_permissions, start=1):
+            log.write(f"[{index}] {permission}\n")
+
+def analyze_android_manifest(apk_path):
+    """
+    Analyze and log information from the AndroidManifest.xml.
+
+    Args:
+        apk_path (str): Path to the APK file.
+    """
+    log_name = "Output/ManifestAnalysis.txt"
+    log_date = datetime.datetime.now().strftime("%A %B %d, %Y %I:%M %p")
+    manifest = read_android_manifest(apk_path)
+
+    # Create log
+    with open(log_name, "w") as log:
+        log.write(f"Date: {log_date}\n\n")
+
+        # Meta Data
+        log.write("Meta-Data\n")
+        log.write(f"Package: {find_manifest_attribute(manifest, 'package')}\n")
+        log.write(f"Compiled SDK Version: {find_manifest_attribute(manifest, 'compileSdkVersion')}\n")
+        log.write(f"Compiled SDK Version Codename: {find_manifest_attribute(manifest, 'compileSdkVersionCodename')}\n")
+        log.write(f"Platform Build Version Code: {find_manifest_attribute(manifest, 'platformBuildVersionCode')}\n")
+        log.write(f"Platform Build Version Name: {find_manifest_attribute(manifest, 'platformBuildVersionName')}\n")
+
+        features = get_manifest_features_used(manifest)
+        if features:
+            log.write("\nUses-Features\n")
+            for feature, value in features.items():
+                log.write(f"{feature}: {value}\n")
+
+        services = get_manifest_components(manifest, 'service')
+        if services:
+            log.write("\nServices\n")
+            for x in services:
+                log.write(f"{x}\n")
+
+        activities = get_manifest_components(manifest, 'activity')
+        if activities:
+            log.write("\nActivities\n")
+            for x in activities:
+                log.write(f"{x}\n")
+
+        providers = get_manifest_components(manifest, 'provider')
+        if providers:
+            log.write("\nProviders\n")
+            for x in providers:
+                log.write(f"{x}\n")

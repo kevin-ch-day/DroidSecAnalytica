@@ -3,7 +3,6 @@
 # Python libraries
 import os
 import logging
-import sys
 
 # Custom libraries
 import static_analysis.static_analysis as static_analysis
@@ -13,7 +12,7 @@ from database import database_main
 
 # Configure logging
 logging.basicConfig(
-        filename='droidsecanalytica.log',
+        filename='logs\main.log',
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s: %(message)s')
 
@@ -128,6 +127,7 @@ def main():
                 pass
 
             elif static_choice == "1":
+                print(os.getcwd())
                 apk_path = input("Enter the path to the APK file for static analysis: ")
                 if not os.path.exists(apk_path):
                     print("Invalid file path. Please provide a valid APK file path.")

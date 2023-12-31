@@ -124,18 +124,3 @@ def copy_android_manifest(apk_path):
 
     except Exception as e:
         logging.error(f"Error copying AndroidManifest.xml: {e}")
-
-def decompile_apk(apk_path):
-    """
-    Decompile an APK file.
-
-    Args:
-        apk_path (str): The path to the APK file.
-    """
-    try:
-        output_directory = os.path.splitext(apk_path)[0]
-        subprocess.run([APK_TOOL, "d", apk_path, "-o", output_directory], check=True)
-        print(f"APK decompiled successfully. Output directory: {output_directory}")
-
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error decompiling APK: {e}")
