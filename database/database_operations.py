@@ -3,6 +3,24 @@
 import mysql.connector
 from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
+def test_database_connection():
+    try:
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_DATABASE
+        )
+        if conn.is_connected():
+            print(f"Connection to MySQL database is successful.")
+            return True
+        else:
+            print(f"Failed to connect to the MySQL database.")
+            return False
+    except mysql.connector.Error as err:
+        print(f"Error connecting to the MySQL database: {err}")
+        return None
+
 # Function to connect to the MySQL database
 def connect_to_database():
     try:
@@ -49,30 +67,26 @@ def retrieve_data(conn, apk_name):
         print(f"Error retrieving data from the MySQL database: {err}")
         return None
 
-# Add more database-related functions as needed for your project
-
 # Close the database connection when done
 def close_database_connection(conn):
     if conn.is_connected():
         conn.close()
 
-# Testing
-if __name__ == "__main__":
-    # Replace with your MySQL database connection details
-    host = "your_mysql_host"
-    user = "your_mysql_user"
-    password = "your_mysql_password"
-    database = "your_mysql_database"
+def save_malware_record(conn, filename, filesize, md5, sha1, sha256):
+    try:
+        if conn.is_connected():
+            cursor = conn.cursor()
+            sql = "insert into malware_samples (file_name, file_size, md5, sha1, sha256) "
+            sql = sql + "values (%s, %d, %s, %s, %s)"
+            val = ("{filename}", "{filesize}", "{md5}", "{sha1}", "{sha256}")
+            cursor.execute(sql, val)
+            conn.commit()
+            return True
+        
+        else:
+            print("Database connection is not available.")
+            return False
     
-    conn = connect_to_database(host, user, password, database)
-    if conn:
-        analysis_result = {"apk_name": "example.apk", "analysis_type": "static", "result": "success"}
-        if store_analysis_result(conn, analysis_result):
-            retrieved_data = retrieve_data(conn, "example.apk")
-            if retrieved_data:
-                print("Database operations executed successfully.")
-            else:
-                print("Error in database operations.")
-        close_database_connection(conn)
-    else:
-        print("Error connecting to the MySQL database.")
+    except mysql.connector.Error as err:
+        print(f"Error storing analysis result in the MySQL database: {err}")
+        return False

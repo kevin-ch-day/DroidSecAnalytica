@@ -1,5 +1,8 @@
-import static_analysis.static_analysis as static_analysis
+import static_analysis.static_analysis as static
 
-apk_path = 'SharkBot.apk'
+def main():
+    apk_path = "0d00206b8e9814ec56c8ed8cff4de107.apk"
+    static.run_static_analysis(apk_path)
 
-static_analysis.run_static_analysis(apk_path)
+if __name__ == "__main__":
+    main()

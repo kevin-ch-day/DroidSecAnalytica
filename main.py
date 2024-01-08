@@ -2,13 +2,14 @@
 
 # Python libraries
 import os
+import shutil
 import logging
 
 # Custom libraries
 import static_analysis.static_analysis as static_analysis
 import dynamic_analysis.dynamic_analysis as dynamic_analysis
 from utils import apk_processing, ml_model
-from database import database_main
+from database import database_operations as db
 
 # Configure logging
 logging.basicConfig(
@@ -64,13 +65,13 @@ def display_app_name(app_name="DroidSecAnalytica"):
 def static_analysis_menu():
     print("\n Static Analysis Menu")
     print("=" * 24)
-    print(" 1. Run Static Analysis")
+    print(" 1. Static Analysis Alpha")
     print(" 0. Back to Main Menu")
 
 # Dynamic analysis menu
 def dynamic_analysis_menu():
     print("\n Dynamic Analysis Menu")
-    print(" 1. Run Dynamic Analysis")
+    print(" 1. Dynamic Alpha")
     print(" 0. Back to Main Menu")
 
 # Utility functions menu
@@ -85,9 +86,7 @@ def utility_functions_menu():
 def database_operations_menu():
     print("\n Database Operations Menu")
     print("=" * 24)
-    print(" 1. Connect to Database")
-    print(" 2. Store Analysis Result")
-    print(" 3. Retrieve Data")
+    print(" 1. Check database connection")
     print(" 0. Back to Main Menu")
 
 # Exit the application
@@ -108,6 +107,34 @@ def exit_app():
     except SystemExit:
         pass  # Catch the exit call and continue gracefully
 
+def display_apk_files():
+    directory = os.getcwd()
+    apk_files = [file for file in os.listdir(directory) if file.endswith('.apk')]
+
+    if not apk_files:
+        print("No APK files found in the current directory.")
+        return None
+
+    print("\nAvaiable APK files")
+    for cnt, file in enumerate(apk_files, start=1):
+        print(f" [{cnt}] {file}")
+    print(" [0] Exit")
+
+    while True:
+        try:
+            choice = int(input("\nSelect an APK option: "))
+            if choice == 0:
+                print("Exiting selection.")
+                return None
+            elif 1 <= choice <= len(apk_files):
+                selected_apk = apk_files[choice - 1]
+                selected_path = os.path.join(directory, selected_apk)
+                return selected_path
+            else:
+                print("Invalid selection. Please select a number or 0 to exit.")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+
 # Main
 def main():
     while True:
@@ -127,10 +154,11 @@ def main():
                 pass
 
             elif static_choice == "1":
-                apk_path = input("Enter the path to the APK file for static analysis: ")
+                apk_path = display_apk_files()
                 if not os.path.exists(apk_path):
                     print("Invalid file path. Please provide a valid APK file path.")
                 else:
+                    print("\nRunning static analysis on: " + os.path.basename(apk_path))
                     static_analysis.run_static_analysis(apk_path)
 
             input("\nPress Enter to continue...")
@@ -182,41 +210,13 @@ def main():
         elif choice == '4':
             database_operations_menu()
             db_choice = input("\nEnter your choice: ")
-            if db_choice == '1':
-                db_path = input("Enter database path: ")
-                db = database_main.connect_to_database(db_path)
-                if db:
-                    print("Connected to the database successfully.")
-                else:
-                    print("Error connecting to the database.")
-                input("\nPress Enter to continue...")
-
-            elif db_choice == '2':
-                if not 'db' in locals():
-                    print("Please connect to the database first.")
-                    continue
-                apk_name = input("Enter APK name: ")
-                analysis_result = {"apk_name": apk_name, "analysis_type": "static", "result": "success"}
-                database_main.store_analysis_result(db, analysis_result)
-                print("Analysis result stored in the database.")
-                input("\nPress Enter to continue...")
-
-            elif db_choice == '3':
-                if not 'db' in locals():
-                    print("Please connect to the database first.")
-                    continue
-                apk_name = input("Enter APK name: ")
-                data = database_main.retrieve_data(db, apk_name)
-                if data:
-                    print("Retrieved data:")
-                    print(data)
-                else:
-                    print("No data found in the database.")
-                input("\nPress Enter to continue...")
-
-            elif db_choice == '4':
-                continue
-
+            # exit
+            if db_choice == '0':
+                return
+            # test connection
+            elif db_choice == '1':
+                db.test_connection()
+            # invalid choice
             else:
                 print("Invalid choice. Please select a valid option.")
                 continue
