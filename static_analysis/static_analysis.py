@@ -8,10 +8,8 @@ import logging
 import hashlib
 from typing import Optional, Dict, List
 
-
 from . import virustotal_api as vt
 from . import manifest_analysis
-
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -29,15 +27,6 @@ METADATA_ELEMENTS = [
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
-    """Decompile an APK file using apktool.
-
-    Args:
-        apk_path (str): Path to the APK file.
-        output_directory (str): Directory to save the decompiled files.
-
-    Returns:
-        Optional[str]: Output directory path on success, None on failure.
-    """
     try:
         subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
         logging.info(f"APK decompiled successfully. Output directory: {output_directory}")
@@ -47,14 +36,6 @@ def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
         return None
 
 def analyze_android_manifest(manifest_path: str) -> Optional[Dict[str, List[Dict]]]:
-    """Analyze the Android manifest file for metadata elements.
-
-    Args:
-        manifest_path (str): Path to the AndroidManifest.xml file.
-
-    Returns:
-        Optional[Dict[str, List[Dict]]]: Parsed manifest data on success, None on failure.
-    """
     if not os.path.exists(manifest_path):
         logging.error(f"AndroidManifest.xml not found at {manifest_path}")
         return None
@@ -126,11 +107,6 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
 
 # Run static analysis
 def run_static_analysis(apk_path: str):
-    """Perform static analysis on an APK file.
-
-    Args:
-        apk_path (str): Path to the APK file.
-    """
     file_basename = os.path.basename(apk_path)
     apk_hashes = calculate_hashes(apk_path)
     file_size_bytes = os.path.getsize(apk_path)
