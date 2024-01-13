@@ -102,8 +102,9 @@ def calculate_hashes(apk_file_path):
     return hashes
 
 # Create apk sample record
+
 def create_apk_record(filename, filesize, md5, sha1, sha256):
-    conn = db.create_connection()
+    conn = db.connect_to_database()
     if conn is None:
         print("Failed to establish a database connection.")
         return False
@@ -121,7 +122,7 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
         return False
     
     finally:
-        db.close_connection(conn)
+        db.close_database_connection(conn)
 
 # Run static analysis
 def run_static_analysis(apk_path: str):
@@ -137,10 +138,11 @@ def run_static_analysis(apk_path: str):
     print(f"\nAPK file size(s):")
     print(f" {file_size_bytes:.2f} Bytes")
     print(f" {file_size_mb:.2f} MB\n")
-    input("Press any button to continue...")
+    #input("Press any button to continue...")
 
     try:
-        output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
+        #output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
+        output_directory = False
         if output_directory:
             manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
             manifest_data = analyze_android_manifest(manifest_path)
@@ -149,7 +151,7 @@ def run_static_analysis(apk_path: str):
                 save_static_results(apk_path, manifest_data, manifest_element)
             
         # virustotal.com scan
-        vt.virustotal_scan(apk_path)
+        #vt.virustotal_scan(apk_path)
 
         # Create malware sample record
         create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
