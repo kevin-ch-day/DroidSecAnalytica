@@ -16,15 +16,14 @@ parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 from database import database_operations as db
 
-LOG_FILE = 'logs/static_analysis.log'
+LOG_FILE_PATH = 'logs/static_analysis.log'
 ANALYSIS_OUTPUT_DIR = 'output'
-METADATA_ELEMENTS = [
-    "uses-permission", "application", "activity", "service", "provider",
-    "receiver", "uses-library", "uses-feature", "instrumentation", "uses-sdk",
-    "meta-data", "permission"]
+METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
+                     "provider", "receiver", "uses-library", "uses-feature",
+                     "instrumentation", "uses-sdk", "meta-data", "permission"]
 
 # Setting up logging
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
     try:
@@ -39,7 +38,6 @@ def analyze_android_manifest(manifest_path: str) -> Optional[Dict[str, List[Dict
     if not os.path.exists(manifest_path):
         logging.error(f"AndroidManifest.xml not found at {manifest_path}")
         return None
-
     try:
         manifest_content = read_file(manifest_path)
         manifest_data = {element: manifest_analysis.extract_metadata(manifest_content, element) for element in METADATA_ELEMENTS}
@@ -83,7 +81,6 @@ def calculate_hashes(apk_file_path):
     return hashes
 
 # Create apk sample record
-
 def create_apk_record(filename, filesize, md5, sha1, sha256):
     conn = db.connect_to_database()
     if conn is None:
@@ -114,11 +111,11 @@ def run_static_analysis(apk_path: str):
     print(f"\nAPK file size(s):")
     print(f" {file_size_bytes:.2f} Bytes")
     print(f" {file_size_mb:.2f} MB\n")
-    #input("Press any button to continue...")
+    input("Press any button to continue...")
 
     try:
-        #output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
-        output_directory = False
+        output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
+        #output_directory = False
         if output_directory:
             manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
             manifest_data = analyze_android_manifest(manifest_path)
@@ -127,7 +124,7 @@ def run_static_analysis(apk_path: str):
                 save_static_results(apk_path, manifest_data, manifest_element)
             
         # virustotal.com scan
-        #vt.virustotal_scan(apk_path)
+        vt.virustotal_scan(apk_path)
 
         # Create malware sample record
         create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
@@ -192,10 +189,8 @@ def read_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.readlines()
-        
     except FileNotFoundError:
         logging.error(f"Error: File not found - {file_path}")
     except Exception as e:
         logging.error(f"Error reading file: {e}")
-
     return None

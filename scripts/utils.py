@@ -1,17 +1,6 @@
-# app_utils.py
+# utils.py
 
-import os
-import zipfile
-import logging
 import calendar
-
-# Constants
-LOG_FILE = 'logs/utils.log'
-ANALYSIS_RESULTS_DIR = 'output'
-
-# Configure logging
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
-
 
 def determine_hash_fields(hash_str):
     # Handle None or empty string input
@@ -114,55 +103,3 @@ def find_similar_categories(target_category, category_counts):
             if target_category in category or category in target_category:
                 similar_categories.append(category)
     return similar_categories
-
-# Helper function to format the menu title
-def format_menu_title(title, width=30):
-    return f"\n{title}\n" + "=" * width
-
-# Helper function to format each menu option
-def format_menu_option(number, description):
-    return f" [{number}] {description}"
-
-# Display the application name in a stylish header
-def display_app_name(app_name="DroidSecAnalytica"):
-    header_width = 40
-    top_border = "╔" + "═" * (header_width - 2) + "╗"
-    app_name_header = "║" + app_name.center(header_width - 2) + "║"
-    bottom_border = "╚" + "═" * (header_width - 2) + "╝"
-    print("\n" + top_border)
-    print(app_name_header)
-    print(bottom_border)
-
-# Get and validate user choice
-def get_user_choice(prompt, valid_choices):
-    while True:
-        choice = input(prompt).strip()
-        if choice in valid_choices:
-            return choice
-        print("Invalid choice. Please select a valid option.")
-
-# Lists and displays all .apk files in the current directory
-def display_apk_files():
-    apk_files = [f for f in os.listdir() if f.endswith('.apk')]
-    print("\nAvailable APK Files:" if apk_files else "No APK files found.")
-    for i, file in enumerate(apk_files, 1):
-        print(f" [{i}] {file}")
-    return apk_files
-
-def copy_android_manifest(apk_path):
-    output_path = os.path.join(ANALYSIS_RESULTS_DIR, 'AndroidManifest.txt')
-    try:
-        with zipfile.ZipFile(apk_path, 'r') as apk_zip:
-            with apk_zip.open('AndroidManifest.xml') as manifest_file:
-                manifest_content = manifest_file.read().decode('utf-8')
-
-        with open(output_path, "w", encoding="utf-8") as output_file:
-            output_file.write(manifest_content)
-
-        print(f"AndroidManifest.xml successfully copied to {output_path}")
-
-    except FileNotFoundError as e:
-        logging.error(f"Error: {e}.")
-
-    except Exception as e:
-        logging.error(f"Error copying AndroidManifest.xml: {e}")

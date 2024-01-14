@@ -6,7 +6,7 @@ import logging
 # Custom Libraries
 import static_analysis.static_analysis as static_analysis
 import dynamic_analysis.dynamic_analysis as dynamic_analysis
-from utils import app_utils, jar_utils
+from utils import app_utils
 from database import database_operations as db
 
 # Configure Logging
@@ -30,7 +30,7 @@ def static_analysis_menu():
     print(app_utils.format_menu_title("Static Analysis Menu"))
     print(app_utils.format_menu_option(1, "Decompile APK"))
     print(app_utils.format_menu_option(2, "Create APK Record"))
-    print(app_utils.format_menu_option(3, "Static Analysis I."))
+    print(app_utils.format_menu_option(3, "Run Static Analysis"))
     print(app_utils.format_menu_option(4, "Metadata Analysis"))
     print(app_utils.format_menu_option(5, "Permissions Analysis"))
     print(app_utils.format_menu_option(6, "Export Static Analysis Data"))
