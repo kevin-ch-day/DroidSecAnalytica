@@ -2,6 +2,9 @@ import mysql.connector
 import logging
 import database.DBConnectionManager as DBConnectionManager
 
+def test_database_connection():
+    DBConnectionManager.test_connection()
+
 def check_for_table(table_name):
     try:
         conn = DBConnectionManager.connect_to_database()
@@ -195,5 +198,42 @@ def list_tables():
         if conn:
             DBConnectionManager.close_database_connection(conn)
 
+def display_tables_info():
+    # Fetches and displays information about all tables in the database.
+    results = list_tables()
+    if results:
+        max_name_length = max(len(table_name) for table_name, _, _ in results)
+        name_column_width = max(max_name_length, len('Table Name'))
+
+        # Header
+        print(f"\033[1m{'Table Name'.ljust(name_column_width)} | {'# Columns'.rjust(10)} | {'# Rows'.rjust(10)}\033[0m")
+        print("=" * (name_column_width + 27))  # Table border
+
+        # Data rows
+        for table_name, num_columns, num_rows in results:
+            formatted_columns = f"{num_columns:,}"
+            formatted_rows = f"{num_rows:,}"
+            print(f"{table_name.ljust(name_column_width)} | {formatted_columns.rjust(10)} | {formatted_rows.rjust(10)}")
+    else:
+        print("No table information available or failed to retrieve table information.")
+
 def empty_table(table_name):
-    DBConnectionManager.truncate_table(table_name)
+    conn = None
+    try:
+        conn = DBConnectionManager.connect_to_database()
+        if conn:
+            if DBConnectionManager.truncate_table(conn, table_name):
+                logging.info(f"Table '{table_name}' emptied successfully.")
+                return True
+            else:
+                logging.error(f"Error emptying table '{table_name}'.")
+                return False
+        else:
+            logging.error("Failed to establish a database connection.")
+            return False
+    except Exception as e:
+        logging.error(f"An error occurred while emptying the table '{table_name}': {e}")
+        return False
+    finally:
+        if conn:
+            DBConnectionManager.close_database_connection(conn)

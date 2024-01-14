@@ -72,3 +72,32 @@ def test_connection():
     except mysql.connector.Error as err:
         print(f"Error connecting to the MySQL database: {err}")
         return False
+    
+def truncate_all_tables():
+    # Truncates all tables in the database.
+    try:
+        conn = connect_to_database()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SHOW TABLES;")
+            tables = cursor.fetchall()
+            tables_to_skip = None
+
+            for (table_name,) in tables:
+                logging.info(f"Truncating table '{table_name}'")
+                if not truncate_table(conn, table_name):
+                    logging.error(f"Failed to truncate table '{table_name}'")
+                    return False
+
+            return True
+        else:
+            logging.error("Failed to establish a database connection.")
+            return False
+
+    except mysql.connector.Error as error:
+        logging.error(f"Error while truncating tables: {error}")
+        return False
+
+    finally:
+        if conn:
+            close_database_connection(conn)

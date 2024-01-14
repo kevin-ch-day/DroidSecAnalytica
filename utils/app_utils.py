@@ -5,7 +5,7 @@ import zipfile
 import logging
 import calendar
 
-import logging_utils
+from . import logging_utils
 
 # Constants
 LOG_FILE = 'logs/utils.log'
