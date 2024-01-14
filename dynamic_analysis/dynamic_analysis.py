@@ -1,14 +1,26 @@
-import os
 import subprocess
 import tempfile
 import logging
-import shutil
+
+from utils import app_utils
 
 # Constants
 LOG_FILE = 'logs/dynamic_analysis.log'
 
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def dynamic_analysis_menu():
+    print(app_utils.format_menu_title("Dynamic Analysis Menu"))
+    print(app_utils.format_menu_option(1, "Run Dynamic Analysis"))
+    print(app_utils.format_menu_option(0, "Back to Main Menu"))
+
+def handle_dynamic_analysis():
+    dynamic_analysis_menu()
+    da_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '0'])
+    if da_choice == '1':
+        apk_path = input("Enter the path to the APK: ").strip()
+        run_dynamic_analysis(apk_path)
 
 def check_devices():
     """

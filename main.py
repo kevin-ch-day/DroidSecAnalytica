@@ -8,7 +8,7 @@ import pandas as pd
 import static_analysis.static_analysis as static_analysis
 import dynamic_analysis.dynamic_analysis as dynamic_analysis
 from utils import app_utils
-from database import database_manager
+from database import database_functions, database_manager
 
 # Configure Logging
 logging.basicConfig(
@@ -26,26 +26,10 @@ def display_menu():
     print(app_utils.format_menu_option(5, "Machine Learning Model"))
     print(app_utils.format_menu_option(0, "Exit"))
 
-# Sub-menu: static analysis
-def static_analysis_menu():
-    print(app_utils.format_menu_title("Static Analysis Menu"))
-    print(app_utils.format_menu_option(1, "Decompile APK"))
-    print(app_utils.format_menu_option(2, "Create APK Record"))
-    print(app_utils.format_menu_option(3, "Run Static Analysis"))
-    print(app_utils.format_menu_option(4, "Metadata Analysis"))
-    print(app_utils.format_menu_option(5, "Permissions Analysis"))
-    print(app_utils.format_menu_option(6, "Export Static Analysis Data"))
-    print(app_utils.format_menu_option(0, "Back to Main Menu"))
-
-def dynamic_analysis_menu():
-    print(app_utils.format_menu_title("Dynamic Analysis Menu"))
-    print(app_utils.format_menu_option(1, "Run Dynamic Analysis"))
-    print(app_utils.format_menu_option(0, "Back to Main Menu"))
-
 def utility_functions_menu():
     print(app_utils.format_menu_title("Utility Functions Menu"))
     print(app_utils.format_menu_option(1, "API Integration Check"))
-    print(app_utils.format_menu_option(3, "View Logs"))
+    print(app_utils.format_menu_option(2, "View Logs"))
     print(app_utils.format_menu_option(0, "Back to Main Menu"))
 
 def utility_database_menu():
@@ -83,15 +67,16 @@ def handle_static_analysis():
         return
 
 def loadAndroidHashData():
-    conn = database_manager.connect_to_database()
-    cursor = conn.cursor()
     try:
-        create_android_malware_table_if_not_exists(cursor)
-        files_to_parse = ['input/2019-README.txt', 'input/2020-README.txt',
-                         'input/2021-README.txt', 'input/2022-README.txt']
+        if not database_functions.check_android_malware_hash_table_exists():
+            database_functions.create_android_malware_hash_table()
+        
+        files_to_parse = ['input/2019-README.txt',
+                          'input/2020-README.txt',
+                         'input/2021-README.txt',
+                         'input/2022-README.txt']
 
         load_data_from_files(files_to_parse)
-        database_manager.close_database_connection(conn)
         print(f"Data processing completed.")
 
     except Exception as e:
@@ -100,18 +85,19 @@ def loadAndroidHashData():
 def export_android_hash_data_to_file():
     filename = 'output/android_malware_data.txt'
     try:
-        with database_manager.connect_to_database() as conn, conn.cursor() as cursor:
-            sql = "SELECT * FROM android_malware_hashes"
-            cursor.execute(sql)
-            rows = cursor.fetchall()
-            if rows:
-                headers = [i[0] for i in cursor.description]  # Extracting column headers
-                max_lengths = [len(str(max([str(row[i]) for row in rows], key=len))) for i in range(len(headers))]
-                headers_line = ' | '.join([headers[i].ljust(max_lengths[i]) for i in range(len(headers))])
-                app_utils.write_data_to_file(filename, headers_line, max_lengths, rows)
-                write_analysis_to_file(cursor)
-            else:
-                logging.info("No data to write")
+        conn = database_manager.connect_to_database()
+        cursor = conn.cursor()
+        sql = "SELECT * FROM android_malware_hashes"
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        if rows:
+            headers = [i[0] for i in cursor.description]  # Extracting column headers
+            max_lengths = [len(str(max([str(row[i]) for row in rows], key=len))) for i in range(len(headers))]
+            headers_line = ' | '.join([headers[i].ljust(max_lengths[i]) for i in range(len(headers))])
+            app_utils.write_data_to_file(filename, headers_line, max_lengths, rows)
+            write_analysis_to_file(cursor)
+        else:
+            logging.info("No data to write")
     except Exception as error:
         logging.error(f"Error writing to file: {error}")
 
@@ -120,8 +106,6 @@ def write_analysis_to_file(cursor):
     try:
         with open(filename, 'w') as f:
             f.write('--- Analysis of Android Malware Hashes ---\n\n')
-
-            # Ensure cursor is valid
             if not cursor:
                 raise ValueError("Invalid database cursor provided.")
 
@@ -172,37 +156,37 @@ def write_top_hashes_to_file(cursor):
 
             # Count of unique locations
             sql = "SELECT COUNT(DISTINCT location) FROM android_malware_hashes"
-            unique_locations = database_manager.execute_sql_query(cursor, sql)
+            unique_locations = database_manager.execute_sql(cursor, sql)
             unique_locations = unique_locations[0][0]
             analysis_file.write(f"Unique Locations: {unique_locations}\n")
 
             # Count of unique months
             sql = "SELECT COUNT(DISTINCT month) FROM android_malware_hashes"
-            unique_months = database_manager.execute_sql_query(cursor, sql)
+            unique_months = database_manager.execute_sql(cursor, sql)
             unique_months = unique_months[0][0]
             analysis_file.write(f"Unique Months: {unique_months}\n")
 
             # Finding and fixing bad data
             sql = "SELECT COUNT(*) FROM android_malware_hashes WHERE malware_category IS NULL OR location IS NULL OR month IS NULL"
-            null_data_count = database_manager.execute_sql_query(cursor, sql)
+            null_data_count = database_manager.execute_sql(cursor, sql)
             null_data_count = null_data_count[0][0]
             analysis_file.write(f"Entries with Missing Data: {null_data_count}\n")
 
             sql = "SELECT COUNT(*) FROM android_malware_hashes WHERE malware_category = '' OR location = '' OR month = ''"
-            empty_data_count = database_manager.execute_sql_query(cursor, sql)
+            empty_data_count = database_manager.execute_sql(cursor, sql)
             empty_data_count = empty_data_count[0][0]
             analysis_file.write(f"Entries with Empty Data: {empty_data_count}\n")
 
             # Count of entries per malware category
             sql = "SELECT malware_category, COUNT(*) FROM android_malware_hashes GROUP BY malware_category"
-            category_counts = database_manager.execute_sql_query(cursor, sql)
+            category_counts = database_manager.execute_sql(cursor, sql)
             analysis_file.write("\nMalware Category Analysis:\n")
             for category, count in category_counts:
                 analysis_file.write(f" '{category}': {count} entries\n")
 
             # Count of entries per month
             sql = "SELECT month, COUNT(*) FROM android_malware_hashes GROUP BY month"
-            month_counts = database_manager.execute_sql_query(cursor, sql)
+            month_counts = database_manager.execute_sql(cursor, sql)
             analysis_file.write("\nMonthly Analysis:\n")
             for month, count in month_counts:
                 analysis_file.write(f" {month}: {count} entries\n")
@@ -240,24 +224,10 @@ def viewAndroidHashTableSummary():
     conn = database_manager.connect_to_database()
     cursor = conn.cursor()
     sql = "SELECT COUNT(*) FROM android_malware_hashes"
-    result = database_manager.execute_sql_query(cursor, sql)
+    result = database_manager.execute_sql(cursor, sql)
     print(f"Total Records in Database: {result[0][0]}")
     database_manager.close_database_connection(conn)
 
-def create_android_malware_table_if_not_exists(cursor):
-    result = database_manager.check_for_table(cursor, 'android_malware_hashes')
-    if not result:
-        sql_create_table = '''
-            CREATE TABLE android_malware_hashes (
-                id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                malware_category VARCHAR(255) DEFAULT NULL,
-                md5 VARCHAR(250) DEFAULT NULL,
-                sha1 VARCHAR(250) DEFAULT NULL,
-                sha256 VARCHAR(250) DEFAULT NULL,
-                location VARCHAR(100) DEFAULT NULL,
-                month VARCHAR(100) DEFAULT NULL)
-        '''
-        cursor.execute(sql_create_table)
 
 def load_data_from_files(files_to_parse):
     try:
@@ -307,26 +277,22 @@ def android_apk_selection():
     apk_choice = app_utils.get_user_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files)+1)])
     return apk_files[int(apk_choice) - 1]
 
-def handle_dynamic_analysis():
-    dynamic_analysis_menu()
-    da_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '0'])
-    if da_choice == '1':
-        apk_path = input("Enter the path to the APK: ").strip()
-        dynamic_analysis.run_dynamic_analysis(apk_path)
-
 def handle_utilities():
     utility_functions_menu()
     utility_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '0'])
-
-    if utility_choice == '1':
+    if utility_choice == '0':
+        return
+    
+    elif utility_choice == '1':
         print("API Integration Check.")
 
-    elif utility_choice == '0':
+    elif utility_choice == '2':
+        print("View logs.")
         app_utils.handle_view_logs()
 
 def handle_database_management():
     utility_database_menu()
-    utility_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '0'])
+    utility_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5','0'])
     if utility_choice == '1':
         database_manager.test_database_connection()
     
@@ -338,7 +304,9 @@ def handle_database_management():
         database_manager.list_tables(conn)
 
     elif utility_choice == '4':
-        database_manager.truncate_table('android_malware_hashes')
+        conn = database_manager.connect_to_database()
+        cursor = conn.cursor()
+        database_manager.truncate_table(cursor, 'android_malware_hashes')
     
     elif utility_choice == '5':
         export_android_hash_data_to_file()
@@ -359,7 +327,7 @@ def main_menu():
             handle_static_analysis()
         
         elif choice == '2':
-            handle_dynamic_analysis()
+            dynamic_analysis.handle_dynamic_analysis()
         
         elif choice == '3':
             handle_utilities()

@@ -10,11 +10,12 @@ from typing import Optional, Dict, List
 
 from . import virustotal_api as vt
 from . import manifest_analysis
+from database import database_manager
+from utils import app_utils
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
-from database import database_manager as db
 
 LOG_FILE_PATH = 'logs/static_analysis.log'
 ANALYSIS_OUTPUT_DIR = 'output'
@@ -24,6 +25,16 @@ METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
 
 # Setting up logging
 logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+
+def static_analysis_menu():
+    print(app_utils.format_menu_title("Static Analysis Menu"))
+    print(app_utils.format_menu_option(1, "Decompile APK"))
+    print(app_utils.format_menu_option(2, "Create APK Record"))
+    print(app_utils.format_menu_option(3, "Run Static Analysis"))
+    print(app_utils.format_menu_option(4, "Metadata Analysis"))
+    print(app_utils.format_menu_option(5, "Permissions Analysis"))
+    print(app_utils.format_menu_option(6, "Export Static Analysis Data"))
+    print(app_utils.format_menu_option(0, "Back to Main Menu"))
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
     try:
@@ -53,9 +64,7 @@ def calculate_hashes(apk_file_path):
         print("The provided file is not an APK file.")
         return False
 
-    # Initialize the dictionary to store hashes
     hashes = {"MD5": None, "SHA1": None, "SHA256": None}
-
     try:
         with open(apk_file_path, 'rb') as file:
             file_data = file.read()
@@ -82,13 +91,13 @@ def calculate_hashes(apk_file_path):
 
 # Create apk sample record
 def create_apk_record(filename, filesize, md5, sha1, sha256):
-    conn = db.connect_to_database()
+    conn = database_manager.connect_to_database()
     if conn is None:
         print("Failed to establish a database connection.")
         return False
     
     try:
-        if db.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
+        if database_manager.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
             print("Malware sample record successfully saved.")
             return True
         else:
@@ -100,7 +109,7 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
         return False
     
     finally:
-        db.close_database_connection(conn)
+        database_manager.close_database_connection(conn)
 
 # Run static analysis
 def run_static_analysis(apk_path: str):
@@ -123,16 +132,13 @@ def run_static_analysis(apk_path: str):
                 manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
                 save_static_results(apk_path, manifest_data, manifest_element)
             
-        # virustotal.com scan
         vt.virustotal_scan(apk_path)
-
-        # Create malware sample record
         create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
 
     except Exception as e:
         logging.error(f"Error during static analysis: {e}")
 
-# save_static_results()
+# Save the static scan results
 def save_static_results(apk_path, manifest_data, manifest_element):
     file_path = 'output/static_analysis_results.txt'
     try:

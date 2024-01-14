@@ -1,6 +1,6 @@
 # database_config.py
 
-# Database configuration
+# Database credentials
 DB_HOST = "localhost"
 DB_USER = "dbadmin"
 DB_PASSWORD = "Password01"
