@@ -97,7 +97,7 @@ def loadAndroidHashData():
     except Exception as e:
         logging.error(f"Error during data processing: {e}")
 
-def export_data_to_file():
+def export_android_hash_data_to_file():
     filename = 'output/android_malware_data.txt'
     try:
         with database_manager.connect_to_database() as conn, conn.cursor() as cursor:
@@ -214,7 +214,7 @@ def write_top_hashes_to_file(cursor):
     except IOError as error:
         logging.error(f"Error writing analysis to file: {error}")
 
-def export_data_to_excel():
+def export_android_hash_data_to_excel():
     filename = 'output/android_hash_data.xlsx'
     try:
         with database_manager.connect_to_database() as conn:
@@ -225,7 +225,7 @@ def export_data_to_excel():
     except Exception as error:
         logging.error(f"Error exporting data to Excel: {error}")
 
-def export_data_to_csv():
+def export_android_hash_data_to_csv():
     filename = 'output/android_hash_data.csv'
     try:
         with database_manager.connect_to_database() as conn:
@@ -341,9 +341,9 @@ def handle_database_management():
         database_manager.truncate_table('android_malware_hashes')
     
     elif utility_choice == '5':
-        export_data_to_file()
-        export_data_to_excel()
-        export_data_to_csv()
+        export_android_hash_data_to_file()
+        export_android_hash_data_to_excel()
+        export_android_hash_data_to_csv()
 
 def handle_machine_learning():
     # Placeholder for machine learning models menu
@@ -377,9 +377,6 @@ def main_menu():
 
         input("\nEnter any key to return to Main Menu.")
 
-def main():
+if __name__ == "__main__":
     app_utils.display_app_name()
     main_menu()
-
-if __name__ == "__main__":
-    main()
