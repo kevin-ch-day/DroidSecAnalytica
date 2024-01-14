@@ -1,11 +1,11 @@
 import logging
-from database import database_core, database_functions
+from database import DBConnectionManager, DBUtils
 from utils import app_utils
 
 def loadAndroidHashData():
     try:
-        if not database_functions.check_android_malware_hash_table_exists():
-            database_functions.create_android_malware_hash_table()
+        if not DBUtils.check_android_malware_hash_table_exists():
+            DBUtils.create_android_malware_hash_table()
         
         files_to_parse = ['input/2019-README.txt',
                           'input/2020-README.txt',
@@ -20,7 +20,7 @@ def loadAndroidHashData():
 
 def load_data_from_files(files_to_parse):
     try:
-        with database_core.connect_to_database() as conn, conn.cursor() as cursor:
+        with DBConnectionManager.connect_to_database() as conn, conn.cursor() as cursor:
             for file in files_to_parse:
                 parsed_data = app_utils.parse_file(file)
                 if not parsed_data:
@@ -37,9 +37,9 @@ def load_data_from_files(files_to_parse):
         print(f"Error occurred while processing file {file}.")
 
 def viewAndroidHashTableSummary():
-    conn = database_core.connect_to_database()
+    conn = DBConnectionManager.connect_to_database()
     cursor = conn.cursor()
     sql = "SELECT COUNT(*) FROM android_malware_hashes"
-    result = database_core.execute_sql(cursor, sql)
+    result = DBConnectionManager.execute_sql(cursor, sql)
     print(f"Total Records in Database: {result[0][0]}")
-    database_core.close_database_connection(conn)
+    DBConnectionManager.close_database_connection(conn)

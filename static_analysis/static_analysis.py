@@ -10,7 +10,7 @@ from typing import Optional, Dict, List
 
 from . import virustotal_api as vt
 from . import manifest_analysis
-from database import database_core
+from database import DBConnectionManager
 from utils import app_utils
 
 current_dir = os.path.dirname(__file__)
@@ -140,13 +140,13 @@ def calculate_hashes(apk_file_path):
 
 # Create apk sample record
 def create_apk_record(filename, filesize, md5, sha1, sha256):
-    conn = database_core.connect_to_database()
+    conn = DBConnectionManager.connect_to_database()
     if conn is None:
         print("Failed to establish a database connection.")
         return False
     
     try:
-        if database_core.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
+        if DBConnectionManager.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
             print("Malware sample record successfully saved.")
             return True
         else:
@@ -158,7 +158,7 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
         return False
     
     finally:
-        database_core.close_database_connection(conn)
+        DBConnectionManager.close_database_connection(conn)
 
 # Run static analysis
 def run_static_analysis(apk_path: str):

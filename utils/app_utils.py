@@ -5,12 +5,33 @@ import zipfile
 import logging
 import calendar
 
+import logging_utils
+
 # Constants
 LOG_FILE = 'logs/utils.log'
 ANALYSIS_RESULTS_DIR = 'output'
 
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+
+def utility_functions_menu():
+    print(format_menu_title("Utility Functions Menu"))
+    print(format_menu_option(1, "API Integration Check"))
+    print(format_menu_option(2, "View Logs"))
+    print(format_menu_option(0, "Back to Main Menu"))
+
+def handle_utilities():
+    utility_functions_menu()
+    utility_choice = get_user_choice("\nEnter your choice: ", ['1', '2', '3', '0'])
+    if utility_choice == '0':
+        return
+    
+    elif utility_choice == '1':
+        print("API Integration Check.")
+
+    elif utility_choice == '2':
+        print("View logs.")
+        logging_utils.handle_view_logs()
 
 def android_apk_selection():
     apk_files = display_apk_files()

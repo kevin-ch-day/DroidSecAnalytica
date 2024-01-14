@@ -1,12 +1,12 @@
 import mysql.connector
 import logging
-import database.database_core as database_core
+import database.DBConnectionManager as DBConnectionManager
 
 def check_for_table(table_name):
     try:
-        conn = database_core.connect_to_database()
+        conn = DBConnectionManager.connect_to_database()
         if conn:
-            result = database_core.execute_sql(conn, f"SELECT 1 FROM {table_name} LIMIT 1", fetch=True)
+            result = DBConnectionManager.execute_sql(conn, f"SELECT 1 FROM {table_name} LIMIT 1", fetch=True)
             return bool(result)
     except mysql.connector.Error as e:
         if e.errno == mysql.connector.errorcode.ER_NO_SUCH_TABLE:
@@ -15,17 +15,17 @@ def check_for_table(table_name):
             logging.error(f"Error checking for table '{table_name}': {e}")
     finally:
         if conn:
-            database_core.close_database_connection(conn)
+            DBConnectionManager.close_database_connection(conn)
     return False
 
 def create_apk_record(conn, filename, filesize, md5, sha1, sha256):
     sql = "INSERT INTO apk_samples (file_name, file_size, md5, sha1, sha256) VALUES (%s, %s, %s, %s, %s)"
     val = (filename, filesize, md5, sha1, sha256)
-    return database_core.execute_sql(conn, sql, val)
+    return DBConnectionManager.execute_sql(conn, sql, val)
 
 def database_health_check():
     try:
-        conn = database_core.connect_to_database()
+        conn = DBConnectionManager.connect_to_database()
         if conn and conn.is_connected():
             cursor = conn.cursor()
             print("\nDatabase Health Check Report")
@@ -60,7 +60,7 @@ def database_health_check():
             # Assuming format_disk_usage is defined elsewhere
             format_disk_usage(disk_usage)
             cursor.close()
-            database_core.close_database_connection(conn)
+            DBConnectionManager.close_database_connection(conn)
         else:
             print("Failed to establish a database connection.")
             return False
@@ -115,9 +115,9 @@ def format_seconds_to_dhms(seconds):
 
 def check_android_malware_hash_table_exists():
     try:
-        conn = database_core.connect_to_database()
+        conn = DBConnectionManager.connect_to_database()
         if conn:
-            result = database_core.check_for_table(conn, 'android_malware_hashes')
+            result = DBConnectionManager.check_for_table(conn, 'android_malware_hashes')
             return result
         return False
     except Exception as e:
@@ -125,12 +125,12 @@ def check_android_malware_hash_table_exists():
         return False
     finally:
         if conn:
-            database_core.close_database_connection(conn)
+            DBConnectionManager.close_database_connection(conn)
 
 def create_android_malware_hash_table():
     try:
         # Establish a connection to the database
-        conn = database_core.connect_to_database()
+        conn = DBConnectionManager.connect_to_database()
         if conn:
             # SQL statement to create the android_malware_hashes table
             sql_create_table = '''
@@ -143,7 +143,7 @@ def create_android_malware_hash_table():
                     location VARCHAR(100) DEFAULT NULL,
                     month VARCHAR(100) DEFAULT NULL)
             '''
-            if database_core.execute_sql(conn, sql_create_table):
+            if DBConnectionManager.execute_sql(conn, sql_create_table):
                 return True
             else:
                 print("Error executing the SQL statement")
@@ -157,4 +157,43 @@ def create_android_malware_hash_table():
        return False
     finally:
         if conn:
-            database_core.close_database_connection(conn)
+            DBConnectionManager.close_database_connection(conn)
+
+def list_tables():
+    # Lists all tables in the database along with their number of columns and rows.
+    try:
+        conn = DBConnectionManager.connect_to_database()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SHOW TABLES;")
+            tables = cursor.fetchall()
+
+            table_info = []
+            for (table_name,) in tables:
+                # Count the number of columns
+                cursor.execute(f"SHOW COLUMNS FROM {table_name};")
+                num_columns = len(cursor.fetchall())
+
+                # Count the number of rows
+                cursor.execute(f"SELECT COUNT(*) FROM {table_name};")
+                num_rows = cursor.fetchone()[0]
+
+                table_info.append((table_name, num_columns, num_rows))
+
+            cursor.close()
+            return table_info
+
+        else:
+            print("Unable to establish a database connection.")
+            return None
+
+    except Exception as e:
+        print(f"An error occurred while listing the tables: {e}")
+        return None
+
+    finally:
+        if conn:
+            DBConnectionManager.close_database_connection(conn)
+
+def empty_table(table_name):
+    DBConnectionManager.truncate_table(table_name)

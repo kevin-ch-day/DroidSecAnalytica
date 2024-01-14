@@ -2,12 +2,12 @@ import logging
 import pandas as pd
 from utils import app_utils
 
-from database import database_core
+from database import DBConnectionManager
 
-def export_android_hash_data_to_excel():
+def android_hash_data_to_excel():
     filename = 'output/android_hash_data.xlsx'
     try:
-        with database_core.connect_to_database() as conn:
+        with DBConnectionManager.connect_to_database() as conn:
             sql = "SELECT * FROM android_malware_hashes"
             df = pd.read_sql(sql, conn)
             df.to_excel(filename, index=False)
@@ -15,10 +15,10 @@ def export_android_hash_data_to_excel():
     except Exception as error:
         logging.error(f"Error exporting data to Excel: {error}")
 
-def export_android_hash_data_to_csv():
+def android_hash_data_to_csv():
     filename = 'output/android_hash_data.csv'
     try:
-        with database_core.connect_to_database() as conn:
+        with DBConnectionManager.connect_to_database() as conn:
             query = "SELECT * FROM android_malware_hashes"
             df = pd.read_sql(query, conn)
             df.to_csv(filename, index=False)
@@ -26,9 +26,9 @@ def export_android_hash_data_to_csv():
     except Exception as error:
         logging.error(f"Error exporting data to CSV: {error}")
 
-def write_top_hashes_to_file(cursor):
+def save_top_hashes(cursor):
     filename = 'output/hash_analysis.txt'
-    conn = database_core.connect_to_database()
+    conn = DBConnectionManager.connect_to_database()
     cursor = conn.cursor()
 
     try:
@@ -41,44 +41,44 @@ def write_top_hashes_to_file(cursor):
 
             # Count of unique locations
             sql = "SELECT COUNT(DISTINCT location) FROM android_malware_hashes"
-            unique_locations = database_core.execute_sql(cursor, sql)
+            unique_locations = DBConnectionManager.execute_sql(cursor, sql)
             unique_locations = unique_locations[0][0]
             analysis_file.write(f"Unique Locations: {unique_locations}\n")
 
             # Count of unique months
             sql = "SELECT COUNT(DISTINCT month) FROM android_malware_hashes"
-            unique_months = database_core.execute_sql(cursor, sql)
+            unique_months = DBConnectionManager.execute_sql(cursor, sql)
             unique_months = unique_months[0][0]
             analysis_file.write(f"Unique Months: {unique_months}\n")
 
             # Finding and fixing bad data
             sql = "SELECT COUNT(*) FROM android_malware_hashes WHERE malware_category IS NULL OR location IS NULL OR month IS NULL"
-            null_data_count = database_core.execute_sql(cursor, sql)
+            null_data_count = DBConnectionManager.execute_sql(cursor, sql)
             null_data_count = null_data_count[0][0]
             analysis_file.write(f"Entries with Missing Data: {null_data_count}\n")
 
             sql = "SELECT COUNT(*) FROM android_malware_hashes WHERE malware_category = '' OR location = '' OR month = ''"
-            empty_data_count = database_core.execute_sql(cursor, sql)
+            empty_data_count = DBConnectionManager.execute_sql(cursor, sql)
             empty_data_count = empty_data_count[0][0]
             analysis_file.write(f"Entries with Empty Data: {empty_data_count}\n")
 
             # Count of entries per malware category
             sql = "SELECT malware_category, COUNT(*) FROM android_malware_hashes GROUP BY malware_category"
-            category_counts = database_core.execute_sql(cursor, sql)
+            category_counts = DBConnectionManager.execute_sql(cursor, sql)
             analysis_file.write("\nMalware Category Analysis:\n")
             for category, count in category_counts:
                 analysis_file.write(f" '{category}': {count} entries\n")
 
             # Count of entries per month
             sql = "SELECT month, COUNT(*) FROM android_malware_hashes GROUP BY month"
-            month_counts = database_core.execute_sql(cursor, sql)
+            month_counts = DBConnectionManager.execute_sql(cursor, sql)
             analysis_file.write("\nMonthly Analysis:\n")
             for month, count in month_counts:
                 analysis_file.write(f" {month}: {count} entries\n")
 
             print(f"Analysis successfully written to {filename}")
 
-        database_core.close_database_connection(conn)
+        DBConnectionManager.close_database_connection(conn)
 
     except IOError as error:
         logging.error(f"Error writing analysis to file: {error}")
@@ -115,7 +115,7 @@ def write_analysis_to_file(cursor):
                 f.write("\n\n")
 
             # Call to external function to write top hashes
-            write_top_hashes_to_file(cursor)
+            save_top_hashes(cursor)
             print(f"Analysis successfully written to {filename}")
 
     except IOError as error:
@@ -126,7 +126,7 @@ def write_analysis_to_file(cursor):
 def export_android_hash_data_to_file():
     filename = 'output/android_malware_data.txt'
     try:
-        conn = database_core.connect_to_database()
+        conn = DBConnectionManager.connect_to_database()
         cursor = conn.cursor()
         sql = "SELECT * FROM android_malware_hashes"
         cursor.execute(sql)
