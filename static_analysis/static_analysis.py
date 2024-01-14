@@ -10,7 +10,7 @@ from typing import Optional, Dict, List
 
 from . import virustotal_api as vt
 from . import manifest_analysis
-from database import database_manager
+from database import database_core
 from utils import app_utils
 
 current_dir = os.path.dirname(__file__)
@@ -25,6 +25,55 @@ METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
 
 # Setting up logging
 logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+
+# Handling creation of APK record
+def handle_create_apk_record():
+    print("Creating APK record...")
+
+# Handling metadata analysis
+def handle_metadata_analysis():
+    print("Performing metadata analysis...")
+
+# Handling permissions analysis
+def handle_permissions_analysis():
+    print("Performing permissions analysis...")
+
+# Handling export of static analysis data
+def handle_export_static_analysis_data():
+    print("Exporting static analysis data...")
+
+def run_static_analysis():
+    apk_path = app_utils.android_apk_selection()
+    run_static_analysis(apk_path)
+
+def handle_decompile_apk():
+    apk_path = app_utils.android_apk_selection()
+    decompile_apk(apk_path)
+
+def handle_static_analysis():
+    static_analysis_menu()
+    sa_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
+    
+    if sa_choice == '1':
+        handle_decompile_apk()
+    
+    elif sa_choice == '2':
+        handle_create_apk_record()
+    
+    elif sa_choice == '3':
+        run_static_analysis()
+    
+    elif sa_choice == '4':
+        handle_metadata_analysis()
+    
+    elif sa_choice == '5':
+        handle_permissions_analysis()
+    
+    elif sa_choice == '6':
+        handle_export_static_analysis_data()
+    
+    elif sa_choice == '0':
+        return
 
 def static_analysis_menu():
     print(app_utils.format_menu_title("Static Analysis Menu"))
@@ -91,13 +140,13 @@ def calculate_hashes(apk_file_path):
 
 # Create apk sample record
 def create_apk_record(filename, filesize, md5, sha1, sha256):
-    conn = database_manager.connect_to_database()
+    conn = database_core.connect_to_database()
     if conn is None:
         print("Failed to establish a database connection.")
         return False
     
     try:
-        if database_manager.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
+        if database_core.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
             print("Malware sample record successfully saved.")
             return True
         else:
@@ -109,7 +158,7 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
         return False
     
     finally:
-        database_manager.close_database_connection(conn)
+        database_core.close_database_connection(conn)
 
 # Run static analysis
 def run_static_analysis(apk_path: str):

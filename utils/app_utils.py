@@ -12,6 +12,11 @@ ANALYSIS_RESULTS_DIR = 'output'
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
+def android_apk_selection():
+    apk_files = display_apk_files()
+    if not apk_files: return
+    apk_choice = get_user_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files)+1)])
+    return apk_files[int(apk_choice) - 1]
 
 def determine_hash_fields(hash_str):
     # Handle None or empty string input
