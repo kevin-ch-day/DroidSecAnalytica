@@ -14,7 +14,7 @@ from . import manifest_analysis
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
-from database import database_operations as db
+from database import database_manager as db
 
 LOG_FILE_PATH = 'logs/static_analysis.log'
 ANALYSIS_OUTPUT_DIR = 'output'

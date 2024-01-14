@@ -1,7 +1,7 @@
 import mysql.connector
 import logging
 
-from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE"
+from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
