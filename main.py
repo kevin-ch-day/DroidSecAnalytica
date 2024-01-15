@@ -4,9 +4,9 @@
 import logging
 
 # Custom Libraries
-import static_analysis.static_analysis as static_analysis
-import dynamic_analysis.dynamic_analysis as dynamic_analysis
-from utils import app_utils
+from static_analysis import static_analysis
+from dynamic_analysis import dynamic_analysis
+from utils import app_utils, app_display, utils_menu
 from database import DBManagement
 from machine_learning import MLManagement
 
@@ -18,13 +18,13 @@ logging.basicConfig(
 
 def display_menu():
     """ Display the main menu options. """
-    print(app_utils.format_menu_title("Main Menu", 24))
-    print(app_utils.format_menu_option(1, "Static Analysis"))
-    print(app_utils.format_menu_option(2, "Dynamic Analysis"))
-    print(app_utils.format_menu_option(3, "Database Management"))
-    print(app_utils.format_menu_option(4, "Machine Learning Model"))
-    print(app_utils.format_menu_option(5, "Utilities"))
-    print(app_utils.format_menu_option(0, "Exit"))
+    print(app_display.format_menu_title("Main Menu", 24))
+    print(app_display.format_menu_option(1, "Static Analysis"))
+    print(app_display.format_menu_option(2, "Dynamic Analysis"))
+    print(app_display.format_menu_option(3, "Database Management"))
+    print(app_display.format_menu_option(4, "Machine Learning Model"))
+    print(app_display.format_menu_option(5, "Utilities"))
+    print(app_display.format_menu_option(0, "Exit"))
 
 def main_menu():
     while True:
@@ -44,7 +44,7 @@ def main_menu():
             MLManagement.handle_machine_learning()
 
         elif choice == '5':
-            app_utils.handle_utilities()
+            utils_menu.handle_utilities()
 
         elif choice == '0':
             print("Exiting. Goodbye!\n")
@@ -53,5 +53,5 @@ def main_menu():
         input("\nEnter any key to return to Main Menu.")
 
 if __name__ == "__main__":
-    app_utils.display_app_name()
+    app_display.display_app_name()
     main_menu()

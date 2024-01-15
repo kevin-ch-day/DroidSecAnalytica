@@ -34,9 +34,10 @@ def execute_sql(conn, sql, data=None, fetch=False):
         cursor = conn.cursor()
         cursor.execute(sql, data or ())
         if fetch:
-            return cursor.fetchall()  # Return all fetched data for SELECT queries
+            return cursor.fetchall()
         conn.commit()
-        return True  # Indicate successful execution for non-SELECT queries
+        return True
+    
     except mysql.connector.Error as error:
         print(f"Error executing SQL statement '{sql}': {error}")
         return False if fetch else None  # Return False or None based on query type
