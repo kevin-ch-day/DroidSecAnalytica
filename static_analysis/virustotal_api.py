@@ -2,6 +2,7 @@ import requests
 import os
 import time
 import logging
+import json
 import pandas as pd
 import matplotlib.pyplot as plt
 from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestException
@@ -34,7 +35,7 @@ def upload_apk_file(file_path):
 
 def retrieve_analysis_report(analysis_id):
     logging.info(f"Retrieving analysis report for ID: {analysis_id}...")
-    url = f'https://www.virustotal.com/api/v3/analyses/{analysis_id}'
+    url = f"https://www.virustotal.com/api/v3/analyses/{analysis_id}"
     attempts = 0
 
     while attempts < MAX_RETRIES:
@@ -60,6 +61,7 @@ def retrieve_analysis_report(analysis_id):
 
     logging.error("Failed to retrieve the report after several attempts.")
     return None
+
 def generate_data_frame(processed_data):
     df = pd.DataFrame.from_dict(processed_data['vendor_analysis'], orient='index')
     return df
@@ -114,7 +116,6 @@ def process_report_data(report):
         processed_data['behavior_analysis'] = behavior_analysis
 
     return processed_data
-
 
 def get_vendor_data(report):
     vendor_list = []
@@ -221,3 +222,67 @@ def virustotal_scan(apk_path):
             logging.error("Failed to obtain a complete analysis report.")
     else:
         logging.error("Failed to upload APK file for analysis.")
+
+def fetch_virustotal_report(file_hash):
+    """
+    Fetches the VirusTotal report for a given file hash and saves the response to a file.
+    """
+    api_key = 'your_api_key_here'
+    report_url = f'https://www.virustotal.com/vtapi/v2/file/report?apikey={api_key}&resource={file_hash}'
+
+    try:
+        response = requests.get(report_url)
+
+        if response.status_code == 200:
+            try:
+                report_data = response.json()
+            except json.JSONDecodeError:
+                return {'error': 'Invalid JSON response from VirusTotal'}
+
+            # Save response to a file
+            try:
+                with open(f'{file_hash}_virustotal_report.json', 'w') as file:
+                    json.dump(report_data, file, indent=4)
+            except IOError as e:
+                return {'error': f'Error writing file: {e}'}
+
+            return report_data
+
+        elif response.status_code == 403:
+            return {'error': 'Access denied, check your API key'}
+        elif response.status_code == 404:
+            return {'error': 'No report found for the provided hash'}
+        else:
+            return {'error': f'Request failed with status code {response.status_code}'}
+
+    except requests.RequestException as request_error:
+        return {'error': f'HTTP request error: {request_error}'}
+    
+def get_virustotal_hash_values(hash):
+    """
+    Retrieve hash values from VirusTotal API.
+    """
+    url = f'https://www.virustotal.com/vtapi/v2/file/report?apikey={API_KEY}&resource={hash}'
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print("MD5:\t", data.get('md5', 'N/A'))
+                print("SHA1:\t", data.get('sha1', 'N/A'))
+                print("SHA256:\t", data.get('sha256', 'N/A'))
+
+                if 'positives' in data:
+                    return {
+                        'md5': data.get('md5', 'N/A'),
+                        'sha1': data.get('sha1', 'N/A'),
+                        'sha256': data.get('sha256', 'N/A')}
+                else:
+                    return {'error': 'No positives found in data'}
+                
+            except json.JSONDecodeError:
+                return {'error': 'Invalid JSON response'}
+        else:
+            return {'error': f'Request failed with status code {response.status_code}'}
+    except requests.RequestException as e:
+        return {'error': f'HTTP request error: {e}'}
