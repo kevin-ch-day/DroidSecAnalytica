@@ -5,7 +5,7 @@ import json
 import time
 import datetime
 
-import DBConnectionManager
+from database import DBConnectionManager
 
 API_KEY = '9665abbb72d64b0eae5b6fcc13db35c6139069fb1f9ae9db0824ba256e354a01'
 

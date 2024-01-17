@@ -5,9 +5,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import data_processing
-import DBConnectionManager
-import report_generation
+from utils import data_processing, report_generation
+from database  import DBConnectionManager
 
 API_KEY = '848c2f7d2499138423f7416f61b8a3e42d8dd9a429ca9bc6f4f478c590c8eec7'
 
