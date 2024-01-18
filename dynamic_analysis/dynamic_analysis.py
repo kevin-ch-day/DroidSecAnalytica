@@ -2,7 +2,7 @@ import subprocess
 import tempfile
 import logging
 
-from utils import app_utils
+from utils import app_display, app_utils
 
 # Constants
 LOG_FILE = 'logs/dynamic_analysis.log'
@@ -11,9 +11,9 @@ LOG_FILE = 'logs/dynamic_analysis.log'
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def dynamic_analysis_menu():
-    print(app_utils.format_menu_title("Dynamic Analysis Menu"))
-    print(app_utils.format_menu_option(1, "Run Dynamic Analysis"))
-    print(app_utils.format_menu_option(0, "Back to Main Menu"))
+    print(app_display.format_menu_title("Dynamic Analysis Menu"))
+    print(app_display.format_menu_option(1, "Run Dynamic Analysis"))
+    print(app_display.format_menu_option(0, "Back to Main Menu"))
 
 def handle_dynamic_analysis():
     dynamic_analysis_menu()

@@ -1,3 +1,6 @@
+import os
+import platform
+
 # Helper function to format the menu title
 def format_menu_title(title, width=40, border_char="=", align='center'):
     # Ensure the width is at least as long as the title
@@ -21,6 +24,11 @@ def format_menu_option(number, description, number_width=0):
     option_format = f" [{formatted_number}] {description}"
     return option_format
 
+def enable_windows_ansi_support():
+    """Enable ANSI escape sequence support on Windows 10 command prompt."""
+    if platform.system() == "Windows":
+        os.system("")
+
 def display_app_name():
     app_name = "DroidSecAnalytica"
     tagline = "Android APK Security Analyzer"
@@ -30,6 +38,9 @@ def display_app_name():
     color_yellow = "\033[93m"
     bold = "\033[1m"
     reset = "\033[0m"
+
+    # Enable ANSI support on Windows
+    enable_windows_ansi_support()
 
     # Define the widths and border styles
     header_width = max(len(app_name), len(tagline)) + 6  # Adjust width based on content
