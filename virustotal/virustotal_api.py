@@ -10,11 +10,33 @@ from requests.exceptions import HTTPError, ConnectionError, Timeout, RequestExce
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+API_KEY = '9665abbb72d64b0eae5b6fcc13db35c6139069fb1f9ae9db0824ba256e354a01'
 API_KEY = '848c2f7d2499138423f7416f61b8a3e42d8dd9a429ca9bc6f4f478c590c8eec7'
 HEADERS = {'x-apikey': API_KEY}
 MAX_RETRIES = 10
 SLEEP_DURATION = 15
 OUTPUT_DIR = 'output'
+
+
+def fetch_virustotal_report(file_hash):
+    try:
+        url = 'https://www.virustotal.com/vtapi/v2/file/report'
+        params = {'apikey': api_key, 'resource': file_hash}
+        response = requests.get(url, params=params)
+        
+        if response.status_code == 200:
+            result = response.json()
+            
+            if result['response_code'] == 1:
+                return result
+            elif result['response_code'] == 0:
+                return {'error': 'No information available for this hash.'}
+            else:
+                return {'error': 'Error occurred during the scan.'}
+        else:
+            return {'error': 'Failed to connect to VirusTotal API.'}
+    except Exception as e:
+        return {'error': str(e)}
 
 def upload_apk_file(file_path):
     logging.info("Uploading APK file for analysis...")

@@ -1,5 +1,4 @@
 from datetime import datetime
-import pycountry
 
 def print_file_info(results):
     print(f"File Resource: {results['resource']}")
@@ -62,18 +61,3 @@ def behavioral_analysis(results):
         behavioral_info = results['behavioral_info']
         return f"Behavioral Analysis:\n{behavioral_info}\nRecommendation: Investigate the suspicious behavioral patterns."
     return ""
-
-def get_country_info(country_code):
-    try:
-        country = pycountry.countries.get(alpha_2=country_code)
-        if country:
-            continent = pycountry.subdivisions.get(code=f"{country.alpha_2}01")
-            if continent:
-                continent_name = continent.name
-            else:
-                continent_name = "Unknown"
-            return f"Continent: {continent_name}, Name: {country.name}, Alpha-2 Code: {country.alpha_2}, Alpha-3 Code: {country.alpha_3}"
-        else:
-            return "Country not found in the pycountry database."
-    except Exception as e:
-        return f"Error fetching country information: {str(e)}"
