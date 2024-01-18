@@ -56,74 +56,75 @@ def display_data(attributes):
             permission_data = parse_permission_details(data[k])
             print_permission_details(permission_data)
 
+def boxed_header(title):
+    """Creates a boxed header for a section."""
+    line = "-" * len(title)
+    return f"+{line}+\n|{title}|\n+{line}+\n"
+
+def write_main_attributes(file, data):
+    """Writes the main attributes section."""
+    file.write(boxed_header("Main Attributes"))
+    for key in ['main_activity', 'Package', 'TargetSdkVersion']:
+        if key in data:
+            file.write(f"{key.replace('_', ' ').title()}: {data[key]}\n")
+    file.write("\n")
+
+def write_nested_data_sections(file, data):
+    """Writes nested data sections like Activities, Receivers, etc."""
+    for key in ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']:
+        if key in data:
+            file.write(boxed_header(key))
+            for item in data[key]:
+                file.write(f"  - {item}\n")
+            file.write("\n")
+
+def write_certificate_details(file, data):
+    """Writes the certificate details section."""
+    if 'certificate' in data:
+        cert_data = parse_certificate(data['certificate'])
+        file.write(boxed_header("Certificate Details"))
+        for k, v in cert_data.items():
+            file.write(f"{k.title().replace('_', ' ')}: {v}\n")
+        file.write("\n")
+
+def write_intent_filters(file, data):
+    """Writes the intent filters section."""
+    if 'intent_filters' in data:
+        intent_data = parse_intent_filters(data['intent_filters'])
+        file.write(boxed_header("Intent Filters"))
+        for activity, filters in intent_data.items():
+            file.write(f"Activity: {activity}\n")
+            for filter_type, values in filters.items():
+                file.write(f"  {filter_type.title()}: {', '.join(values)}\n")
+        file.write("\n")
+
+def write_permissions_data(file, data):
+    """Writes the permissions data section."""
+    if 'permission_details' in data:
+        permission_data = parse_permission_details(data['permission_details'])
+        if permission_data:
+            file.write(boxed_header("Permissions Data"))
+            file.write(f"Total Permissions: {len(permission_data)}\n\n")
+            for i, permission in enumerate(permission_data, 1):
+                permission_name, short_desc, long_desc, perm_type = permission
+                file.write(f"[{i}] {permission_name}\n")
+                file.write(f"    Description: {short_desc}\n")
+                file.write(f"    Type: {perm_type}\n\n")
+        else:
+            file.write("No permission data available.\n\n")
+
 def save_data_to_file(attributes):
     with open(FILE_NAME, 'w', encoding='utf-8') as file:
-        # Androguard Data Section Header
-        file.write("\nAndroguard Data\n")
+        file.write("Android Malware Analysis Report\n")
+        file.write("=" * 80 + "\n\n")
         data = attributes.get('androguard', None)
 
         if data:
-            # Simplified output for main attributes
-            for key in ['main_activity', 'Package', 'TargetSdkVersion']:
-                if key in data:
-                    file.write(f"{key}: {data[key]}\n")
-
-            file.write("\n")  # Adding extra spacing for readability
-
-            # Consistent formatting for nested data
-            for key in ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']:
-                if key in data:
-                    file.write(f"\n{key}:\n")
-                    for item in data[key]:
-                        file.write(f"  - {item}\n")
-
-            file.write("\n")  # Extra spacing
-
-            # Enhanced table formatting for certificate details
-            if 'certificate' in data:
-                cert_data = parse_certificate(data['certificate'])
-                file.write("\nCertificate Details:\n")
-                for k, v in cert_data.items():
-                    file.write(f"{k}: {v}\n")
-
-            file.write("\n")  # Extra spacing
-
-            # Formatting for intent filters
-            if 'intent_filters' in data:
-                intent_data = parse_intent_filters(data['intent_filters'])
-                file.write("\nIntent Filters:\n")
-                for activity, filters in intent_data.items():
-                    file.write(f"Activity: {activity}\n")
-                    for filter_type, values in filters.items():
-                        file.write(f"  {filter_type}:\n")
-                        for value in values:
-                            file.write(f"    - {value}\n")
-
-            file.write("\n")  # Extra spacing
-
-            # Call to write permission details to a file
-            if 'permission_details' in data:
-                permission_data = parse_permission_details(data['permission_details'])
-
-                # Check if permission_data is not empty
-                if permission_data:
-                    try:
-                        with open(FILE_NAME, 'a', encoding='utf-8') as file:
-                            file.write("\nPermissions:\n")
-                            for permission in permission_data:
-                                permission_name, short_desc, long_desc, perm_type = permission
-                                file.write(f"Name: {permission_name}\n")
-                                file.write(f"Desc: {short_desc}\n")
-                                file.write(f"Type: {perm_type}\n\n")
-                                    
-                    except Exception as e:
-                        print(f"An error occurred: {e}")
-                else:
-                    print("No permission data available.")
-            else:
-                print("'permission_details' not found in data.")
-        
-        # If no data available
+            write_main_attributes(file, data)
+            write_nested_data_sections(file, data)
+            write_certificate_details(file, data)
+            write_intent_filters(file, data)
+            write_permissions_data(file, data)
         else:
             file.write("No Androguard data available.\n")
 

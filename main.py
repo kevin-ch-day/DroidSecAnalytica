@@ -9,6 +9,7 @@ from dynamic_analysis import dynamic_analysis
 from utils import app_utils, app_display, utils_menu
 from database import DBManagement
 from machine_learning import MLManagement
+from virustotal import vt_analysis
 
 # Configure Logging
 logging.basicConfig(
@@ -24,12 +25,13 @@ def display_menu():
     print(app_display.format_menu_option(3, "Database Management"))
     print(app_display.format_menu_option(4, "Machine Learning Model"))
     print(app_display.format_menu_option(5, "Utilities"))
+    print(app_display.format_menu_option(6, "VirusTotal API Analysis"))
     print(app_display.format_menu_option(0, "Exit"))
 
 def main_menu():
     while True:
         display_menu()
-        choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
+        choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
 
         if choice == '1':
             static_analysis.handle_static_analysis()
@@ -45,6 +47,9 @@ def main_menu():
 
         elif choice == '5':
             utils_menu.handle_utilities()
+
+        elif choice == '5':
+            vt_analysis.virustotal_menu()
 
         elif choice == '0':
             print("Exiting. Goodbye!\n")
