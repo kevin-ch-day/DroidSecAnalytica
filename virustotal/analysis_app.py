@@ -6,6 +6,8 @@ import time
 import datetime
 
 from database import DBConnectionManager
+from database import DBUtils
+from utils import app_utils
 
 API_KEY = '9665abbb72d64b0eae5b6fcc13db35c6139069fb1f9ae9db0824ba256e354a01'
 
@@ -127,45 +129,6 @@ def update_database_hash_records(record_id, hash_values):
     finally:
         conn.close()
 
-def get_total_records_to_process():
-    try:
-        conn = DBConnectionManager.connect_to_database()
-        if conn:
-            with conn.cursor() as cursor:
-                sql = """
-                    SELECT COUNT(*) FROM android_malware_hashes
-                    WHERE id NOT IN (SELECT id FROM android_malware_hashes WHERE no_virustotal_match = 1)
-                    AND (md5 IS NULL OR sha1 IS NULL OR sha256 IS NULL);
-                """
-                cursor.execute(sql)
-                result = cursor.fetchone()
-                if result:
-                    return result[0]
-                else:
-                    return 0
-    except Exception as e:
-        print(f"Error counting records with no match: {e}")
-    finally:
-        conn.close()
-
-def update_records_no_virustotal_match(record_id):
-    try:
-        conn = DBConnectionManager.connect_to_database()
-        if conn:
-            with conn.cursor() as cursor:
-                sql = "UPDATE android_malware_hashes SET no_virustotal_match = 1 WHERE id = %s"
-                cursor.execute(sql, (record_id,))
-                conn.commit()
-                if cursor.rowcount > 0:
-                    print(f"Database record updated.")
-                else:
-                    print(f"Database record not updated. Exiting...")
-    except Exception as e:
-        print(f"Error updating record ID {record_id}: {e}")
-    finally:
-        if conn:
-            conn.close()
-
 def process_record(record):
     """
     Process a database record, check for matching hashes, and update the record if necessary.
@@ -179,7 +142,7 @@ def process_record(record):
     
     if "No positives found in data" in hash_values:
         print(f"Error in hash retrieval: {hash_values['error']}")
-        update_records_no_virustotal_match(record[0])
+        DBConnectionManager.update_records_no_virustotal_match(record[0])
         return
     
     check_result = check_matching_hashes(hash_values, md5, sha1, sha256)
@@ -190,38 +153,6 @@ def process_record(record):
             'sha256': hash_values.get('sha256')
         }
         update_database_hash_records(record[0], update_values)
-
-def get_total_hash_records():
-    conn = DBConnectionManager.connect_to_database()
-    if conn:
-        with conn.cursor() as cursor:
-            print("Fetching records from the database...")
-            cursor.execute("SELECT * FROM android_malware_hashes")
-            records = cursor.fetchall()
-            total_records = len(records)
-            print(f"Total records: {total_records}")
-    
-    return records
-
-def wait_for_next_batch(batch_interval):
-    try:      
-        # Calculate time left for the next batch after the first iteration
-        time_left = batch_interval
-        for j in range(3, 0, -1):
-            minutes_left = time_left // 60          
-            if minutes_left == 4:
-                print(f"{minutes_left} minutes left.")
-            elif minutes_left > 1:
-                print(f"{minutes_left} minutes left.")
-            elif minutes_left == 1:
-                print(f"{minutes_left} minute seconds left.")
-            
-            time_left -= 60
-            time.sleep(60)
-
-    except KeyboardInterrupt:
-        print("\nExiting.")
-        exit()
 
 def display_estimated_completion_time(total_batches, batch_interval):
     # Calculate and display the estimated completion time
@@ -253,8 +184,8 @@ def display_estimated_completion_time(total_batches, batch_interval):
     print(f"{'=' * 54}\n")
 
 def check_database_for_missing_hashes():
-    total_records = get_total_hash_records()
-    num_records = get_total_records_to_process()
+    total_records = DBUtils.get_total_hash_records()
+    num_records = DBUtils.get_total_records_to_process()
     if num_records == 0:
         print("All records have data.\n")
     else:
@@ -290,7 +221,7 @@ def check_database_for_missing_hashes():
             if iteration_count == 4:
                 print("\nWaiting for the next batch...")
                 display_estimated_completion_time(total_batches, batch_interval)
-                wait_for_next_batch(batch_interval)
+                app_utils.wait_for_next_batch(batch_interval)
                 iteration_count = 0 # reset
 
 def main():

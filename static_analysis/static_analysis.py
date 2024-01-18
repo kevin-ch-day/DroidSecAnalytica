@@ -4,6 +4,7 @@
 import os
 import sys
 import subprocess
+import platform
 import logging
 import hashlib
 from typing import Optional, Dict, List
@@ -86,12 +87,22 @@ def static_analysis_menu():
     print(app_display.format_menu_option(0, "Back to Main Menu"))
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
-    try:
-        subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
-        logging.info(f"APK decompiled successfully. Output directory: {output_directory}")
-        return output_directory
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error decompiling APK: {e}")
+    # Check OS and exit if Windows
+    if platform.system() == "Windows":
+        logging.error("This function cannot be executed on Windows.")
+        return None
+
+    # Check if OS is Kali Linux or Ubuntu
+    if "kali" in platform.version().lower() or "ubuntu" in platform.version().lower():
+        try:
+            subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
+            logging.info(f"APK decompiled successfully. Output directory: {output_directory}")
+            return output_directory
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Error decompiling APK: {e}")
+            return None
+    else:
+        logging.error("This function can only be executed on Kali Linux or Ubuntu.")
         return None
 
 def analyze_android_manifest(manifest_path: str) -> Optional[Dict[str, List[Dict]]]:
@@ -182,7 +193,7 @@ def run_static_analysis(apk_path: str):
                 save_static_results(apk_path, manifest_data, manifest_element)
             
         vt.virustotal_scan(apk_path)
-        create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
+        #create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
 
     except Exception as e:
         logging.error(f"Error during static analysis: {e}")

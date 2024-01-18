@@ -1,6 +1,6 @@
 CREATE TABLE `android_malware_hashes` (
   `id` int NOT NULL,
-  `malware_name_1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `malware_name_1` varchar(255) DEFAULT NULL,
   `malware_name_2` varchar(250) DEFAULT NULL,
   `md5` varchar(250) DEFAULT NULL,
   `sha1` varchar(250) DEFAULT NULL,

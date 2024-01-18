@@ -1,7 +1,7 @@
 # app_utils.py
 
 import os
-import zipfile
+import time
 import logging
 
 # Constants
@@ -69,20 +69,22 @@ def display_apk_files():
         print(f" [{i}] {file}")
     return apk_files
 
-def copy_android_manifest(apk_path):
-    output_path = os.path.join(ANALYSIS_RESULTS_DIR, 'AndroidManifest.txt')
-    try:
-        with zipfile.ZipFile(apk_path, 'r') as apk_zip:
-            with apk_zip.open('AndroidManifest.xml') as manifest_file:
-                manifest_content = manifest_file.read().decode('utf-8')
+def wait_for_next_batch(batch_interval):
+    try:      
+        # Calculate time left for the next batch after the first iteration
+        time_left = batch_interval
+        for j in range(3, 0, -1):
+            minutes_left = time_left // 60          
+            if minutes_left == 4:
+                print(f"{minutes_left} minutes left.")
+            elif minutes_left > 1:
+                print(f"{minutes_left} minutes left.")
+            elif minutes_left == 1:
+                print(f"{minutes_left} minute seconds left.")
+            
+            time_left -= 60
+            time.sleep(60)
 
-        with open(output_path, "w", encoding="utf-8") as output_file:
-            output_file.write(manifest_content)
-
-        print(f"AndroidManifest.xml successfully copied to {output_path}")
-
-    except FileNotFoundError as e:
-        logging.error(f"Error: {e}.")
-
-    except Exception as e:
-        logging.error(f"Error copying AndroidManifest.xml: {e}")
+    except KeyboardInterrupt:
+        print("\nExiting.")
+        exit()

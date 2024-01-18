@@ -253,3 +253,54 @@ def create_android_malware_hash_table():
         except Exception as e:
             logging.error(f"An unexpected error occurred while creating table 'android_malware_hashes': {e}")
             return False
+
+def update_records_no_virustotal_match(record_id):
+    try:
+        conn = dbConnect.connect_to_database()
+        if conn:
+            with conn.cursor() as cursor:
+                sql = "UPDATE android_malware_hashes SET no_virustotal_match = 1 WHERE id = %s"
+                cursor.execute(sql, (record_id,))
+                conn.commit()
+                if cursor.rowcount > 0:
+                    print(f"Database record updated.")
+                else:
+                    print(f"Database record not updated. Exiting...")
+    except Exception as e:
+        print(f"Error updating record ID {record_id}: {e}")
+    finally:
+        if conn:
+            conn.close()
+
+def get_total_hash_records():
+    conn = dbConnect.connect_to_database()
+    if conn:
+        with conn.cursor() as cursor:
+            print("Fetching records from the database...")
+            cursor.execute("SELECT * FROM android_malware_hashes")
+            records = cursor.fetchall()
+            total_records = len(records)
+            print(f"Total records: {total_records}")
+    
+    return records
+
+def get_total_records_to_process():
+    try:
+        conn = dbConnect.connect_to_database()
+        if conn:
+            with conn.cursor() as cursor:
+                sql = """
+                    SELECT COUNT(*) FROM android_malware_hashes
+                    WHERE id NOT IN (SELECT id FROM android_malware_hashes WHERE no_virustotal_match = 1)
+                    AND (md5 IS NULL OR sha1 IS NULL OR sha256 IS NULL);
+                """
+                cursor.execute(sql)
+                result = cursor.fetchone()
+                if result:
+                    return result[0]
+                else:
+                    return 0
+    except Exception as e:
+        print(f"Error counting records with no match: {e}")
+    finally:
+        conn.close()

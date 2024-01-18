@@ -1,2 +1,2 @@
 python -m pip install --upgrade pip
-pip install -U matplotlib seaborn plotly mysql-connector-python pandas scikit-learn reportlab
+pip install -U matplotlib seaborn plotly mysql-connector-python pandas scikit-learn reportlab pycountry
