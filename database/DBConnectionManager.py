@@ -16,7 +16,11 @@ def connect_to_database():
             password=DB_PASSWORD,
             database=DB_DATABASE
         )
-        return conn
+        if not conn:
+            print("Error connection to database")
+            return False
+        else:
+            return conn
     except mysql.connector.Error as error:
         logging.error(f"Error connecting to database: {error}")
         return None

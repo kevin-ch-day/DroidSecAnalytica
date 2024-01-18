@@ -1,9 +1,10 @@
 # DBUtils.py
 
 import mysql.connector
+from mysql.connector import Error
 import logging
 from contextlib import contextmanager
-import database.DBConnectionManager as dbConnect
+from . import DBConnectionManager as dbConnect
 
 # Context manager for database connection
 @contextmanager
@@ -15,14 +16,21 @@ def database_connection():
         dbConnect.close_database_connection(conn)
 
 def test_database_connection():
+    conn = None
     try:
-        with database_connection() as conn:
-            if conn.is_connected():
-                logging.info("Database connection successful.")
-            else:
-                logging.error("Database connection failed.")
+        conn = dbConnect.connect_to_database()
+        if conn == None:
+            print("Error connecting to database\n")
+            return
+        elif conn.is_connected():
+            logging.info("Database connection successful.")
+        else:
+            logging.error("Database connection failed.")
     except mysql.connector.Error as e:
         logging.error(f"Database connection failed: {e}")
+    finally:
+        if conn and conn.is_connected():
+            dbConnect.close_database_connection(conn)
 
 def run_sql(sql, values=None, fetch=False):
     with database_connection() as conn:
@@ -134,8 +142,9 @@ def display_disk_usage(conn):
         cursor = conn.cursor()
         sql = """
         SELECT table_schema 'Database',
-               ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
         FROM information_schema.TABLES
+        where table_schema = 'droidsecanalytica'
         GROUP BY table_schema;
         """
         cursor.execute(sql)
