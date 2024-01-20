@@ -9,7 +9,6 @@ import logging
 import hashlib
 from typing import Optional, Dict, List
 
-from . import virustotal_api as vt
 from . import manifest_analysis
 from database import DBConnectionManager
 from utils import app_utils, app_display
@@ -192,7 +191,7 @@ def run_static_analysis(apk_path: str):
                 manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
                 save_static_results(apk_path, manifest_data, manifest_element)
             
-        vt.virustotal_scan(apk_path)
+        #vt.virustotal_scan(apk_path)
         #create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
 
     except Exception as e:

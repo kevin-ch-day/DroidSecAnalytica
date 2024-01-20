@@ -3,7 +3,7 @@ import json
 import os
 from tabulate import tabulate
 
-import vt_androguard
+from . import vt_androguard
 
 def save_json_response(response, filename, overwrite=False):
     try:

@@ -1,6 +1,6 @@
 import os
-import vt_requests
-import vt_response_handler
+from . import vt_requests
+from . import vt_response_handler
 
 def is_file_path(input_str):
     return os.path.isfile(input_str)
