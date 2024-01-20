@@ -4,50 +4,30 @@ import json
 
 import AndroguardADT
 import PermissionADT
+import IntentFilterADT
 
 def display_androguard_data(attributes):
     androguard_data = parse_androguard_data(attributes)
     if androguard_data:
-        print("\n-- Main Analysis --")
-        print(f"Main Activity    : {androguard_data.get_main_activity()}")
-        print(f"Package          : {androguard_data.get_package()}")
-        print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
+        print("\nMain Activity:", androguard_data.get_main_activity())
+        print("Package:", androguard_data.get_package())
+        print("Targetsdkversion:", androguard_data.get_target_sdk_version())
 
-        display_sections(androguard_data)
-        display_certificate_details(androguard_data)
+        display_list("Activities", androguard_data.get_activities())
+        display_list("Receivers", androguard_data.get_receivers())
+        display_list("Providers", androguard_data.get_providers())
+        display_list("Services", androguard_data.get_services())
+        display_list("Libraries", androguard_data.get_libraries())
+
+        print("\nCertificate Details:")
+        display_dict(androguard_data.get_certificate_data())
+
         display_permissions(androguard_data.get_permissions())
-        display_intent_filters(androguard_data)
+
+        # display_intent_filters()
+
     else:
         print("Error: no androguard data found.")
-
-def display_sections(androguard_data):
-    sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-    for section in sections:
-        items = getattr(androguard_data, f'get_{section.lower()}')()
-        display_list(section, items)
-
-def display_list(title, items):
-    print(f"\n-- {title} --")
-    if items:
-        for item in items:
-            print(f"  {item}")
-    else:
-        print("  None found")
-
-def display_certificate_details(androguard_data):
-    print("\n-- Certificate Details --")
-    certificate_data = androguard_data.get_certificate_data()
-    if not certificate_data:
-        print("  No certificate data available.")
-        return
-
-    for key, value in certificate_data.items():
-        if isinstance(value, dict):
-            print(f"\n{key}:")
-            for subkey, subvalue in value.items():
-                print(f"  {subkey}: {subvalue}")
-        else:
-            print(f"{key}: {value}")
 
 def display_permissions(permissions):
     print("\nPermissions:")
@@ -97,9 +77,9 @@ def parse_androguard_data(attributes):
         return None
 
     androguard_data = AndroguardADT.AndroguardADT()
-    parse_basic_data(androguard_data, data)
-    parse_permissions(androguard_data, data)
-    parse_certificate_data(androguard_data, data)
+    #parse_basic_data(androguard_data, data)
+    #parse_permissions(androguard_data, data)
+    #parse_certificate_data(androguard_data, data)
     parse_intent_filters(androguard_data, data)
     return androguard_data
 
@@ -126,71 +106,43 @@ def parse_permissions(androguard_data, data):
             androguard_data.add_permission(p)
 
 def parse_intent_filters(androguard_data, data):
-    # Validate the input data
-    if not data or 'intent_filters' not in data:
-        print("No intent filter data found.")
-        return
-
-    if androguard_data and not hasattr(androguard_data, 'add_intent_filter'):
-        print("Error: androguard_data does not support adding intent filters.")
-        return
-
-    for entity_type, entities in data['intent_filters'].items():
-        for entity, filters in entities.items():
-            action = filters.get('action', [])
-            category = filters.get('category', [])
-            
-            if androguard_data:
+    if 'intent_filters' in data:
+        for entity_type, entities in data['intent_filters'].items():
+            for entity, filters in entities.items():
+                action = filters.get('action', [])
+                category = filters.get('category', [])
                 androguard_data.add_intent_filter(entity_type, entity, action, category)
 
-def display_intent_filters(androguard_data):
-    print("\nIntent Filters:")
-
-    if not androguard_data or not hasattr(androguard_data, 'get_all_intent_filters'):
-        print("Invalid or no data provided.")
-        return
-
-    intent_filters = androguard_data.get_all_intent_filters()
-    if not intent_filters:
-        print("No intent filters to display.")
-        return
-
-    for entity_type, entities in intent_filters.items():
-        print(f"\n--- {entity_type} ({len(entities)} Entities) ---")
-        if not entities:
-            print("  No entities found.")
-            continue
-
+    print("Parsed Intent Filters:")
+    for entity_type, entities in androguard_data.get_all_intent_filters().items():
+        print(f"{entity_type}:")
         for entity, filters in entities.items():
-            actions = ', '.join(filters.get('action', [])) or "None"
-            categories = ', '.join(filters.get('category', [])) or "None"
-            
-            print(f"\n  {entity}:")
-            print(f"    Actions     : {actions}")
-            print(f"    Categories  : {categories}")
+            print(f"  {entity}: {filters}")
+    exit()
 
-    print_intent_filters_summary(intent_filters)
+def get_intent_filters(intent_filters_data):
+    parsed_data = {}
 
-def print_intent_filters_summary(intent_filters):
-    total_entities = sum(len(entities) for entities in intent_filters.values())
-    total_actions = sum(len(filters.get('action', [])) for entities in intent_filters.values() for filters in entities.values())
-    total_categories = sum(len(filters.get('category', [])) for entities in intent_filters.values() for filters in entities.values())
+    # Parse Activities
+    activities = intent_filters_data.get('Activities', {})
+    parsed_activities = {}
+    for activity, filters in activities.items():
+        action = filters.get('action', [])
+        category = filters.get('category', [])
+        parsed_activities[activity] = {'action': action, 'category': category}
+    
+    parsed_data['Activities'] = parsed_activities
 
-    print("\nSummary:")
-    print(f"Total Entities : {total_entities}")
-    print(f"Total Actions  : {total_actions}")
-    print(f"Total Categories: {total_categories}")
+    # Parse Receivers
+    receivers = intent_filters_data.get('Receivers', {})
+    parsed_receivers = {}
+    for receiver, filters in receivers.items():
+        action = filters.get('action', [])
+        parsed_receivers[receiver] = {'action': action}
+    
+    parsed_data['Receivers'] = parsed_receivers
 
-    # Additional breakdown by entity type
-    for entity_type, entities in intent_filters.items():
-        entity_count = len(entities)
-        action_count = sum(len(filters.get('action', [])) for filters in entities.values())
-        category_count = sum(len(filters.get('category', [])) for filters in entities.values())
-
-        print(f"\n{entity_type} Breakdown:")
-        print(f"  Entities    : {entity_count} ({entity_count / total_entities * 100:.2f}%)")
-        print(f"  Actions     : {action_count} ({action_count / total_actions * 100:.2f}%)")
-        print(f"  Categories  : {category_count} ({category_count / total_categories * 100:.2f}%)")
+    return parsed_data
 
 def parse_certificate_data(androguard_data, data):
     if 'certificate' in data:
@@ -205,6 +157,12 @@ def add_items_to_list_if_key_exists(key, add_function, data):
     if key in data:
         for item in data[key]:
             add_function(item)
+
+def display_intent_filters(intent_filters):
+    for k in intent_filters:
+        print(intent_filters[k])
+        for index in intent_filters[k]:
+            print(index)
 
 def parse_permission_details(permission_details):
     parsed_data = []

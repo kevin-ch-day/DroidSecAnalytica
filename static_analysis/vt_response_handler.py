@@ -3,7 +3,7 @@ import json
 import os
 from tabulate import tabulate
 
-from . import vt_androguard
+import vt_androguard
 
 def save_json_response(response, filename, overwrite=False):
     try:
@@ -143,9 +143,9 @@ def parse_response(response):
             #summary_statistics(attributes)
 
             #vt_androguard.display_data(attributes)
-            vt_androguard.save_data_to_file(attributes)
+            vt_androguard.display_androguard_data(attributes)
             
-            save_filename = "detection_stats.png"
+            #save_filename = "detection_stats.png"
             #visualize_detection_stats(attributes, save_filename)
             
             # Historical Analysis
