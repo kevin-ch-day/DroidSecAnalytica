@@ -13,14 +13,6 @@ ANALYSIS_RESULTS_DIR = 'output'
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
-# Determine the type of a hash
-def determine_hash_type(hash_string, display=False):
-    hash_length_to_type = {32: "MD5", 40: "SHA1", 64: "SHA256"}
-    hash_type = hash_length_to_type.get(len(hash_string), "Unknown")
-    if display:
-        print(f"Determined Hash Type: {hash_type}")
-    return hash_type
-
 def read_file(file_path):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -95,3 +87,19 @@ def wait_for_next_batch(batch_interval):
     except KeyboardInterrupt:
         print("\nExiting.")
         exit()
+
+def check_files(file_paths):
+    """ Check if files exist and have content. """
+    valid_files = []
+    for file_path in file_paths:
+        if not os.path.isfile(file_path):
+            logging.warning(f"File not found: {file_path}")
+            continue
+
+        if os.path.getsize(file_path) == 0:
+            logging.warning(f"File is empty: {file_path}")
+            continue
+
+        valid_files.append(file_path)
+
+    return valid_files

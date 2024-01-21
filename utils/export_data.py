@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -315,3 +317,9 @@ def visualize_clusters_interactive(df):
     )
     fig.write_image('output/combined_category_clusters.png')
     fig.show()
+
+# Function to write JSON data to a file
+def write_json_to_file(filename, data):
+    with open(filename, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"Data written to file: {filename}")

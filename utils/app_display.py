@@ -3,6 +3,7 @@
 import datetime
 import platform
 import ctypes
+import os
 
 APP_NAME = "DroidSecAnalytica"
 
@@ -91,3 +92,11 @@ def display_app_name():
     print(middle_border)
     print(tagline_header)
     print(bottom_border)
+
+def display_hashes(file_path, hashes):
+    print("\nAPK Calculated Hashes")
+    print("-" * 60)
+    print(f"File  : {os.path.basename(file_path)}")
+    for hash_type, hash_value in hashes.items():
+        print(f"{hash_type:6}: {hash_value}")
+    print("-" * 60)

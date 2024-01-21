@@ -349,3 +349,19 @@ def create_apk_record(filename, filesize, md5, sha1, sha256):
     sql = "INSERT INTO apk_samples (...) VALUES (%s, %s, %s, %s, %s)"
     values = (filename, filesize, md5, sha1, sha256)
     run_sql(sql, values)
+
+def insert_data_into_malware_hashes(file_path, data):
+    """ Insert parsed data into the database. """
+    sql_insert_data = """
+        INSERT INTO malware_hashes 
+        (name_1, name_2, md5, sha1, sha256, location, month, year)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    for record in data:
+        try:
+            run_sql(sql_insert_data, record)
+        except Exception as e:
+            logging.error(f"Error inserting record from {file_path}: {e}")
+            logging.error(f"Problematic record: {record}")
+
+    logging.info(f"Data from {file_path} inserted successfully. Total records: {len(data)}")

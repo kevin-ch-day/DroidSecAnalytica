@@ -6,7 +6,7 @@ import logging
 import sys
 
 # Import custom libraries
-from static_analysis import static_analysis
+from static_analysis import static_analysis_menu
 from dynamic_analysis import dynamic_analysis
 from utils import app_display, utils_menu, user_prompts
 from database import DBManagement
@@ -39,7 +39,7 @@ def main_menu():
 
         try:
             if choice == '1':
-                static_analysis.static_analysis_menu()
+                static_analysis_menu.static_analysis_menu()
             
             elif choice == '2':
                 dynamic_analysis.dynamic_analysis_menu()

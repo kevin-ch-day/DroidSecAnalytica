@@ -33,25 +33,31 @@ logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctim
 def handle_sample_check():
     print(app_display.format_menu_title("Check Previously Analyzed"))
     print(app_display.format_menu_option(1, "Enter APK Path"))
-    print(app_display.format_menu_option(2, "Enter Hash IOT"))
+    print(app_display.format_menu_option(2, "Enter Hash IOC"))
     print(app_display.format_menu_option(3, "Return to menu"))
     print(app_display.format_menu_option(0, "Exit Application"))
     user_options = ['1', '2', '3', '0']
-    user_choice = app_utils.get_user_choice("\nEnter your choice: ", user_options)
+    user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
 
     if user_choice == 0:
         exit()
 
     elif user_choice == 1:
-        apk_path = user_choice.user_enter_apk_path()
-        # check if apk has records
+        check_analyzed_by_apk_path()
 
     elif user_choice == 2:
-        hash_ioc = user_choice.user_enter_hash_ioc()
-        # check if apk has records
+        check_analyzed_by_hash_ioc()
 
     elif user_choice == 3:
         return
+
+def check_analyzed_by_apk_path():
+    apk_path = user_prompts.user_enter_apk_path()
+    # check if apk has records
+
+def check_analyzed_by_hash_ioc():
+    hash_ioc = user_prompts.user_enter_hash_ioc()
+    # check if apk has records
 
 # Run static analysis
 def precheck_sample(apk_path: str):
