@@ -3,7 +3,7 @@
 import os
 
 # Get and validate user menu choice from a list of valid options
-def prompt_user_menu_choice(prompt, valid_choices):
+def user_menu_choice(prompt, valid_choices):
     while True:
         try:
             choice = input(prompt).strip()
@@ -17,7 +17,7 @@ def prompt_user_menu_choice(prompt, valid_choices):
             exit(0)
 
 # Prompt user to enter a valid file path for an APK and validate it
-def prompt_user_enter_apk_path():
+def user_enter_apk_path():
     while True:
         user_data = input("Enter the path to the APK file: ").strip()
         # Validate that the path is not empty, exists, and is a file
@@ -27,7 +27,7 @@ def prompt_user_enter_apk_path():
             print("Invalid path or file. Please enter a valid path.")
 
 # Prompt user to enter a hash Indicator of Compromise (IOC) and validate it
-def prompt_user_enter_hash_ioc():
+def user_enter_hash_ioc():
     while True:
         user_data = input("Enter the hash IOC: ").strip()
         # Validate if the input is a non-empty hexadecimal string of common hash lengths
@@ -43,7 +43,7 @@ def prompt_user_enter_hash_ioc():
             print("Please enter a valid hash.")
 
 # Prompt user for a yes/no confirmation
-def prompt_user_for_confirmation(prompt):
+def user_for_confirmation(prompt):
     while True:
         user_input = input(prompt + " (yes/no): ").strip().lower()
         if user_input in ["yes", "y"]:
@@ -62,7 +62,7 @@ def pause_until_keypress():
         exit(0)
 
 # Prompt user for input with custom validation
-def prompt_user_for_input_with_validation(prompt, validation_func, error_msg):
+def user_for_input_with_validation(prompt, validation_func, error_msg):
     while True:
         user_input = input(prompt).strip()
         if validation_func(user_input):

@@ -1,14 +1,21 @@
+# main.py
+
 # Python Libraries
 import os
 import logging
 import sys
 
-# Custom Libraries
-from static_analysis import static_analysis
-from dynamic_analysis import dynamic_analysis
-from utils import app_display, utils_menu, user_prompts
-from database import DBManagement
-from machine_learning import MLManagement
+# Import custom libraries and handle errors
+try:
+    from static_analysis import static_analysis
+    from dynamic_analysis import dynamic_analysis
+    from utils import app_display, utils_menu, user_prompts
+    from database import DBManagement
+    from machine_learning import MLManagement
+
+except ImportError as e:
+    print(f"Error importing custom modules: {e}")
+    sys.exit(1)
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
@@ -33,7 +40,7 @@ def display_menu():
 def main_menu():
     while True:
         display_menu()
-        choice = user_prompts.prompt_user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
 
         try:
             if choice == '1':
@@ -64,7 +71,7 @@ def main_menu():
 if __name__ == "__main__":
     try:
         app_display.display_app_name()
-        print("Welcome, applicationis starting up...")
+        app_display.display_greeting()
         main_menu()
 
     except KeyboardInterrupt:
