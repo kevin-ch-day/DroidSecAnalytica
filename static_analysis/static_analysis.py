@@ -9,7 +9,7 @@ import logging
 from typing import Optional, Dict, List
 
 from database import DBUtils
-from utils import app_utils, app_display, data_processing
+from utils import app_utils, app_display, data_processing, user_prompts
 
 from . import manifest_analysis
 from . import vt_analysis, vt_requests, vt_response_handler
@@ -45,7 +45,7 @@ def static_analysis_menu():
 
     # Collecting user's choice
     menu_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '0']
-    menu_choice = app_utils.get_user_choice("\nEnter your choice: ", menu_options)
+    menu_choice = user_prompts.get_user_choice("\nEnter your choice: ", menu_options)
 
     # Check previous analysis status
     if menu_choice == '1':
@@ -105,16 +105,18 @@ def handle_sample_check():
 
     elif user_choice == 1:
         apk_path = app_utils.prompt_user_enter_apk_path()
+        # check if apk has records
 
     elif user_choice == 2:
         hash_ioc = app_utils.prompt_user_enter_hash_ioc()
+        # check if apk has records
 
     elif user_choice == 3:
         return
 
 # Run static analysis
 def precheck_sample(apk_path: str):
-    apk_hashes = data_processing.calculate_hashes(apk_path)
+    apk_hashes = app_utils.calculate_hashes(apk_path)
     print("MD5:", apk_hashes["MD5"])
     print("SHA1:", apk_hashes["SHA1"])
     print("SHA256:", apk_hashes["SHA256"])

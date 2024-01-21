@@ -40,19 +40,6 @@ def format_timestamp(timestamp, format='%Y-%m-%d %H:%M:%S'):
         print("Invalid Timestamp")
         return 'Invalid Date'
 
-# Function to determine the type of a hash (MD5, SHA1, SHA256, or Unknown)
-def determine_hash_type(hash_string):
-    length = len(hash_string)
-    hash_type = "Unknown"
-    if length == 32:
-        hash_type = "MD5"
-    elif length == 40:
-        hash_type = "SHA1"
-    elif length == 64:
-        hash_type = "SHA256"
-    print(f"Determined Hash Type: {hash_type}")
-    return hash_type
-
 def calculate_hashes(apk_file_path):
     # Check if the file is an APK file
     if not apk_file_path.lower().endswith('.apk'):

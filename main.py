@@ -1,15 +1,18 @@
-# main.py
-
 # Python Libraries
+import os
 import logging
+import sys
 
 # Custom Libraries
 from static_analysis import static_analysis
 from dynamic_analysis import dynamic_analysis
-from utils import app_utils, app_display, utils_menu
+from utils import app_display, utils_menu, user_prompts
 from database import DBManagement
 from machine_learning import MLManagement
-from virustotal import vt_analysis
+
+# Create logs directory if it doesn't exist
+if not os.path.exists('logs'):
+    os.makedirs('logs')
 
 # Configure Logging
 logging.basicConfig(
@@ -25,38 +28,49 @@ def display_menu():
     print(app_display.format_menu_option(3, "Database Management"))
     print(app_display.format_menu_option(4, "Machine Learning Model"))
     print(app_display.format_menu_option(5, "Utilities"))
-    print(app_display.format_menu_option(6, "VirusTotal API Analysis"))
     print(app_display.format_menu_option(0, "Exit"))
 
 def main_menu():
     while True:
         display_menu()
-        choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
+        choice = user_prompts.prompt_user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
 
-        if choice == '1':
-            static_analysis.handle_static_analysis()
-        
-        elif choice == '2':
-            dynamic_analysis.handle_dynamic_analysis()
+        try:
+            if choice == '1':
+                static_analysis.static_analysis_menu()
+            
+            elif choice == '2':
+                dynamic_analysis.dynamic_analysis_menu()
+            
+            elif choice == '3':
+                DBManagement.database_management_menu()
+            
+            elif choice == '4':
+                MLManagement.machine_learning_menu()
+            
+            elif choice == '5':
+                utils_menu.utilities_menu()
+            
+            elif choice == '0':
+                print("Exiting. Goodbye!\n")
+                break
 
-        elif choice == '3':
-            DBManagement.handle_database_management()
+            user_prompts.pause_until_keypress()
 
-        elif choice == '4':
-            MLManagement.handle_machine_learning()
-
-        elif choice == '5':
-            utils_menu.handle_utilities()
-
-        elif choice == '5':
-            vt_analysis.virustotal_menu()
-
-        elif choice == '0':
-            print("Exiting. Goodbye!\n")
-            break
-
-        input("\nEnter any key to return to Main Menu.")
+        except Exception as e:
+            logging.error(f"An error occurred: {e}", exc_info=True)
+            print("An error occurred. Please check the logs for more details.")
 
 if __name__ == "__main__":
-    app_display.display_app_name()
-    main_menu()
+    try:
+        app_display.display_app_name()
+        print("Welcome, applicationis starting up...")
+        main_menu()
+
+    except KeyboardInterrupt:
+        print("\nProgram interrupted by user. Exiting...")
+
+    except Exception as e:
+        logging.error(f"Critical error on startup: {e}", exc_info=True)
+        print("A critical error occurred on startup. Please check the logs for more details.")
+        sys.exit(1)
