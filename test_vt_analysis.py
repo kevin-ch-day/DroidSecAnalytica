@@ -1,6 +1,6 @@
 import os
-from . import vt_requests
-from . import vt_response_handler
+from .static_analysis import vt_requests
+from .static_analysis import vt_response_handler
 
 def is_file_path(input_str):
     return os.path.isfile(input_str)
