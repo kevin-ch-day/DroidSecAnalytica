@@ -6,12 +6,13 @@ import sys
 import subprocess
 import platform
 import logging
-import hashlib
 from typing import Optional, Dict, List
 
+from database import DBUtils
+from utils import app_utils, app_display, data_processing
+
 from . import manifest_analysis
-from database import DBConnectionManager
-from utils import app_utils, app_display
+from . import vt_analysis, vt_requests, vt_response_handler
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -26,64 +27,170 @@ METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
 # Setting up logging
 logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
-# Handling creation of APK record
-def handle_create_apk_record():
-    print("Creating APK record...")
+# static analysis menu
+def static_analysis_menu():
+    # Menu display
+    print(app_display.format_menu_title("Static Analysis Menu"))
+    print(app_display.format_menu_option(1, "Check if sample has been previously analyzed"))
+    print(app_display.format_menu_option(2, "Decompile APK file for detailed analysis"))
+    print(app_display.format_menu_option(3, "In-depth static analysis on APK"))
+    print(app_display.format_menu_option(4, "In-depth static analysis on Hash"))
+    print(app_display.format_menu_option(5, "Static APK Analysis II"))
+    print(app_display.format_menu_option(6, "Permissions Analysis"))
+    print(app_display.format_menu_option(7, "Display available APK Files"))
+    print(app_display.format_menu_option(8, "Display APK File Hashes"))
+    print(app_display.format_menu_option(9, "Perform VirusTotal.com APK Analysis"))
+    print(app_display.format_menu_option(10, "Perform VirusTotal.com Hash IOC Analysis"))
+    print(app_display.format_menu_option(0, "Return to Main Menu"))
 
-# Handling metadata analysis
-def handle_metadata_analysis():
-    print("Performing metadata analysis...")
+    # Collecting user's choice
+    menu_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '0']
+    menu_choice = app_utils.get_user_choice("\nEnter your choice: ", menu_options)
+
+    # Check previous analysis status
+    if menu_choice == '1':
+        handle_sample_check()
+
+    # Decompile APK for analysis
+    elif menu_choice == '2':
+        handle_apk_decompilation()
+
+    # In-depth analysis on APK
+    elif menu_choice == '3':
+        handle_indepth_apk_analysis()
+
+    # In-depth analysis on Hash
+    elif menu_choice == '4':
+        handle_indepth_hash_analysis()
+
+    # Static APK Analysis II
+    elif menu_choice == '5':
+        handle_static_apk_analysis_beta()
+
+    # Analyze APK permissions
+    elif menu_choice == '6':
+        handle_permissions_analysis()
+
+    # Display available APK files
+    elif menu_choice == '7':
+        app_utils.display_apk_files()
+
+    # Display APK file hashes
+    elif menu_choice == '8':
+        display_apk_file_hashes()
+
+    # VirusTotal analysis on APK
+    elif menu_choice == '9':
+        perform_virustotal_apk_analysis()
+
+    # VirusTotal analysis on Hash IOC
+    elif menu_choice == '10':
+        perform_virustotal_hash_analysis()
+
+    # Return to Main Menu
+    elif menu_choice == '0':
+        return
+
+def handle_sample_check():
+    print(app_display.format_menu_title("Check Previously Analyzed"))
+    print(app_display.format_menu_option(1, "Enter APK Path"))
+    print(app_display.format_menu_option(2, "Enter Hash IOT"))
+    print(app_display.format_menu_option(3, "Return to menu"))
+    print(app_display.format_menu_option(0, "Exit Application"))
+    user_options = ['1', '2', '3', '0']
+    user_choice = app_utils.get_user_choice("\nEnter your choice: ", user_options)
+
+    if user_choice == 0:
+        exit()
+
+    elif user_choice == 1:
+        apk_path = app_utils.prompt_user_enter_apk_path()
+
+    elif user_choice == 2:
+        hash_ioc = app_utils.prompt_user_enter_hash_ioc()
+
+    elif user_choice == 3:
+        return
+
+# Run static analysis
+def precheck_sample(apk_path: str):
+    apk_hashes = data_processing.calculate_hashes(apk_path)
+    print("MD5:", apk_hashes["MD5"])
+    print("SHA1:", apk_hashes["SHA1"])
+    print("SHA256:", apk_hashes["SHA256"])
+
+    file_size_bytes = os.path.getsize(apk_path)
+    file_size_mb = file_size_bytes / 1024
+    print(f"\nAPK file size(s):")
+    print(f" {file_size_bytes:.2f} Bytes")
+    print(f" {file_size_mb:.2f} MB\n")
+
+    # check to see if hash has already been analyzed
+    if not DBUtils.check_for_hash_record(apk_hashes):
+        # hash does not have a record in malware_hashes
+        print("IOC hash does not have a record")
+        file_basename = os.path.basename(apk_path)
+        DBUtils.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
+        
+        if not DBUtils.check_if_hash_analyzed(apk_hashes):
+            # hash has not been analyzed
+            print("IOC hash has not been analyzed")
+            # run analysis on hash
+
+        else:
+            # hash has been analyzed
+            print("IOC hash has already been analyzed")
+            return # return to main
+
+    else:
+        # hash does not have a record in malware_hashes
+        print("IOC hash has a record")
+
+    input("Press any button to continue...")
+
+# Run static analysis
+def full_analysis_scan(apk_path: str):
+    file_basename = os.path.basename(apk_path)
+    try:
+        output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
+        if output_directory:
+            manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
+            manifest_data = analyze_android_manifest(manifest_path)
+            if manifest_data:
+                manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
+                save_static_results(apk_path, manifest_data, manifest_element)
+        else:
+            print("Error decompiling the apk file")
+        
+        # Virustotal.com scan
+        result = vt_requests.query_apk(apk_path)
+        if result:
+            vt_response_handler.parse_response(result)
+        else:
+            print("Error in processing the APK file request.")
+
+    except Exception as e:
+        logging.error(f"Error during static analysis: {e}")
+
+# Run static analysis
+def virustotal_analysis(apk_path: str):
+    try:
+        result = vt_requests.query_apk(apk_path)
+        if result:
+            vt_response_handler.parse_response(result)
+        else:
+            print("Error in processing the APK file request.")
+
+    except Exception as e:
+        logging.error(f"Error during static analysis: {e}")
 
 # Handling permissions analysis
 def handle_permissions_analysis():
     print("Performing permissions analysis...")
 
-# Handling export of static analysis data
-def handle_export_static_analysis_data():
-    print("Exporting static analysis data...")
-
-def run_static_analysis():
-    apk_path = app_utils.android_apk_selection()
-    run_static_analysis(apk_path)
-
-def handle_decompile_apk():
+def handle_apk_decompilation():
     apk_path = app_utils.android_apk_selection()
     decompile_apk(apk_path)
-
-def handle_static_analysis():
-    static_analysis_menu()
-    sa_choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
-    
-    if sa_choice == '1':
-        handle_decompile_apk()
-    
-    elif sa_choice == '2':
-        handle_create_apk_record()
-    
-    elif sa_choice == '3':
-        run_static_analysis()
-    
-    elif sa_choice == '4':
-        handle_metadata_analysis()
-    
-    elif sa_choice == '5':
-        handle_permissions_analysis()
-    
-    elif sa_choice == '6':
-        handle_export_static_analysis_data()
-    
-    elif sa_choice == '0':
-        return
-
-def static_analysis_menu():
-    print(app_display.format_menu_title("Static Analysis Menu"))
-    print(app_display.format_menu_option(1, "Decompile APK"))
-    print(app_display.format_menu_option(2, "Create APK Record"))
-    print(app_display.format_menu_option(3, "Run Static Analysis"))
-    print(app_display.format_menu_option(4, "Metadata Analysis"))
-    print(app_display.format_menu_option(5, "Permissions Analysis"))
-    print(app_display.format_menu_option(6, "Export Static Analysis Data"))
-    print(app_display.format_menu_option(0, "Back to Main Menu"))
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
     # Check OS and exit if Windows
@@ -109,101 +216,21 @@ def analyze_android_manifest(manifest_path: str) -> Optional[Dict[str, List[Dict
         logging.error(f"AndroidManifest.xml not found at {manifest_path}")
         return None
     try:
-        manifest_content = read_file(manifest_path)
+        manifest_content = app_utils.read_file(manifest_path)
         manifest_data = {element: manifest_analysis.extract_metadata(manifest_content, element) for element in METADATA_ELEMENTS}
         logging.info("AndroidManifest.xml analysis completed.")
         return manifest_data
     except Exception as e:
         logging.error(f"Error analyzing AndroidManifest.xml: {e}")
         return None
-  
-def calculate_hashes(apk_file_path):
-    # Check if the file is an APK file
-    if not apk_file_path.lower().endswith('.apk'):
-        print("The provided file is not an APK file.")
-        return False
-
-    hashes = {"MD5": None, "SHA1": None, "SHA256": None}
-    try:
-        with open(apk_file_path, 'rb') as file:
-            file_data = file.read()
-
-        # Calculate and store hashes
-        hashes["MD5"] = hashlib.md5(file_data).hexdigest()
-        hashes["SHA1"] = hashlib.sha1(file_data).hexdigest()
-        hashes["SHA256"] = hashlib.sha256(file_data).hexdigest()
-
-        # Display the hashes
-        print("\nAPK Calculated Hashes")
-        print("-" * 60)
-        print(f"File  : {os.path.basename(apk_file_path)}")
-        for hash_type, hash_value in hashes.items():
-            print(f"{hash_type:6}: {hash_value}")
-        print("-" * 60)
-
-    except FileNotFoundError:
-        print(f"Error: The file '{apk_file_path}' does not exist.")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-    return hashes
-
-# Create apk sample record
-def create_apk_record(filename, filesize, md5, sha1, sha256):
-    conn = DBConnectionManager.connect_to_database()
-    if conn is None:
-        print("Failed to establish a database connection.")
-        return False
-    
-    try:
-        if DBConnectionManager.create_apk_record(conn, filename, filesize, md5, sha1, sha256):
-            print("Malware sample record successfully saved.")
-            return True
-        else:
-            print("Failed to save the malware sample record.")
-            return False
-        
-    except Exception as e:
-        print(f"An error occurred while saving the malware sample record: {e}")
-        return False
-    
-    finally:
-        DBConnectionManager.close_database_connection(conn)
-
-# Run static analysis
-def run_static_analysis(apk_path: str):
-    file_basename = os.path.basename(apk_path)
-    apk_hashes = calculate_hashes(apk_path)
-    file_size_bytes = os.path.getsize(apk_path)
-    file_size_mb = file_size_bytes / 1024
-    print(f"\nAPK file size(s):")
-    print(f" {file_size_bytes:.2f} Bytes")
-    print(f" {file_size_mb:.2f} MB\n")
-    input("Press any button to continue...")
-
-    try:
-        output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
-        #output_directory = False
-        if output_directory:
-            manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
-            manifest_data = analyze_android_manifest(manifest_path)
-            if manifest_data:
-                manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
-                save_static_results(apk_path, manifest_data, manifest_element)
-            
-        #vt.virustotal_scan(apk_path)
-        #create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
-
-    except Exception as e:
-        logging.error(f"Error during static analysis: {e}")
 
 # Save the static scan results
-def save_static_results(apk_path, manifest_data, manifest_element):
+def save_static_results(apk_basename, manifest_data, manifest_element):
     file_path = 'output/static_analysis_results.txt'
     try:
         with open(file_path, "w") as f:
             f.write(f"Static Analysis Results\n")
-            f.write(f"APK: {os.path.basename(apk_path)}\n")
+            f.write(f"APK: {apk_basename}\n")
             f.write("=" * 60 + "\n\n")
 
             write_manifest_data(f, manifest_data)
@@ -249,13 +276,3 @@ def get_attribute_description(attribute):
         "packageInstaller": "The package installer",
     }
     return attribute_description.get(attribute, "No description available")
-
-def read_file(file_path):
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return f.readlines()
-    except FileNotFoundError:
-        logging.error(f"Error: File not found - {file_path}")
-    except Exception as e:
-        logging.error(f"Error reading file: {e}")
-    return None

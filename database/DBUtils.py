@@ -51,12 +51,7 @@ def check_for_table(table_name):
         return False
     except Exception as e:
         logging.error(f"An unexpected error occurred: {e}")
-        return False
-
-def create_apk_record(filename, filesize, md5, sha1, sha256):
-    sql = "INSERT INTO apk_samples (...) VALUES (%s, %s, %s, %s, %s)"
-    values = (filename, filesize, md5, sha1, sha256)
-    return run_sql(sql, values)
+        return False    
 
 def database_health_check():
     with database_connection() as conn:
@@ -284,6 +279,50 @@ def get_total_hash_records():
     
     return records
 
+def check_for_hash_record(hash_dict):
+    try:
+        conn = dbConnect.connect_to_database()
+        if conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes "
+                sql += f"where md5 = {hash_dict['MD5']} or sha1 = {hash_dict['SHA1']} or sha256 = {hash_dict['SHA256']} "
+                sql += "order by id"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                if result:
+                    return True
+                else:
+                    return False
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
+def check_if_hash_analyzed(hash_dict):
+    hash_record_id = []
+    try:
+        conn = dbConnect.connect_to_database()
+        if conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes "
+                sql += f"where md5 = {hash_dict['MD5']} or sha1 = {hash_dict['SHA1']} or sha256 = {hash_dict['SHA256']} "
+                sql += "order by id"
+                cursor.execute(sql)
+                result = cursor.fetchall()
+                if result:
+                    for x in result:
+                        hash_record_id.append(x)
+                        if len(hash_record_id) == 0:
+                            return False
+                        else:
+                            return True
+                else:
+                    return False
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
 def get_total_records_to_process():
     try:
         conn = dbConnect.connect_to_database()
@@ -304,3 +343,9 @@ def get_total_records_to_process():
         print(f"Error counting records with no match: {e}")
     finally:
         conn.close()
+
+# Create apk sample record
+def create_apk_record(filename, filesize, md5, sha1, sha256):
+    sql = "INSERT INTO apk_samples (...) VALUES (%s, %s, %s, %s, %s)"
+    values = (filename, filesize, md5, sha1, sha256)
+    run_sql(sql, values)

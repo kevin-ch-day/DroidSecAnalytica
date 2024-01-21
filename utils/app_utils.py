@@ -11,6 +11,16 @@ ANALYSIS_RESULTS_DIR = 'output'
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
+def read_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.readlines()
+    except FileNotFoundError:
+        logging.error(f"Error: File not found - {file_path}")
+    except Exception as e:
+        logging.error(f"Error reading file: {e}")
+    return None
+
 def android_apk_selection():
     apk_files = display_apk_files()
     if not apk_files: return
@@ -48,6 +58,33 @@ def find_similar_categories(target_category, category_counts):
             if target_category in category or category in target_category:
                 similar_categories.append(category)
     return similar_categories
+
+def prompt_user_enter_apk_path():
+    while True:
+        user_data = input("Enter the path to the APK file: ").strip()
+        if user_data and os.path.exists(user_data) and os.path.isfile(user_data):
+            return user_data
+        else:
+            print("Invalid path or file.")
+
+def prompt_user_enter_hash_ioc():
+    while True:
+        user_data = input("Enter the hash IOC: ").strip()
+        if user_data:
+            # Check if the hash is valid hexadecimal and determine its type
+            if all(c in '0123456789abcdefABCDEF' for c in user_data):
+                if len(user_data) == 32:
+                    return user_data
+                elif len(user_data) == 40:
+                    return user_data
+                elif len(user_data) == 64:
+                    return user_data
+                else:
+                    print("Invalid hash length. Please enter a valid MD5, SHA1, or SHA256 hash.")
+            else:
+                print("Invalid hash. Hashes should contain hexadecimal characters only.")
+        else:
+            print("Please enter a valid hash.")
 
 # Get and validate user choice
 def get_user_choice(prompt, valid_choices):

@@ -31,12 +31,10 @@ class AndroguardADT:
     def find_permission(self, p_name):
         if not p_name or not isinstance(p_name, str):
             return None
-
         p_name = p_name.lower()
         for p in self.permissions:
             if p.get_name().lower() == p_name:
                 return p
-
         return None
 
     # Set the main activity

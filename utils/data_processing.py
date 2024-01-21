@@ -1,7 +1,9 @@
 # data_processing.py
 
 import datetime
+import hashlib
 import json
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
@@ -28,12 +30,6 @@ def structured_output(data):
     except TypeError:
         return 'Error in data formatting.'
 
-# data_processing.py
-import datetime
-import json
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-
 # Function to format a timestamp as a date string
 def format_timestamp(timestamp, format='%Y-%m-%d %H:%M:%S'):
     try:
@@ -56,6 +52,37 @@ def determine_hash_type(hash_string):
         hash_type = "SHA256"
     print(f"Determined Hash Type: {hash_type}")
     return hash_type
+
+def calculate_hashes(apk_file_path):
+    # Check if the file is an APK file
+    if not apk_file_path.lower().endswith('.apk'):
+        print("The provided file is not an APK file.")
+        return False
+
+    hashes = {"MD5": None, "SHA1": None, "SHA256": None}
+    try:
+        with open(apk_file_path, 'rb') as file:
+            file_data = file.read()
+
+        # Calculate and store hashes
+        hashes["MD5"] = hashlib.md5(file_data).hexdigest()
+        hashes["SHA1"] = hashlib.sha1(file_data).hexdigest()
+        hashes["SHA256"] = hashlib.sha256(file_data).hexdigest()
+
+        # Display the hashes
+        print("\nAPK Calculated Hashes")
+        print("-" * 60)
+        print(f"File  : {os.path.basename(apk_file_path)}")
+        for hash_type, hash_value in hashes.items():
+            print(f"{hash_type:6}: {hash_value}")
+        print("-" * 60)
+
+    except FileNotFoundError:
+        print(f"Error: The file '{apk_file_path}' does not exist.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+    return hashes
 
 # Function to write JSON data to a file
 def write_json_to_file(filename, data):
