@@ -1,12 +1,9 @@
 # create_analysis_report.py
 
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Image, PageBreak, Table, TableStyle
+from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Image, Table, TableStyle
 from reportlab.lib import colors
-
-from . import export_data
 
 def create_additional_report():
     filename = 'output/additional_report.pdf'

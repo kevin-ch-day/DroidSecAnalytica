@@ -1,32 +1,42 @@
-# utils_menu.py
+from . import app_display, load_data, export_data, user_prompts
 
-from . import app_display
-from . import app_utils
-from . import load_data
-from . import export_data
-
-def utility_functions_menu():
+def display_menu():
     print(app_display.format_menu_title("Utility Functions"))
     print(app_display.format_menu_option(1, "API Integration Check"))
     print(app_display.format_menu_option(2, "Load Android Malware Hashes"))
     print(app_display.format_menu_option(3, "Export Malware Hash Table Data"))
     print(app_display.format_menu_option(0, "Back to Main Menu"))
 
-def handle_utilities():
-    utility_functions_menu()
-    choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '0'])
-    if choice == '0':
-        return
-    
-    elif choice == '1':
-        # place holder
-        print("API Integration Check.")
+def handle_api_integration():
+    print("API Integration Check.")
 
-    elif choice == '2':
+def handle_load_android_hashes():
+    try:
         load_data.loadAndroidHashData()
-        
-    elif choice == '3':
+    except Exception as e:
+        print(f"Error loading Android malware hashes: {e}")
+
+def handle_export_data():
+    try:
         export_data.hash_data_txt()
         export_data.hash_data_excel()
         export_data.hash_data_csv()
         export_data.comprehensive_analysis_report()
+    except Exception as e:
+        print(f"Error exporting data: {e}")
+
+def display_app_utils():
+    while True:
+        display_menu()
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '0'])
+
+        if choice == '0':
+            return
+        elif choice == '1':
+            handle_api_integration()
+        elif choice == '2':
+            handle_load_android_hashes()
+        elif choice == '3':
+            handle_export_data()
+        else:
+            print("Invalid option. Please try again.")
