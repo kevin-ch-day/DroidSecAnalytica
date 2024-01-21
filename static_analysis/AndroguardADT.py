@@ -1,5 +1,5 @@
-from PermissionADT import PermissionADT
-from IntentFilterADT import IntentFilterADT
+from . import PermissionADT
+from . import IntentFilterADT
 
 class AndroguardADT:
 

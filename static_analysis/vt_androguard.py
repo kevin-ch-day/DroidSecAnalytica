@@ -2,8 +2,8 @@
 
 import json
 
-import AndroguardADT
-import PermissionADT
+from . import AndroguardADT
+from . import PermissionADT
 
 def display_androguard_data(attributes):
     androguard_data = parse_androguard_data(attributes)

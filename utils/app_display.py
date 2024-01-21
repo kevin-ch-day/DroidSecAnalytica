@@ -13,32 +13,38 @@ def display_greeting():
                "Good afternoon" if 12 <= current_time.hour < 18 else \
                "Good evening"
 
+    formatted_time = current_time.strftime('%I:%M %p on %A, %B %d, %Y')
     print(f"\n{greeting}! Welcome to {APP_NAME}.")
-    print(f"The current time is {current_time.strftime('%H:%M on %A, %B %d, %Y')}.")
-    print("The application is starting up, please wait...")
+    print(f"The current time is {formatted_time}.")
 
-# Helper function to format the menu title
-def format_menu_title(title, width=40, border_char="=", align='center'):
-    # Ensure the width is at least as long as the title
-    adjusted_width = max(width, len(title) + 4)
+# Formats the menu title with borders and alignment
+def format_menu_title(title: str, width: int = 50, border_char: str = "=", align: str = 'center', padding: int = 1) -> str:
+    # Adjust width to be at least as long as the title plus padding
+    adjusted_width = max(width, len(title) + padding * 2)
 
-    # Align the title based on the align parameter
-    if align == 'left':
-        aligned_title = title.ljust(adjusted_width)
-    elif align == 'right':
-        aligned_title = title.rjust(adjusted_width)
-    else:  # default to center
-        aligned_title = title.center(adjusted_width)
+    # Align the title
+    aligned_title = title.ljust(adjusted_width) if align == 'left' \
+                    else title.rjust(adjusted_width) if align == 'right' \
+                    else title.center(adjusted_width)
 
-    # Create the formatted title with decorative borders
-    top_border = border_char * adjusted_width
-    bottom_border = border_char * adjusted_width
-    return f"\n{top_border}\n{aligned_title}\n{bottom_border}\n"
+    # Add padding and create borders
+    padded_title = f"{' ' * padding}{aligned_title}{' ' * padding}"
+    border = border_char * adjusted_width
+    return f"\n{border}\n{padded_title}\n{border}\n"
 
-def format_menu_option(number, description, number_width=0):
-    formatted_number = str(number).rjust(number_width)
-    option_format = f" [{formatted_number}] {description}"
-    return option_format
+# Formats a menu option with a dynamic adjustment for the option number spacing
+def format_menu_option(number: int, description: str, number_width: int = 3, right_align: bool = False) -> str:
+    if not isinstance(number, int) or not isinstance(description, str) or not isinstance(number_width, int):
+        raise ValueError("Invalid input types for format_menu_option")
+
+    formatted_number = str(number)
+    # Adjust spacing based on the number width
+    padding = max(number_width - len(formatted_number), 0)
+    # Right-align the number if specified
+    formatted_number = formatted_number.rjust(number_width) if right_align else formatted_number
+
+    # Construct the option string with dynamic spacing
+    return f" [{formatted_number}]" + " " * (padding + 1) + description
 
 # Enable ANSI escape sequence support on Windows 10 and later command prompt.
 def enable_windows_ansi_support():

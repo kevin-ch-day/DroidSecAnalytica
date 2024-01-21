@@ -9,10 +9,10 @@ import logging
 from typing import Optional, Dict, List
 
 from database import DBUtils
-from utils import app_utils, app_display, data_processing, user_prompts
+from utils import app_utils, app_display, user_prompts
 
 from . import manifest_analysis
-from . import vt_analysis, vt_requests, vt_response_handler
+from . import vt_requests, vt_response_handler
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)
@@ -45,7 +45,7 @@ def static_analysis_menu():
 
     # Collecting user's choice
     menu_options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '0']
-    menu_choice = user_prompts.get_user_choice("\nEnter your choice: ", menu_options)
+    menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", menu_options)
 
     # Check previous analysis status
     if menu_choice == '1':

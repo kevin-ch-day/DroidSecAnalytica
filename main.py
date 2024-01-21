@@ -5,17 +5,12 @@ import os
 import logging
 import sys
 
-# Import custom libraries and handle errors
-try:
-    from static_analysis import static_analysis
-    from dynamic_analysis import dynamic_analysis
-    from utils import app_display, utils_menu, user_prompts
-    from database import DBManagement
-    from machine_learning import MLManagement
-
-except ImportError as e:
-    print(f"Error importing custom modules: {e}")
-    sys.exit(1)
+# Import custom libraries
+from static_analysis import static_analysis
+from dynamic_analysis import dynamic_analysis
+from utils import app_display, utils_menu, user_prompts
+from database import DBManagement
+from machine_learning import MLManagement
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
