@@ -18,8 +18,8 @@ def get_user_input():
 # Function to compare user input with existing config
 def compare_config(user_config):
     try:
-        from database import DBConfig  # Import the existing configuration
-        existing_config = (DBConfig.DB_HOST, DBConfig.DB_USER, DBConfig.DB_PASSWORD, DBConfig.DB_DATABASE)
+        from database import database_config  # Import the existing configuration
+        existing_config = (database_config.DB_HOST, database_config.DB_USER, database_config.DB_PASSWORD, database_config.DB_DATABASE)
         return user_config == existing_config
 
     except ImportError:

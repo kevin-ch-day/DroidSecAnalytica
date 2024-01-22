@@ -1,21 +1,9 @@
-# DBPerformance.py
+# database_performance.py
 
 import logging
 import mysql.connector
-import time
-from contextlib import contextmanager
 from utils import app_utils, app_display
-
-import database.DBConnectionManager as dbConnect
-
-# Context manager for database connection
-@contextmanager
-def database_connection():
-    conn = dbConnect.connect_to_database()
-    try:
-        yield conn
-    finally:
-        dbConnect.close_database_connection(conn)
+import database.database_manager as database_conn
 
 def performance_menu():
     print(app_display.format_menu_title("Database Performance Metrics"))
@@ -28,29 +16,29 @@ def performance_menu():
     
 def dispay_performance():
     try:
-        conn = dbConnect.connect_to_database()
-        cursor = conn.cursor()
+        with database_conn.database_connection() as conn:
+            cursor = conn.cursor()
 
-        while True:
-            performance_menu()
-            choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6','0'])
+            while True:
+                performance_menu()
+                choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6','0'])
 
-            if choice == '1':
-                show_query_count(cursor)
-            elif choice == '2':
-                show_slow_queries(cursor)
-            elif choice == '3':
-                show_memory_usage(cursor)
-            elif choice == '4':
-                show_thread_info(cursor)
-            elif choice == '5':
-                show_detailed_server_status(cursor)
-            elif choice == '0':
-                print("Exiting performance metrics...")
-                break
-            else:
-                print("Invalid option. Please try again.")
-                
+                if choice == '1':
+                    show_query_count(cursor)
+                elif choice == '2':
+                    show_slow_queries(cursor)
+                elif choice == '3':
+                    show_memory_usage(cursor)
+                elif choice == '4':
+                    show_thread_info(cursor)
+                elif choice == '5':
+                    show_detailed_server_status(cursor)
+                elif choice == '0':
+                    print("Exiting performance metrics...")
+                    break
+                else:
+                    print("Invalid option. Please try again.")
+
     except mysql.connector.Error as e:
         logging.error(f"Error in performance metrics: {e}")
     except Exception as e:

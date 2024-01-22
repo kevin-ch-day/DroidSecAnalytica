@@ -6,7 +6,7 @@ import logging
 from contextlib import contextmanager
 from typing import Dict, List
 
-from . import DBConnectionManager as dbConnect
+from . import database_manager as dbConnect
 
 # Context manager for database connection
 @contextmanager

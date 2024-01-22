@@ -1,7 +1,7 @@
 # DBManagement.py
 
 import database.DBUtils as dbu
-import database.DBPerformance as dbpu
+import database.database_performance as dbpu
 from utils import app_display, user_prompts
 
 def display_database_menu():

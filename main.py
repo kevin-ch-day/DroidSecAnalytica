@@ -9,7 +9,7 @@ import sys
 from static_analysis import static_analysis_menu as static_menu
 from dynamic_analysis import dynamic_analysis_menu as dynamic_menu
 from utils import app_display, utils_menu, user_prompts
-from database import DBManagement
+from database import database_menu
 from machine_learning import MLManagement
 
 # Create logs directory if it doesn't exist
@@ -45,7 +45,7 @@ def main_menu():
                 dynamic_menu.dynamic_analysis_menu()
             
             elif choice == '3':
-                DBManagement.database_management_menu()
+                database_menu.database_management_menu()
             
             elif choice == '4':
                 MLManagement.machine_learning_menu()
