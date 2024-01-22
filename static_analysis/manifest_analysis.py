@@ -1,3 +1,5 @@
+# manifest_analysis.py
+
 def analyze_manifest_element(manifest_file_path):
     try:
         with open(manifest_file_path, "r", encoding="utf-8") as manifest_file:
@@ -10,29 +12,30 @@ def analyze_manifest_element(manifest_file_path):
         if manifest_start != -1 and manifest_end != -1:
             manifest_attributes = manifest_content[manifest_start:manifest_end]
             manifest_data["package"] = extract_attribute(manifest_attributes, "package")
-            manifest_data["compileSdkVersion"] = extract_attribute(manifest_attributes, "android:compileSdkVersion")
-            manifest_data["compileSdkVersionCodename"] = extract_attribute(manifest_attributes, "android:compileSdkVersionCodename")
+            manifest_data["compileSdkVersion"] = extract_attribute(manifest_attributes, "compileSdkVersion")
+            manifest_data["compileSdkVersionCodename"] = extract_attribute(manifest_attributes, "compileSdkVersionCodename")
             manifest_data["platformBuildVersionCode"] = extract_attribute(manifest_attributes, "platformBuildVersionCode")
             manifest_data["platformBuildVersionName"] = extract_attribute(manifest_attributes, "platformBuildVersionName")
-            manifest_data["targetSdkVersion"] = extract_attribute(manifest_attributes, "android:targetSdkVersion")
-            manifest_data["versionCode"] = extract_attribute(manifest_attributes, "android:versionCode")
-            manifest_data["versionName"] = extract_attribute(manifest_attributes, "android:versionName")
-            manifest_data["installLocation"] = extract_attribute(manifest_attributes, "android:installLocation")
-            manifest_data["debuggable"] = extract_attribute(manifest_attributes, "android:debuggable")
-            manifest_data["applicationLabel"] = extract_attribute(manifest_attributes, "android:label")
-            manifest_data["packageInstaller"] = extract_attribute(manifest_attributes, "android:packageInstaller")
+            manifest_data["targetSdkVersion"] = extract_attribute(manifest_attributes, "targetSdkVersion")
+            manifest_data["versionCode"] = extract_attribute(manifest_attributes, "versionCode")
+            manifest_data["versionName"] = extract_attribute(manifest_attributes, "versionName")
+            manifest_data["installLocation"] = extract_attribute(manifest_attributes, "installLocation")
+            manifest_data["debuggable"] = extract_attribute(manifest_attributes, "debuggable")
+            manifest_data["applicationLabel"] = extract_attribute(manifest_attributes, "label")
+            manifest_data["packageInstaller"] = extract_attribute(manifest_attributes, "packageInstaller")
 
         return manifest_data
 
     except FileNotFoundError:
         print(f"Error: File not found - {manifest_file_path}")
+        return None
     
     except Exception as e:
         print(f"Error analyzing AndroidManifest.xml: {e}")
         return None
 
 def extract_attribute(element, attribute_name):
-    attribute_start = element.find(attribute_name + "=")
+    attribute_start = element.find(f'{attribute_name}="')
 
     if attribute_start != -1:
         attribute_start += len(attribute_name) + 2
@@ -44,7 +47,7 @@ def extract_attribute(element, attribute_name):
 
 def extract_metadata(content, element_name):
     metadata = []
-    for line in content:
+    for line in content.splitlines():
         if f"<{element_name}" in line:
             metadata_item = {}
             metadata_item["name"] = find_attribute_value(line, 'name')

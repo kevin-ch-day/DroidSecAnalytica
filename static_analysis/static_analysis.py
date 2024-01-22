@@ -11,7 +11,7 @@ from typing import Optional, Dict, List
 # Local application imports
 from database import DBUtils
 from utils import app_utils, app_display, user_prompts
-from . import manifest_analysis, vt_requests, vt_response_handler, export_analysis_results
+from . import manifest_analysis, vt_requests, vt_response_handler
 
 # Set up logging
 LOG_FILE_PATH = 'logs/static_analysis.log'
@@ -128,7 +128,7 @@ def full_analysis_scan(apk_path: str):
             manifest_data = analyze_android_manifest(manifest_path)
             if manifest_data:
                 manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
-                export_analysis_results.save_static_results(apk_path, manifest_data, manifest_element)
+                
         else:
             print("Error decompiling the apk file")
         
