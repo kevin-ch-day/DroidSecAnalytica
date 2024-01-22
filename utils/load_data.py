@@ -6,6 +6,7 @@ import calendar
 import re
 
 from database import DBUtils as dbu
+from . import hash_utils
 
 def check_files(file_paths):
     """ Check if files exist and have content. """
@@ -122,7 +123,7 @@ def parse_malware_entry(line, name, file_path, month):
     year = year_match.group(1) if year_match else None
 
     # Assuming the hash strings don't have a specific prefix and are direct hash values.
-    md5, sha1, sha256 = determine_hash_fields(line)
+    md5, sha1, sha256 = hash_utils.determine_hash_fields(line)
     if any([md5, sha1, sha256]):
         # Return the structured entry, including the year (or None if not found)
         return name, name, md5, sha1, sha256, file_path, month, year
