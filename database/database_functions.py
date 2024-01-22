@@ -1,6 +1,6 @@
 import logging
 import mysql.connector
-from . import database_manager, database_utils
+from . import database_manager, database_utils_2
 
 def display_performance_metrics(conn):
     try:
@@ -122,7 +122,7 @@ def display_disk_usage(conn):
         """
         cursor.execute(sql)
         disk_usage = cursor.fetchall()
-        database_utils.format_disk_usage(disk_usage)
+        database_utils_2.format_disk_usage(disk_usage)
     except mysql.connector.Error as e:
         logging.error(f"Error displaying disk usage: {e}")
     except Exception as e:
@@ -182,7 +182,7 @@ def display_database_info(conn):
         # Display the server uptime
         cursor.execute("SHOW STATUS LIKE 'Uptime';")
         uptime = cursor.fetchone()
-        formatted_uptime = database_utils.format_seconds_to_dhms(int(uptime[1]))
+        formatted_uptime = database_utils_2.format_seconds_to_dhms(int(uptime[1]))
         print(f"Server Uptime: {formatted_uptime}")
 
         # Display the number of active connections
