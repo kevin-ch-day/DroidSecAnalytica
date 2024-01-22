@@ -97,13 +97,13 @@ def process_lines(lines, month_mapping, file_path):
     return malware_data
 
 def parse_malware_entry(line, name, file_path, month):
-    file_name = file_path.split('/')[-1]
+    file_name = os.path.basename(file_path)
     year_match = re.match(r'(\d{4})-README\.txt', file_name)
     year = year_match.group(1) if year_match else None
     md5, sha1, sha256 = hash_utils.determine_hash_fields(line)
 
     if any([md5, sha1, sha256]):
-        return name, name, md5, sha1, sha256, file_path, month, year
+        return name, line, md5, sha1, sha256, file_path, month, year
     else:
         raise ValueError(f"Invalid hash string: '{line}'")
 

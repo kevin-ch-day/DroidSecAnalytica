@@ -4,6 +4,8 @@ import mysql.connector
 from mysql.connector import Error
 import logging
 from contextlib import contextmanager
+from typing import Dict, List
+
 from . import DBConnectionManager as dbConnect
 
 # Context manager for database connection
@@ -119,8 +121,6 @@ def display_performance_metrics(conn):
         query_count = cursor.fetchone()
         print(f"Total Queries executed: {query_count[1]}")
 
-        # Add additional performance metrics as needed
-        # Example: Threads running
         cursor.execute("SHOW STATUS LIKE 'Threads_running';")
         threads_running = cursor.fetchone()
         print(f"Threads Running: {threads_running[1]}")
@@ -365,3 +365,28 @@ def insert_data_into_malware_hashes(file_path, data):
             logging.error(f"Problematic record: {record}")
 
     logging.info(f"Data from {file_path} inserted successfully. Total records: {len(data)}")
+
+def get_intent_filters(is_unusual=True):
+    try:
+        conn = dbConnect.connect_to_database()
+        if conn:
+            with conn.cursor() as cursor:
+                sql = "SELECT * FROM android_intent_filters x WHERE x.IsUnusual = %s"
+                cursor.execute(sql, (1 if is_unusual else 0,))
+                results = cursor.fetchall()
+                return results if results else []
+    except Exception as e:
+        print(f"Error: {e}")
+    finally:
+        conn.close()
+
+    return False  # Return False if no unusual intent filter found
+
+def get_intent_filter_record_by_name(intent_name: str) -> Dict:
+    """Get an intent filter by its name."""
+    cursor = cursor(dictionary=True)
+    query = "SELECT * FROM android_intent_filters WHERE IntentName = %s"
+    cursor.execute(query, (intent_name,))
+    result = cursor.fetchone()
+    cursor.close()
+    return result
