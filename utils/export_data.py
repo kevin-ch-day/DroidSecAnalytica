@@ -1,10 +1,6 @@
 import json
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
-from sklearn.cluster import KMeans
 
 from utils import app_utils
 from database import DBConnectionManager
@@ -235,3 +231,18 @@ def get_manifest_attribute_description(attribute):
         "packageInstaller": "The package installer",
     }
     return attribute_description.get(attribute, "No description available")
+
+# Function for advanced data analysis and reporting
+def data_analysis_report(analysis_df):
+    # Save the analyzed data to a CSV file
+    analysis_df.to_csv('analysis_results.csv', index=False)
+    print("Analysis results saved to 'analysis_results.csv'")
+
+    # Implement machine learning models for predictive analysis
+    X = analysis_df[['Malicious Votes', 'Harmless Votes', 'Suspicious Votes', 'Undetected Votes']]
+    y = analysis_df['Classification']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    accuracy = model.score(X_test, y_test)
+    print(f'Model Accuracy: {accuracy}')

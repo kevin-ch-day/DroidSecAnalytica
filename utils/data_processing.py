@@ -7,8 +7,6 @@ import os
 import calendar
 import re
 import logging
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 
 from . import app_display
 
@@ -185,21 +183,6 @@ def analyze_data(data):
     }
     print(f"Analysis Results: {analysis_results}")
     return analysis_results
-
-# Function for advanced data analysis and reporting
-def advanced_data_analysis_and_reporting(analysis_df):
-    # Save the analyzed data to a CSV file
-    analysis_df.to_csv('analysis_results.csv', index=False)
-    print("Analysis results saved to 'analysis_results.csv'")
-
-    # Implement machine learning models for predictive analysis
-    X = analysis_df[['Malicious Votes', 'Harmless Votes', 'Suspicious Votes', 'Undetected Votes']]
-    y = analysis_df['Classification']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train)
-    accuracy = model.score(X_test, y_test)
-    print(f'Model Accuracy: {accuracy}')
 
 def determine_hash_fields(hash_str):
     hash_lengths = {"MD5": 32, "SHA1": 40, "SHA256": 64}

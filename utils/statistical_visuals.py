@@ -1,3 +1,9 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from sklearn.cluster import KMeans
+import pandas as pd
+
 def visualize_category_distribution_interactive(df, category_column):
     fig = px.bar(
         df.sort_values('Count', ascending=False), 
@@ -107,5 +113,4 @@ def advanced_category_analysis(cursor, file, category_column):
         category_str = category if category else "Unknown"
         file.write(f"**{category_str}**\n")
         file.write(f"Category Count: {count} entries\n")
-        # Additional advanced analysis here
         file.write("\n")
