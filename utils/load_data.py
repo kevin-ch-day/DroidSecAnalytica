@@ -28,6 +28,16 @@ def read_file_lines(file_path):
     with open(file_path, 'r') as file:
         return file.readlines()
 
+def read_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return f.readlines()
+    except FileNotFoundError:
+        logging.error(f"Error: File not found - {file_path}")
+    except Exception as e:
+        logging.error(f"Error reading file: {e}")
+    return None
+
 def loadAndroidHashData():
     try:
         if not dbu.check_for_table('android_malware_hashes'):

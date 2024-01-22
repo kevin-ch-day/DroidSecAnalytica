@@ -14,30 +14,11 @@ ANALYSIS_RESULTS_DIR = 'output'
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
-def read_file(file_path):
-    try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            return f.readlines()
-    except FileNotFoundError:
-        logging.error(f"Error: File not found - {file_path}")
-    except Exception as e:
-        logging.error(f"Error reading file: {e}")
-    return None
-
 def android_apk_selection():
     apk_files = display_apk_files()
     if not apk_files: return
-    apk_choice = user_prompts.get_user_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files)+1)])
+    apk_choice = user_prompts.user_menu_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files)+1)])
     return apk_files[int(apk_choice) - 1]
-
-def find_similar_categories(target_category, category_counts):
-    similar_categories = []
-    for category, _ in category_counts:
-        if target_category != category:
-            # Check if the target_category is a substring of category or vice versa
-            if target_category in category or category in target_category:
-                similar_categories.append(category)
-    return similar_categories
 
 # Displays all .apk files in the current directory
 def display_apk_files():
