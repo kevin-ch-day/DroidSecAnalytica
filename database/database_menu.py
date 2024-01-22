@@ -1,6 +1,6 @@
 # DBManagement.py
 
-import database.DBUtils as dbu
+import database.database_functions as dbu
 import database.database_performance as dbpu
 from utils import app_display, user_prompts
 

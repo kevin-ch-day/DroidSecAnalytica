@@ -5,7 +5,7 @@ import platform
 import logging
 from typing import Optional
 
-from database import DBUtils
+from database import database_functions
 from utils import app_utils, app_display, user_prompts
 from . import manifest_analysis, vt_requests, vt_response_handler
 
@@ -50,14 +50,14 @@ def perform_preanalysis(apk_path: str):
     apk_hashes = app_utils.calculate_hashes(apk_path)
     app_display.display_hashes(apk_path, apk_hashes)
     
-    if not DBUtils.check_for_hash_record(apk_hashes):
+    if not database_functions.check_for_hash_record(apk_hashes):
         # Hash does not have a record in malware_hashes
         print("IOC hash does not have a record")
         file_basename = os.path.basename(apk_path)
         file_size_bytes = os.path.getsize(apk_path)
-        DBUtils.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
+        database_functions.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
         
-        if not DBUtils.check_if_hash_analyzed(apk_hashes):
+        if not database_functions.check_if_hash_analyzed(apk_hashes):
             # Hash has not been analyzed
             print("IOC hash has not been analyzed")
             perform_full_analysis(apk_path)

@@ -6,21 +6,21 @@ import logging
 from contextlib import contextmanager
 from typing import Dict, List
 
-from . import database_manager as dbConnect
+from . import database_manager, database_utils
 
 # Context manager for database connection
 @contextmanager
 def database_connection():
-    conn = dbConnect.connect_to_database()
+    conn = database_manager.connect_to_database()
     try:
         yield conn
     finally:
-        dbConnect.close_database_connection(conn)
+        database_manager.close_database_connection(conn)
 
 def test_database_connection():
     conn = None
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn == None:
             print("Error connecting to database\n")
             return
@@ -32,11 +32,11 @@ def test_database_connection():
         logging.error(f"Database connection failed: {e}")
     finally:
         if conn and conn.is_connected():
-            dbConnect.close_database_connection(conn)
+            database_manager.close_database_connection(conn)
 
 def run_sql(sql, values=None, fetch=False):
     with database_connection() as conn:
-        return dbConnect.execute_sql(conn, sql, values, fetch)
+        return database_manager.execute_sql(conn, sql, values, fetch)
 
 def check_for_table(table_name):
     try:
@@ -76,7 +76,7 @@ def display_database_info(conn):
         # Display the server uptime
         cursor.execute("SHOW STATUS LIKE 'Uptime';")
         uptime = cursor.fetchone()
-        formatted_uptime = format_seconds_to_dhms(int(uptime[1]))
+        formatted_uptime = database_utils.format_seconds_to_dhms(int(uptime[1]))
         print(f"Server Uptime: {formatted_uptime}")
 
         # Display the number of active connections
@@ -144,27 +144,11 @@ def display_disk_usage(conn):
         """
         cursor.execute(sql)
         disk_usage = cursor.fetchall()
-        format_disk_usage(disk_usage)
+        database_utils.format_disk_usage(disk_usage)
     except mysql.connector.Error as e:
         logging.error(f"Error displaying disk usage: {e}")
     except Exception as e:
         logging.error(f"An unexpected error occurred while displaying disk usage: {e}")
-
-def format_disk_usage(disk_usage):
-    if not disk_usage:
-        print("No disk usage data available.")
-        return
-
-    print(f"\n{'Database'.ljust(20)} | {'Size in MB'.rjust(10)}")
-    print("-" * 33)
-    for db_name, size_mb in disk_usage:
-        print(f"{db_name.ljust(20)} | {str(size_mb).rjust(10)}")
-
-def format_seconds_to_dhms(seconds):
-    days, remainder = divmod(seconds, 86400)
-    hours, remainder = divmod(remainder, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return f"{days}d {hours}h {minutes}m {seconds}s"
 
 def display_tables_info():
     tables_info = list_tables()
@@ -198,22 +182,6 @@ def list_tables():
         except Exception as e:
             logging.error(f"An unexpected error occurred while listing tables: {e}")
     return table_info
-
-def empty_table(table_name):
-    with database_connection() as conn:
-        try:
-            cursor = conn.cursor()
-            cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
-            cursor.execute(f"TRUNCATE TABLE {table_name};")
-            cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
-            logging.info(f"Table '{table_name}' has been successfully emptied.")
-            return True
-        except mysql.connector.Error as e:
-            logging.error(f"Error emptying table '{table_name}': {e}")
-            return False
-        except Exception as e:
-            logging.error(f"An unexpected error occurred while emptying table '{table_name}': {e}")
-            return False
 
 def viewAndroidHashTableSummary():
     sql = "SELECT COUNT(*) FROM android_malware_hashes"
@@ -251,7 +219,7 @@ def create_android_malware_hash_table():
 
 def update_records_no_virustotal_match(record_id):
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn:
             with conn.cursor() as cursor:
                 sql = "UPDATE android_malware_hashes SET no_virustotal_match = 1 WHERE id = %s"
@@ -268,7 +236,7 @@ def update_records_no_virustotal_match(record_id):
             conn.close()
 
 def get_total_hash_records():
-    conn = dbConnect.connect_to_database()
+    conn = database_manager.connect_to_database()
     if conn:
         with conn.cursor() as cursor:
             print("Fetching records from the database...")
@@ -281,7 +249,7 @@ def get_total_hash_records():
 
 def check_for_hash_record(hash_dict):
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn:
             with conn.cursor() as cursor:
                 sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes "
@@ -301,7 +269,7 @@ def check_for_hash_record(hash_dict):
 def check_if_hash_analyzed(hash_dict):
     hash_record_id = []
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn:
             with conn.cursor() as cursor:
                 sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes "
@@ -325,7 +293,7 @@ def check_if_hash_analyzed(hash_dict):
 
 def get_total_records_to_process():
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn:
             with conn.cursor() as cursor:
                 sql = """
@@ -368,7 +336,7 @@ def insert_data_into_malware_hashes(file_path, data):
 
 def get_intent_filters(is_unusual=True):
     try:
-        conn = dbConnect.connect_to_database()
+        conn = database_manager.connect_to_database()
         if conn:
             with conn.cursor() as cursor:
                 sql = "SELECT * FROM android_intent_filters x WHERE x.IsUnusual = %s"
