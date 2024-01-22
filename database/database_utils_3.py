@@ -1,111 +1,70 @@
-# database_utils_3
-
 import mysql.connector
-from mysql.connector import Error
 import logging
-from contextlib import contextmanager
-from typing import Dict, List
+from typing import Dict
 
-from . import other_utils, database_manager as dbConnect
-
-# Context manager for database connection
-@contextmanager
-def database_connection():
-    conn = dbConnect.connect_to_database()
-    try:
-        yield conn
-    finally:
-        dbConnect.close_database_connection(conn)
+from . import database_manager as dbConnect
 
 def check_if_hash_analyzed(hash_dict):
-    hash_record_id = []
     try:
-        conn = dbConnect.connect_to_database()
-        if conn:
-            with conn.cursor() as cursor:
-                sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes "
-                sql += f"where md5 = {hash_dict['MD5']} or sha1 = {hash_dict['SHA1']} or sha256 = {hash_dict['SHA256']} "
-                sql += "order by id"
-                cursor.execute(sql)
-                result = cursor.fetchall()
-                if result:
-                    for x in result:
-                        hash_record_id.append(x)
-                        if len(hash_record_id) == 0:
-                            return False
-                        else:
-                            return True
-                else:
-                    return False
+        sql = "SELECT id, md5, sha1, sha256 FROM malware_hashes WHERE md5 = %s OR sha1 = %s OR sha256 = %s ORDER BY id"
+        params = (hash_dict['MD5'], hash_dict['SHA1'], hash_dict['SHA256'])
+        result = dbConnect.execute_query(sql, params, fetch=True)
+        return bool(result)
     except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        conn.close()
+        dbConnect.log_error("Error checking if hash is analyzed", e)
+        return False
 
 def get_total_records_to_process():
     try:
-        conn = dbConnect.connect_to_database()
-        if conn:
-            with conn.cursor() as cursor:
-                sql = """
-                    SELECT COUNT(*) FROM android_malware_hashes
-                    WHERE id NOT IN (SELECT id FROM android_malware_hashes WHERE no_virustotal_match = 1)
-                    AND (md5 IS NULL OR sha1 IS NULL OR sha256 IS NULL);
-                """
-                cursor.execute(sql)
-                result = cursor.fetchone()
-                if result:
-                    return result[0]
-                else:
-                    return 0
+        sql = """
+            SELECT COUNT(*) FROM android_malware_hashes
+            WHERE id NOT IN (SELECT id FROM android_malware_hashes WHERE no_virustotal_match = 1)
+            AND (md5 IS NULL OR sha1 IS NULL OR sha256 IS NULL);
+        """
+        result = dbConnect.execute_query(sql, fetch=True)
+        return result[0][0] if result else 0
     except Exception as e:
-        print(f"Error counting records with no match: {e}")
-    finally:
-        conn.close()
+        dbConnect.log_error("Error getting total records to process", e)
+        return 0
 
-# Create apk sample record
 def create_apk_record(filename, filesize, md5, sha1, sha256):
-    sql = "INSERT INTO apk_samples (...) VALUES (%s, %s, %s, %s, %s)"
-    values = (filename, filesize, md5, sha1, sha256)
-    run_sql(sql, values)
+    try:
+        sql = "INSERT INTO apk_samples (filename, filesize, md5, sha1, sha256) VALUES (%s, %s, %s, %s, %s)"
+        values = (filename, filesize, md5, sha1, sha256)
+        dbConnect.execute_query(sql, values)
+        logging.info("APK record created successfully.")
+    except Exception as e:
+        dbConnect.log_error("Error creating APK record", e)
 
 def insert_data_into_malware_hashes(file_path, data):
-    """ Insert parsed data into the database. """
-    sql_insert_data = """
-        INSERT INTO malware_hashes 
-        (name_1, name_2, md5, sha1, sha256, location, month, year)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-    """
-    for record in data:
-        try:
-            run_sql(sql_insert_data, record)
-        except Exception as e:
-            logging.error(f"Error inserting record from {file_path}: {e}")
-            logging.error(f"Problematic record: {record}")
-
-    logging.info(f"Data from {file_path} inserted successfully. Total records: {len(data)}")
+    try:
+        sql_insert_data = """
+            INSERT INTO malware_hashes 
+            (name_1, name_2, md5, sha1, sha256, location, month, year)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        for record in data:
+            dbConnect.execute_query(sql_insert_data, record)
+        logging.info(f"Data from {file_path} inserted successfully. Total records: {len(data)}")
+    except Exception as e:
+        dbConnect.log_error(f"Error inserting record from {file_path}", e)
 
 def get_intent_filters(is_unusual=True):
     try:
-        conn = dbConnect.connect_to_database()
-        if conn:
-            with conn.cursor() as cursor:
-                sql = "SELECT * FROM android_intent_filters x WHERE x.IsUnusual = %s"
-                cursor.execute(sql, (1 if is_unusual else 0,))
-                results = cursor.fetchall()
-                return results if results else []
+        sql = "SELECT * FROM android_intent_filters WHERE IsUnusual = %s"
+        params = (1 if is_unusual else 0,)
+        results = dbConnect.execute_query(sql, params, fetch=True)
+        return results if results else []
     except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        conn.close()
-
-    return False  # Return False if no unusual intent filter found
+        dbConnect.log_error("Error fetching intent filters", e)
+        return []
 
 def get_intent_filter_record_by_name(intent_name: str) -> Dict:
-    """Get an intent filter by its name."""
-    cursor = cursor(dictionary=True)
-    query = "SELECT * FROM android_intent_filters WHERE IntentName = %s"
-    cursor.execute(query, (intent_name,))
-    result = cursor.fetchone()
-    cursor.close()
-    return result
+    try:
+        sql = "SELECT * FROM android_intent_filters WHERE IntentName = %s"
+        params = (intent_name,)
+        result = dbConnect.execute_query(sql, params, fetch=True)
+        return result[0] if result else None
+    except Exception as e:
+        dbConnect.log_error(f"Error fetching intent filter record for {intent_name}", e)
+        return None
