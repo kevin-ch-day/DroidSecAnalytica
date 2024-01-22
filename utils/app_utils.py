@@ -3,6 +3,7 @@
 import os
 import time
 import logging
+import datetime
 
 from . import user_prompts
 
@@ -28,28 +29,6 @@ def android_apk_selection():
     if not apk_files: return
     apk_choice = user_prompts.get_user_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files)+1)])
     return apk_files[int(apk_choice) - 1]
-
-def write_data_to_file(data_filename, headers_line, max_lengths, rows):
-    try:
-        with open(data_filename, 'w') as data_file:
-            data_file.write(headers_line + '\n')
-            data_file.write('-' * len(headers_line) + '\n')
-            for row in rows:
-                formatted_row = ' | '.join([str(row[i]).ljust(max_lengths[i]) for i in range(len(row))])
-                data_file.write(formatted_row + '\n')
-
-    except IOError as error:
-        print(f'IOError occurred: {error}. Check file permissions and path.')
-        print(f"Error writing data to file: {error}")
-
-def write_top_hashes(title, analysis_file, cursor, hash_type):
-    analysis_file.write(f'{title} - Top 10 {hash_type.upper()} Hashes:\n')
-    analysis_file.write(f"\n{title}:\n")
-    sql = f"SELECT {hash_type}, COUNT(*) FROM android_malware_hashes WHERE {hash_type} IS NOT NULL GROUP BY {hash_type} ORDER BY COUNT(*) DESC LIMIT 10"
-    cursor.execute(sql)
-    top_hashes = cursor.fetchall()
-    for hash_value, count in top_hashes:
-        analysis_file.write(f"  - {hash_type.upper()} Hash: {hash_value}, Count: {count}\n")
 
 def find_similar_categories(target_category, category_counts):
     similar_categories = []
@@ -88,18 +67,9 @@ def wait_for_next_batch(batch_interval):
         print("\nExiting.")
         exit()
 
-def check_files(file_paths):
-    """ Check if files exist and have content. """
-    valid_files = []
-    for file_path in file_paths:
-        if not os.path.isfile(file_path):
-            logging.warning(f"File not found: {file_path}")
-            continue
-
-        if os.path.getsize(file_path) == 0:
-            logging.warning(f"File is empty: {file_path}")
-            continue
-
-        valid_files.append(file_path)
-
-    return valid_files
+def format_timestamp(timestamp, format='%Y-%m-%d %H:%M:%S'):
+    # Formats a Unix timestamp into a readable date string
+    try:
+        return datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
+    except ValueError:
+        return 'Invalid Timestamp format.'

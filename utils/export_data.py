@@ -246,3 +246,25 @@ def data_analysis_report(analysis_df):
     model.fit(X_train, y_train)
     accuracy = model.score(X_test, y_test)
     print(f'Model Accuracy: {accuracy}')
+
+def write_data_to_file(data_filename, headers_line, max_lengths, rows):
+    try:
+        with open(data_filename, 'w') as data_file:
+            data_file.write(headers_line + '\n')
+            data_file.write('-' * len(headers_line) + '\n')
+            for row in rows:
+                formatted_row = ' | '.join([str(row[i]).ljust(max_lengths[i]) for i in range(len(row))])
+                data_file.write(formatted_row + '\n')
+
+    except IOError as error:
+        print(f'IOError occurred: {error}. Check file permissions and path.')
+        print(f"Error writing data to file: {error}")
+
+def write_top_hashes(title, analysis_file, cursor, hash_type):
+    analysis_file.write(f'{title} - Top 10 {hash_type.upper()} Hashes:\n')
+    analysis_file.write(f"\n{title}:\n")
+    sql = f"SELECT {hash_type}, COUNT(*) FROM android_malware_hashes WHERE {hash_type} IS NOT NULL GROUP BY {hash_type} ORDER BY COUNT(*) DESC LIMIT 10"
+    cursor.execute(sql)
+    top_hashes = cursor.fetchall()
+    for hash_value, count in top_hashes:
+        analysis_file.write(f"  - {hash_type.upper()} Hash: {hash_value}, Count: {count}\n")

@@ -7,6 +7,8 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import Paragraph, Spacer, SimpleDocTemplate, Image, Table, TableStyle
 from reportlab.lib import colors
 
+from database import DBConnectionManager
+
 def comprehensive_analysis_report():
     filename = 'output/analysis.txt'
     print("Starting comprehensive analysis data saving...")
