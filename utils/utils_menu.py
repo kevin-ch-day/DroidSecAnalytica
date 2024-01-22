@@ -1,4 +1,4 @@
-from . import app_display, load_data, export_data, user_prompts
+from . import app_display, load_data, user_prompts
 
 def display_menu():
     print(app_display.format_menu_title("Utility Functions"))
@@ -12,18 +12,12 @@ def handle_api_integration():
 
 def handle_load_android_hashes():
     try:
-        load_data.loadAndroidHashData()
+        load_data.load_android_malware_hash_data()
     except Exception as e:
         print(f"Error loading Android malware hashes: {e}")
 
 def handle_export_data():
-    try:
-        export_data.hash_data_txt()
-        export_data.hash_data_excel()
-        export_data.hash_data_csv()
-        export_data.comprehensive_analysis_report()
-    except Exception as e:
-        print(f"Error exporting data: {e}")
+    print("Export malware hash data.")
 
 def display_app_utils():
     while True:
@@ -32,11 +26,15 @@ def display_app_utils():
 
         if choice == '0':
             return
+        
         elif choice == '1':
             handle_api_integration()
+        
         elif choice == '2':
             handle_load_android_hashes()
+        
         elif choice == '3':
             handle_export_data()
+        
         else:
             print("Invalid option. Please try again.")
