@@ -6,12 +6,6 @@ from contextlib import contextmanager
 
 from . import other_utils, database_manager as dbConnect
 
-def log_error(message: str, error: Exception = None):
-    if error:
-        logging.error(f"{message}: {error}")
-    else:
-        logging.error(message)
-
 @contextmanager
 def managed_database_connection():
     conn = None
@@ -19,19 +13,11 @@ def managed_database_connection():
         conn = dbConnect.connect_to_database()
         yield conn
     except mysql.connector.Error as e:
-        log_error("Managed database connection failed", e)
+        dbConnect.log_error("Managed database connection failed", e)
         raise
     finally:
         if conn:
             dbConnect.close_database_connection(conn)
-
-def test_database_connection():
-    try:
-        with managed_database_connection() as conn:
-            if conn.is_connected():
-                logging.info("Database connection successful.")
-    except mysql.connector.Error as e:
-        log_error("Database connection failed", e)
 
 def check_for_table(table_name: str) -> bool:
     try:
@@ -41,7 +27,7 @@ def check_for_table(table_name: str) -> bool:
             result = cursor.fetchone()
             return bool(result)
     except Exception as e:
-        log_error(f"Error checking for table '{table_name}'", e)
+        dbConnect.log_error(f"Error checking for table '{table_name}'", e)
         return False    
 
 def database_health_check():
@@ -52,7 +38,7 @@ def database_health_check():
             display_performance_metrics(conn)
             display_disk_usage(conn)
     except mysql.connector.Error as e:
-        log_error("Failed to perform database health check", e)
+        dbConnect.log_error("Failed to perform database health check", e)
 
 def display_database_info():
     try:
@@ -71,7 +57,7 @@ def display_database_info():
             connections = cursor.fetchone()
             logging.info(f"Active Connections: {connections[1]}")
     except Exception as e:
-        log_error("Error displaying database info", e)
+        dbConnect.log_error("Error displaying database info", e)
 
 def check_critical_tables(table_list):
     try:
@@ -89,7 +75,7 @@ def check_critical_tables(table_list):
         logging.info("All critical tables are present.")
         return True
     except Exception as e:
-        log_error("Error checking critical tables", e)
+        dbConnect.log_error("Error checking critical tables", e)
         return False
 
 def display_performance_metrics():
@@ -104,7 +90,7 @@ def display_performance_metrics():
             threads_running = cursor.fetchone()
             logging.info(f"Threads Running: {threads_running[1]}")
     except Exception as e:
-        log_error("Error displaying performance metrics", e)
+        dbConnect.log_error("Error displaying performance metrics", e)
 
 def display_disk_usage():
     try:
@@ -121,4 +107,4 @@ def display_disk_usage():
             disk_usage = cursor.fetchall()
             other_utils.format_disk_usage(disk_usage)
     except Exception as e:
-        log_error("Error displaying disk usage", e)
+        dbConnect.log_error("Error displaying disk usage", e)

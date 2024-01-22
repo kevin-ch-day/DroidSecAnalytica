@@ -1,6 +1,6 @@
 import logging
 import mysql.connector
-from . import database_manager, database_utils_2
+from ..database import database_manager, database_utils_2
 
 def display_performance_metrics(conn):
     try:

@@ -5,7 +5,7 @@ import platform
 import logging
 from typing import Optional
 
-from database import database_functions
+from SAVED_CODE import database_functions
 from utils import app_utils, app_display, user_prompts
 from . import manifest_analysis, vt_requests, vt_response_handler
 

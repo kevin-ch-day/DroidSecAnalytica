@@ -31,17 +31,25 @@ def database_connection():
         if conn and conn.is_connected():
             conn.close()
 
-# Function to execute SQL queries
+# Test the database connection
+def test_database_connection():
+    try:
+        with database_connection() as conn:
+            if conn.is_connected():
+                logging.info("Database connection successful.")
+    except mysql.connector.Error as e:
+        log_error("Database connection failed", e)
+
+# Execute SQL queries
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     with database_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(query, params)
+        cursor.execute(query, params or ())
         if fetch:
             return cursor.fetchall()
         else:
             conn.commit()
 
-# Functions for insert, update, and delete operations
 def execute_insert(table, data):
     try:
         columns = ', '.join(data.keys())
