@@ -1,15 +1,9 @@
+# database_manager.py
+
 import mysql.connector
-import logging
-from contextlib import contextmanager
 from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
-# Configure logging only if not already configured by other modules
-if not logging.getLogger().hasHandlers():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-@contextmanager
-def database_connection():
-    conn = None
+def create_connection():
     try:
         conn = mysql.connector.connect(
             host=DB_HOST,
@@ -17,58 +11,69 @@ def database_connection():
             password=DB_PASSWORD,
             database=DB_DATABASE
         )
-        yield conn
-    except mysql.connector.Error as error:
-        logging.error(f"Error in database operation: {error}")
-        yield None
-    finally:
-        if conn and conn.is_connected():
-            conn.close()
-            logging.info("Database connection closed.")
 
-def execute_query(sql, values=None, fetch_mode=None):
+        if conn.is_connected():
+            print("Connected to the MySQL database")
+            return conn
+
+    except mysql.connector.Error as e:
+        print("Error connecting to MySQL:", e)
+    
+    return None
+
+def execute_query(conn, query, fetch=True):
     try:
-        with database_connection() as conn:
-            if conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(sql, values or ())
-                    if fetch_mode == 'all':
-                        return cursor.fetchall()
-                    elif fetch_mode == 'one':
-                        return cursor.fetchone()
-                    conn.commit()
-            else:
-                logging.error("Failed to establish a database connection.")
-                return None
-    except mysql.connector.Error as error:
-        logging.error(f"Error executing SQL query: {error}")
+        cursor = conn.cursor()
+        cursor.execute(query)
+        if fetch:
+            return cursor.fetchall()
+        else:
+            conn.commit()
+
+    except mysql.connector.Error as e:
+        print("Error executing query:", e)
         return None
 
-def test_connection():
-    with database_connection() as conn:
-        if conn:
-            logging.info("Connection to database is successful.")
-            return True
-        else:
-            logging.error("Failed to connect to the database.")
-            return False
+def close_connection(conn):
+    try:
+        if conn is not None and conn.is_connected():
+            conn.close()
+            print("Connection to MySQL database is closed")
+    except mysql.connector.Error as e:
+        print("Error closing connection:", e)
 
-def truncate_all_tables():
-    with database_connection() as conn:
-        if conn:
-            try:
-                with conn.cursor() as cursor:
-                    cursor.execute("SHOW TABLES;")
-                    tables = cursor.fetchall()
-                    for (table_name,) in tables:
-                        logging.info(f"Truncating table '{table_name}'")
-                        if not execute_query(f"TRUNCATE TABLE {table_name}"):
-                            logging.error(f"Failed to truncate table '{table_name}'")
-                            return False
-                return True
-            except mysql.connector.Error as error:
-                logging.error(f"Error during truncation: {error}")
-                return False
-        else:
-            logging.error("Failed to establish a database connection.")
-            return False
+def execute_insert(conn, table, data):
+    try:
+        cursor = conn.cursor()
+        columns = ', '.join(data.keys())
+        placeholders = ', '.join(['%s'] * len(data))
+        query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
+        cursor.execute(query, tuple(data.values()))
+        conn.commit()
+        print("Insertion successful")
+
+    except mysql.connector.Error as e:
+        print("Error executing insert query:", e)
+
+def execute_update(conn, table, data, condition):
+    try:
+        cursor = conn.cursor()
+        update_values = ', '.join([f"{key} = %s" for key in data.keys()])
+        query = f"UPDATE {table} SET {update_values} WHERE {condition}"
+        cursor.execute(query, tuple(data.values()))
+        conn.commit()
+        print("Update successful")
+
+    except mysql.connector.Error as e:
+        print("Error executing update query:", e)
+
+def execute_delete(conn, table, condition):
+    try:
+        cursor = conn.cursor()
+        query = f"DELETE FROM {table} WHERE {condition}"
+        cursor.execute(query)
+        conn.commit()
+        print("Deletion successful")
+
+    except mysql.connector.Error as e:
+        print("Error executing delete query:", e)
