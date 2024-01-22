@@ -31,15 +31,6 @@ def database_connection():
         if conn and conn.is_connected():
             conn.close()
 
-# Test the database connection
-def test_database_connection():
-    try:
-        with database_connection() as conn:
-            if conn.is_connected():
-                logging.info("Database connection successful.")
-    except mysql.connector.Error as e:
-        log_error("Database connection failed", e)
-
 # Execute SQL queries
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     with database_connection() as conn:
@@ -76,3 +67,49 @@ def execute_delete(table, condition):
         logging.info("Deletion successful")
     except mysql.connector.Error as e:
         log_error("Error executing delete query", e)
+
+def list_tables():
+    try:
+        result = execute_query("SHOW TABLES;", fetch=True)
+        table_info = []
+        for (table_name,) in result:
+            num_columns = len(execute_query(f"SHOW COLUMNS FROM {table_name};", fetch=True))
+            num_rows = execute_query(f"SELECT COUNT(*) FROM {table_name};", fetch=True)[0][0]
+            table_info.append((table_name, num_columns, num_rows))
+        return table_info
+    except mysql.connector.Error as e:
+        log_error("Error listing tables", e)
+        return []
+
+def display_tables_info():
+    tables_info = list_tables()
+    if not tables_info:
+        log_error("No table information available or failed to retrieve table information.")
+        return
+
+    print("\nDatabase Tables Information:")
+    print(f"{'Table Name'.ljust(30)} | {'# of Columns'.rjust(15)} | {'# of Rows'.rjust(15)}")
+    print("-" * 65)
+    
+    for table_name, num_columns, num_rows in tables_info:
+        print(f"{table_name.ljust(30)} | {str(num_columns).rjust(15)} | {str(num_rows).rjust(15)}")
+
+# Test the database connection
+def test_database_connection():
+    try:
+        with database_connection() as conn:
+            if conn.is_connected():
+                print("Database connection successful.")
+    except mysql.connector.Error as e:
+        print("Database connection failed", e)
+
+def empty_table(table_name):
+    try:
+        execute_query("SET FOREIGN_KEY_CHECKS = 0;", fetch=False)
+        execute_query(f"TRUNCATE TABLE {table_name};", fetch=False)
+        execute_query("SET FOREIGN_KEY_CHECKS = 1;", fetch=False)
+        logging.info(f"Table '{table_name}' has been successfully emptied.")
+        return True
+    except Exception as e:
+        log_error(f"Error emptying table '{table_name}'", e)
+        return False

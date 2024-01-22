@@ -3,7 +3,8 @@
 import logging
 import mysql.connector
 from utils import app_utils, app_display
-import database.database_manager as database_conn
+from . import database_manager as db_conn
+from . import database_performance_utils as db_utils
 
 def performance_menu():
     print(app_display.format_menu_title("Database Performance Metrics"))
@@ -16,7 +17,7 @@ def performance_menu():
     
 def dispay_performance():
     try:
-        with database_conn.database_connection() as conn:
+        with db_conn.database_connection() as conn:
             cursor = conn.cursor()
 
             while True:
@@ -24,15 +25,15 @@ def dispay_performance():
                 choice = app_utils.get_user_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6','0'])
 
                 if choice == '1':
-                    show_query_count(cursor)
+                    db_utils.show_query_count(cursor)
                 elif choice == '2':
-                    show_slow_queries(cursor)
+                    db_utils.show_slow_queries(cursor)
                 elif choice == '3':
-                    show_memory_usage(cursor)
+                    db_utils.show_memory_usage(cursor)
                 elif choice == '4':
-                    show_thread_info(cursor)
+                    db_utils.show_thread_info(cursor)
                 elif choice == '5':
-                    show_detailed_server_status(cursor)
+                    db_utils.show_detailed_server_status(cursor)
                 elif choice == '0':
                     print("Exiting performance metrics...")
                     break

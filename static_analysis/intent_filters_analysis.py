@@ -1,7 +1,6 @@
 # intent_filters_analysis.py
 
 from typing import Dict, List
-from DBUtils import get_intent_filters
 
 def is_unusual_intent(action: str, unusual_intents: List[str]) -> bool:
     """Check if an intent action is unusual or high-risk."""
