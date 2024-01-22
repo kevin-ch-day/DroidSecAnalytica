@@ -1,17 +1,14 @@
-# database_manager.py
-
 import mysql.connector
 import logging
 from contextlib import contextmanager
-
-# Database configuration variables
 from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging only if not already configured by other modules
+if not logging.getLogger().hasHandlers():
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @contextmanager
 def database_connection():
-    """Context manager for database connection."""
     conn = None
     try:
         conn = mysql.connector.connect(
@@ -29,26 +26,25 @@ def database_connection():
             conn.close()
             logging.info("Database connection closed.")
 
-def execute_sql(sql, data=None, fetch=False):
-    """Execute an SQL statement."""
-    with database_connection() as conn:
-        if conn is None:
-            return False if fetch else None
-        try:
-            cursor = conn.cursor()
-            cursor.execute(sql, data or ())
-            if fetch:
-                return cursor.fetchall()
-            conn.commit()
-            return True
-        except mysql.connector.Error as error:
-            logging.error(f"Error executing SQL statement '{sql}': {error}")
-            return False if fetch else None
-        finally:
-            cursor.close()
+def execute_query(sql, values=None, fetch_mode=None):
+    try:
+        with database_connection() as conn:
+            if conn:
+                with conn.cursor() as cursor:
+                    cursor.execute(sql, values or ())
+                    if fetch_mode == 'all':
+                        return cursor.fetchall()
+                    elif fetch_mode == 'one':
+                        return cursor.fetchone()
+                    conn.commit()
+            else:
+                logging.error("Failed to establish a database connection.")
+                return None
+    except mysql.connector.Error as error:
+        logging.error(f"Error executing SQL query: {error}")
+        return None
 
 def test_connection():
-    """Test the database connection."""
     with database_connection() as conn:
         if conn:
             logging.info("Connection to database is successful.")
@@ -58,18 +54,21 @@ def test_connection():
             return False
 
 def truncate_all_tables():
-    """Truncates all tables in the database."""
     with database_connection() as conn:
         if conn:
-            cursor = conn.cursor()
-            cursor.execute("SHOW TABLES;")
-            tables = cursor.fetchall()
-            for (table_name,) in tables:
-                logging.info(f"Truncating table '{table_name}'")
-                if not execute_sql(f"TRUNCATE TABLE {table_name}"):
-                    logging.error(f"Failed to truncate table '{table_name}'")
-                    return False
-            return True
+            try:
+                with conn.cursor() as cursor:
+                    cursor.execute("SHOW TABLES;")
+                    tables = cursor.fetchall()
+                    for (table_name,) in tables:
+                        logging.info(f"Truncating table '{table_name}'")
+                        if not execute_query(f"TRUNCATE TABLE {table_name}"):
+                            logging.error(f"Failed to truncate table '{table_name}'")
+                            return False
+                return True
+            except mysql.connector.Error as error:
+                logging.error(f"Error during truncation: {error}")
+                return False
         else:
             logging.error("Failed to establish a database connection.")
             return False
