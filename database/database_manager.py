@@ -35,6 +35,7 @@ def execute_query(query: str, params: tuple = None, fetch: bool = False):
         else:
             conn.commit()
 
+# Insert into database tables
 def execute_insert(table, data):
     try:
         columns = ', '.join(data.keys())
@@ -45,6 +46,7 @@ def execute_insert(table, data):
     except mysql.connector.Error as e:
         logging_utils.log_error("Error executing insert query", e)
 
+# Update database tables
 def execute_update(table, data, condition):
     try:
         update_values = ', '.join([f"{key} = %s" for key in data.keys()])
@@ -54,6 +56,7 @@ def execute_update(table, data, condition):
     except mysql.connector.Error as e:
         logging_utils.log_error("Error executing update query", e)
 
+# Delete from database tables
 def execute_delete(table, condition):
     try:
         query = f"DELETE FROM {table} WHERE {condition}"
@@ -62,6 +65,7 @@ def execute_delete(table, condition):
     except mysql.connector.Error as e:
         logging_utils.log_error("Error executing delete query", e)
 
+# Get database table info
 def database_tables_info():
     try:
         result = execute_query("SHOW TABLES;", fetch=True)
@@ -72,8 +76,7 @@ def database_tables_info():
 
             # Calculate the size in MB for the table
             size_query = f"""
-            SELECT table_schema 'Database',
-                   ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
+            SELECT table_schema 'Database', ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
             FROM information_schema.TABLES
             WHERE table_schema = '{DB_DATABASE}' AND table_name = '{table_name}'
             GROUP BY table_schema, table_name;
@@ -87,6 +90,7 @@ def database_tables_info():
         logging_utils.log_error("Error listing tables", e)
         return []
 
+# Test database connection
 def test_database_connection():
     try:
         with database_connection() as conn:
@@ -95,6 +99,7 @@ def test_database_connection():
     except mysql.connector.Error as e:
         print("Database connection failed", e)
 
+# Empty database table
 def empty_table(table_name):
     try:
         execute_query("SET FOREIGN_KEY_CHECKS = 0;", fetch=False)
@@ -105,6 +110,7 @@ def empty_table(table_name):
     except Exception as e:
         logging_utils.log_error(f"Error emptying table '{table_name}'", e)
 
+# Create database table
 def create_table(table_name, columns):
     try:
         query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})"
@@ -115,6 +121,7 @@ def create_table(table_name, columns):
         logging_utils.log_error(f"Error creating table '{table_name}'", e)
         return False
 
+# Drop database table
 def drop_table(table_name):
     try:
         query = f"DROP TABLE IF EXISTS {table_name}"
@@ -124,12 +131,12 @@ def drop_table(table_name):
     except Exception as e:
         logging_utils.log_error(f"Error dropping table '{table_name}'", e)
         return False
-    
+
+# Get disk usage  
 def get_disk_usage(min_size_mb: float = 0.0):
     try:
         query = """
-        SELECT 
-            table_name AS 'Table',
+        SELECT table_name AS 'Table',
             ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
             ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
             ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
@@ -144,7 +151,7 @@ def get_disk_usage(min_size_mb: float = 0.0):
         logging_utils.log_error("Error fetching disk usage", e)
         return []
 
-# New function to get database information
+# Get database information
 def get_database_info():
     try:
         with database_connection() as conn:
@@ -160,33 +167,23 @@ def get_database_info():
         logging_utils.log_error("Error fetching database information", e)
         return None
 
-# Get thread information
+# Thread information
 def get_thread_information():
     try:
-        query = """
-        SELECT 
-            VARIABLE_NAME AS 'Metric',
-            VARIABLE_VALUE AS 'Value'
-        FROM information_schema.GLOBAL_STATUS
-        WHERE VARIABLE_NAME IN (
-            'Threads_connected', 
-            'Threads_running', 
-            'Threads_cached', 
-            'Threads_created', 
-            'Threads_waiting'
-        );
-        """
-        thread_info = execute_query(query, fetch=True)
+        sql = "SELECT VARIABLE_NAME AS 'Metric', VARIABLE_VALUE AS 'Value' "
+        sql += "FROM information_schema.GLOBAL_STATUS "
+        sql += "WHERE VARIABLE_NAME IN ('Threads_connected', 'Threads_running', 'Threads_cached', 'Threads_created', 'Threads_waiting');"
+        thread_info = execute_query(sql, fetch=True)
         return thread_info
     except mysql.connector.Error as e:
         logging_utils.log_error("Error fetching thread information", e)
         return []
 
-# Get query statistics
+# Query statistics
 def get_query_statistics():
     try:
-        query = "SHOW STATUS LIKE 'Queries';"
-        return execute_query(query, fetch=True)
+        sql = "SHOW STATUS LIKE 'Queries';"
+        return execute_query(sql, fetch=True)
     except mysql.connector.Error as e:
         logging_utils.log_error("Error fetching query statistics", e)
         return []
