@@ -1,6 +1,5 @@
 # main.py
 
-# Python Libraries
 import os
 import logging
 import sys
@@ -22,8 +21,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s: %(message)s')
 
-def display_menu():
-    """ Display the main menu options. """
+def main_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
     print(app_display.format_menu_option(2, "Dynamic Analysis"))
@@ -32,9 +30,9 @@ def display_menu():
     print(app_display.format_menu_option(5, "Utilities"))
     print(app_display.format_menu_option(0, "Exit"))
 
-def main_menu():
+def main():
     while True:
-        display_menu()
+        main_menu()
         choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
 
         try:
@@ -67,7 +65,7 @@ if __name__ == "__main__":
     try:
         app_display.display_app_name()
         app_display.display_greeting()
-        main_menu()
+        main()
 
     except KeyboardInterrupt:
         print("\nProgram interrupted by user. Exiting...")
