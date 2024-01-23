@@ -91,3 +91,63 @@ def display_app_name():
     print(middle_border)
     print(tagline_header)
     print(bottom_border)
+
+def display_tables_info(database_tables_info):
+    if not database_tables_info:
+        print("No table information available.")
+        return
+
+    # Define column headers
+    table_header = "Table Name"
+    columns_header = "Columns"
+    rows_header = "Rows"
+    size_mb_header = "Size (MB)"
+
+    # Calculate column widths based on headers and data
+    max_table_len = max(len(table_header), max(len(table[0]) for table in database_tables_info)) + 5
+    max_columns_len = max(len(columns_header), max(len(str(table[1])) for table in database_tables_info)) + 5
+    max_rows_len = max(len(rows_header), max(len(str(table[2])) for table in database_tables_info)) + 5
+    max_size_mb_len = max(len(size_mb_header), max(len(str(table[3])) for table in database_tables_info)) + 5
+
+    # Format the headers with proper alignment and padding
+    table_header = table_header.ljust(max_table_len)
+    columns_header = columns_header.ljust(max_columns_len)
+    rows_header = rows_header.ljust(max_rows_len)
+    size_mb_header = size_mb_header.ljust(max_size_mb_len)
+
+    # Print the table headers
+    print(f"\n{table_header} | {columns_header} | {rows_header} | {size_mb_header}")
+    print("-" * (max_table_len + max_columns_len + max_rows_len + max_size_mb_len + 10))
+
+    # Print table information with proper formatting
+    for table_name, num_columns, num_rows, size_mb in database_tables_info:
+        table_name = table_name.ljust(max_table_len)
+        num_columns = str(num_columns).ljust(max_columns_len)
+        num_rows = str(num_rows).ljust(max_rows_len)
+        size_mb = str(size_mb).ljust(max_size_mb_len)
+
+        print(f"{table_name} | {num_columns} | {num_rows} | {size_mb}")
+
+def display_query_statistics(query_stats):
+    if query_stats:
+        print("\nQuery Statistics:")
+        for stat in query_stats:
+            print(f"{stat[0]}: {stat[1]}")
+    else:
+        print("No query statistics available.")
+
+def display_disk_usage(disk_usage):
+    if disk_usage:
+        print("\nDisk Usage:")
+        for usage in disk_usage:
+            print(f"Database: {usage[0]}, Size in MB: {usage[1]}")
+    else:
+        print("No disk usage data available.")
+
+def display_thread_information(thread_info):
+    if thread_info:
+        print("\nThread Information:")
+        for info in thread_info:
+            print(f"{info[0]}: {info[1]}")
+    else:
+        print("No thread information available.")
