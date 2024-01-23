@@ -1,21 +1,98 @@
-# database_menu.py
+import mysql.connector
+from contextlib import contextmanager
+from utils import app_display, user_prompts, app_utils
+from . import database_manager as dbConnect
 
-from . import database_manager as db_manager
-from . import database_utils_1 as utils
-from utils import app_display, user_prompts
+# Define a context manager for database connections
+@contextmanager
+def managed_database_connection():
+    try:
+        conn = dbConnect.connect_to_database()
+        yield conn
+    except mysql.connector.Error as e:
+        dbConnect.log_error("Managed database connection failed", e)
+        raise
+    finally:
+        if conn:
+            dbConnect.close_database_connection(conn)
 
+# Function to display database information
+def display_database_info(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT VERSION();")
+        version = cursor.fetchone()
+        print(f"Database Version: {version[0]}")
+
+        cursor.execute("SHOW STATUS LIKE 'Uptime';")
+        uptime = cursor.fetchone()
+        formatted_uptime = app_utils.format_seconds_to_dhms(int(uptime[1]))
+        print(f"Server Uptime: {formatted_uptime}")
+
+        cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
+        connections = cursor.fetchone()
+        print(f"Active Connections: {connections[1]}")
+    except Exception as e:
+        dbConnect.log_error("Error displaying database info", e)
+
+# Function to perform database health check
+def database_health_check(conn):
+    try:
+        print("Performing database health check...")
+        display_database_info(conn)
+        show_performance_metrics(conn)
+        show_disk_usage(conn)
+    except mysql.connector.Error as e:
+        dbConnect.log_error("Failed to perform database health check", e)
+
+# Function to display performance metrics
+def show_performance_metrics(conn):
+    try:
+        cursor = conn.cursor()
+        metrics = ["Queries", "Threads_running"]
+        for metric in metrics:
+            cursor.execute(f"SHOW STATUS LIKE '{metric}';")
+            result = cursor.fetchone()
+            if result:
+                print(f"{metric}: {result[1]}")
+            else:
+                print(f"Metric '{metric}' not found.")
+    except mysql.connector.Error as e:
+        print(f"Error displaying performance metrics: {e}")
+    except Exception as e:
+        print(f"An unexpected error occurred while displaying performance metrics: {e}")
+
+# Function to display disk usage
+def show_disk_usage(conn):
+    try:
+        cursor = conn.cursor()
+        sql = """
+        SELECT table_schema 'Database',
+               ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
+        FROM information_schema.TABLES
+        WHERE table_schema = 'droidsecanalytica'
+        GROUP BY table_schema;
+        """
+        cursor.execute(sql)
+        disk_usage = cursor.fetchall()
+        other_utils.format_disk_usage(disk_usage)
+    except Exception as e:
+        dbConnect.log_error("Error displaying disk usage", e)
+
+# Function to display the database management menu
 def display_database_menu():
     print(app_display.format_menu_title("Database Management Menu"))
     print(app_display.format_menu_option(1, "Test Database Connection"))
     print(app_display.format_menu_option(2, "List Database Tables"))
-    print(app_display.format_menu_option(3, "Run Database Health Check"))
+    print(app_display.format_menu_option(3, "Database Health Check"))
     print(app_display.format_menu_option(4, "Clear Android Malware Hash Table"))
-    print(app_display.format_menu_option(5, "Query Count"))
-    print(app_display.format_menu_option(6, "Slow Queries"))
-    print(app_display.format_menu_option(7, "Memory Usage"))
+    print(app_display.format_menu_option(5, "Query Statistics"))
+    print(app_display.format_menu_option(6, "Performance Metrics"))
+    print(app_display.format_menu_option(7, "Disk Usage"))
     print(app_display.format_menu_option(8, "Thread Information"))
-    print(app_display.format_menu_option(0, "Return to Main Menu"))
+    print(app_display.format_menu_option(0, "Return to main menu"))
 
+# Function to execute the database management menu
 def database_management_menu():
     while True:
         display_database_menu()
@@ -25,27 +102,61 @@ def database_management_menu():
             return
         
         elif menu_choice == '1':
-            db_manager.test_database_connection()
-        
+            dbConnect.test_database_connection()
+
         elif menu_choice == '2':
-            db_manager.display_tables_info()
+            conn = dbConnect.connect_to_database()
+            dbConnect.display_tables_info(conn)
 
         elif menu_choice == '3':
-            utils.database_health_check()
+            conn = dbConnect.connect_to_database()
+            database_health_check(conn)
 
         elif menu_choice == '4':
-            db_manager.empty_table('android_malware_hashes')
+            conn = dbConnect.connect_to_database()
+            dbConnect.empty_table(conn, 'android_malware_hashes')
 
         elif menu_choice == '5':
-            utils.show_query_count()
-            
+            conn = dbConnect.connect_to_database()
+            show_query_count(conn)
+
         elif menu_choice == '6':
-            utils.show_slow_queries()
-            
+            conn = dbConnect.connect_to_database()
+            show_performance_metrics(conn)
+
         elif menu_choice == '7':
-            utils.show_memory_usage()
-            
+            conn = dbConnect.connect_to_database()
+            show_disk_usage(conn)
+
         elif menu_choice == '8':
-            utils.show_thread_info()
+            conn = dbConnect.connect_to_database()
+            show_thread_info(conn)
 
         input("\nPress any key to continue.")
+
+
+# Function to clear the Android Malware Hash Table
+def clear_malware_hash_table(conn):
+    dbConnect.empty_table(conn, 'android_malware_hashes')
+    print("Android Malware Hash Table cleared successfully.")
+
+# Function to show query count
+def show_query_count(conn):
+    cursor = conn.cursor()
+    cursor.execute("SHOW STATUS LIKE 'Queries';")
+    query_count = cursor.fetchone()
+    print(f"\nTotal Queries Executed: {query_count[1]}")
+
+# Function to show thread information
+def show_thread_info(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
+        threads_connected = cursor.fetchone()
+        print(f"Threads Connected: {threads_connected[1]}")
+
+        cursor.execute("SHOW STATUS LIKE 'Threads_running';")
+        threads_running = cursor.fetchone()
+        print(f"Threads Running: {threads_running[1]}")
+    except Exception as e:
+        dbConnect.log_error("Error displaying thread information", e)
