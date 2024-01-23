@@ -27,15 +27,16 @@ def display_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
     print(app_display.format_menu_option(2, "Dynamic Analysis"))
-    print(app_display.format_menu_option(3, "Database Management"))
-    print(app_display.format_menu_option(4, "Machine Learning Model"))
-    print(app_display.format_menu_option(5, "Utilities"))
+    print(app_display.format_menu_option(3, "Report Generation"))
+    print(app_display.format_menu_option(4, "Database Management"))
+    print(app_display.format_menu_option(5, "Machine Learning Model"))
+    print(app_display.format_menu_option(6, "Utilities"))
     print(app_display.format_menu_option(0, "Exit"))
 
 def main_menu():
     while True:
         display_menu()
-        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6','0'])
 
         try:
             if choice == '1':
@@ -48,9 +49,12 @@ def main_menu():
                 database_menu.main_menu()
             
             elif choice == '4':
-                MLManagement.machine_learning_menu()
+                database_menu.main_menu()
             
             elif choice == '5':
+                MLManagement.main_menu()
+            
+            elif choice == '6':
                 utils_menu.display_app_utils()
             
             elif choice == '0':
