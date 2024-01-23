@@ -6,11 +6,11 @@ import logging
 import sys
 
 # Import custom libraries
-from static_analysis import static_analysis_menu as static_menu
+from static_analysis import static_analysis
 from dynamic_analysis import dynamic_analysis
+from reporting import reporting
 from utils import app_display, utils_menu, user_prompts
 from database import database_menu
-from machine_learning import MLManagement
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
@@ -29,32 +29,28 @@ def display_menu():
     print(app_display.format_menu_option(2, "Dynamic Analysis"))
     print(app_display.format_menu_option(3, "Report Generation"))
     print(app_display.format_menu_option(4, "Database Management"))
-    print(app_display.format_menu_option(5, "Machine Learning Model"))
-    print(app_display.format_menu_option(6, "Utilities"))
+    print(app_display.format_menu_option(5, "Utilities"))
     print(app_display.format_menu_option(0, "Exit"))
 
 def main_menu():
     while True:
         display_menu()
-        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6','0'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '0'])
 
         try:
             if choice == '1':
-                static_menu.main_menu()
+                static_analysis.static_menu()
             
             elif choice == '2':
-                dynamic_analysis.main_menu()
+                dynamic_analysis.dynamic_menu()
             
             elif choice == '3':
-                database_menu.main_menu()
+                reporting.report_menu()
             
             elif choice == '4':
-                database_menu.main_menu()
+                database_menu.database_menu()
             
             elif choice == '5':
-                MLManagement.main_menu()
-            
-            elif choice == '6':
                 utils_menu.display_app_utils()
             
             elif choice == '0':

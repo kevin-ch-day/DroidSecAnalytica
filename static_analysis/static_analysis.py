@@ -1,5 +1,4 @@
 import os
-import sys
 import subprocess
 import platform
 import logging
@@ -14,6 +13,59 @@ logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctim
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
+
+# Display the static analysis menu and handle user interaction.
+def static_menu():
+    while True:
+        print(app_display.format_menu_title("Static Analysis Menu"))
+        print(app_display.format_menu_option(1, "Check if sample has been previously analyzed"))
+        print(app_display.format_menu_option(2, "Decompile APK file for detailed analysis"))
+        print(app_display.format_menu_option(3, "In-depth static analysis on APK"))
+        print(app_display.format_menu_option(4, "In-depth static analysis on Hash"))
+        print(app_display.format_menu_option(5, "Static APK Analysis II"))
+        print(app_display.format_menu_option(6, "Display available APK Files"))
+        print(app_display.format_menu_option(7, "Display APK File Hashes"))
+        print(app_display.format_menu_option(8, "Perform VirusTotal.com APK Analysis"))
+        print(app_display.format_menu_option(9, "Perform VirusTotal.com Hash IOC Analysis"))
+        print(app_display.format_menu_option(0, "Return to Main Menu"))
+        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(11)])
+        
+        if menu_choice == '1':
+            handle_sample_check()
+        
+        elif menu_choice == '2':
+            handle_apk_decompilation()
+        
+        elif menu_choice == '3':
+            handle_indepth_apk_analysis()
+        
+        elif menu_choice == '4':
+            handle_indepth_hash_analysis()
+        
+        elif menu_choice == '5':
+            handle_static_apk_analysis_beta()
+        
+        elif menu_choice == '6':
+            handle_permissions_analysis()
+        
+        elif menu_choice == '7':
+            app_utils.display_apk_files()
+        
+        elif menu_choice == '8':
+            display_apk_file_hashes()
+        
+        elif menu_choice == '9':
+            perform_virustotal_apk_analysis()
+        
+        elif menu_choice == '10':
+            perform_virustotal_hash_analysis()
+        
+        elif menu_choice == '0':
+            break
+        
+        else:
+            print("Invalid option. Please try again.")
+        user_prompts.pause_until_keypress()
 
 def display_sample_check_menu():
     print(app_display.format_menu_title("Check Previously Analyzed"))
