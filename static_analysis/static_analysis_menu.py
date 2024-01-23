@@ -12,7 +12,7 @@ LOG_FILE_PATH = 'logs/static_analysis.log'
 logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
 # Display the static analysis menu and handle user interaction.
-def static_analysis_menu():
+def main_menu():
     while True:
         display_menu()
         menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(11)])

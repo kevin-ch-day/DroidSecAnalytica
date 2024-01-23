@@ -7,7 +7,7 @@ import sys
 
 # Import custom libraries
 from static_analysis import static_analysis_menu as static_menu
-from dynamic_analysis import dynamic_analysis_menu as dynamic_menu
+from dynamic_analysis import dynamic_analysis
 from utils import app_display, utils_menu, user_prompts
 from database import database_menu
 from machine_learning import MLManagement
@@ -39,13 +39,13 @@ def main_menu():
 
         try:
             if choice == '1':
-                static_menu.static_analysis_menu()
+                static_menu.main_menu()
             
             elif choice == '2':
-                dynamic_menu.dynamic_analysis_menu()
+                dynamic_analysis.main_menu()
             
             elif choice == '3':
-                database_menu.database_management_menu()
+                database_menu.main_menu()
             
             elif choice == '4':
                 MLManagement.machine_learning_menu()

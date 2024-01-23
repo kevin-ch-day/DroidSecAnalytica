@@ -5,7 +5,7 @@ from utils import app_display, user_prompts, app_utils, logging_utils
 from . import database_manager as dbConnect
 
 # Execute the database management menu
-def database_management_menu():
+def main_menu():
     while True:
         print(app_display.format_menu_title("Database Management Menu"))
         print(app_display.format_menu_option(1, "Test Database Connection"))
