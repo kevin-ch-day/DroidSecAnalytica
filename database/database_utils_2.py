@@ -1,4 +1,5 @@
-import mysql.connector
+# database_utils_2.py
+
 import logging
 from typing import Dict
 
