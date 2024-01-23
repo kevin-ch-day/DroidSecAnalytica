@@ -125,15 +125,20 @@ def drop_table(table_name):
         logging_utils.log_error(f"Error dropping table '{table_name}'", e)
         return False
     
-def get_disk_usage():
+def get_disk_usage(min_size_mb: float = 0.0):
     try:
         query = """
-        SELECT table_schema 'Database',
-               ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
+        SELECT 
+            table_name AS 'Table',
+            ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
+            ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
+            ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
         FROM information_schema.TABLES
         WHERE table_schema = '{}'
-        GROUP BY table_schema;
-        """.format(DB_DATABASE)
+        GROUP BY table_name
+        HAVING 'Total Size in MB' >= {}
+        ORDER BY 'Total Size in MB' DESC;
+        """.format(DB_DATABASE, min_size_mb)
         return execute_query(query, fetch=True)
     except mysql.connector.Error as e:
         logging_utils.log_error("Error fetching disk usage", e)
@@ -155,16 +160,29 @@ def get_database_info():
         logging_utils.log_error("Error fetching database information", e)
         return None
 
-# New function to get thread information
+# Get thread information
 def get_thread_information():
     try:
-        query = "SHOW STATUS LIKE 'Threads_%';"
-        return execute_query(query, fetch=True)
+        query = """
+        SELECT 
+            VARIABLE_NAME AS 'Metric',
+            VARIABLE_VALUE AS 'Value'
+        FROM information_schema.GLOBAL_STATUS
+        WHERE VARIABLE_NAME IN (
+            'Threads_connected', 
+            'Threads_running', 
+            'Threads_cached', 
+            'Threads_created', 
+            'Threads_waiting'
+        );
+        """
+        thread_info = execute_query(query, fetch=True)
+        return thread_info
     except mysql.connector.Error as e:
         logging_utils.log_error("Error fetching thread information", e)
         return []
 
-# New function to get query statistics
+# Get query statistics
 def get_query_statistics():
     try:
         query = "SHOW STATUS LIKE 'Queries';"

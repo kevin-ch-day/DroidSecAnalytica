@@ -138,16 +138,30 @@ def display_query_statistics(query_stats):
 
 def display_disk_usage(disk_usage):
     if disk_usage:
-        print("\nDisk Usage:")
+        # Header
+        print("\nDisk Usage Report:")
+        header = f"{'Table':<30} | {'Data Size (MB)':>15} | {'Index Size (MB)':>15} | {'Total Size (MB)':>15}"
+        print(header)
+        print("-" * len(header))
+
+        # Data rows
         for usage in disk_usage:
-            print(f"Database: {usage[0]}, Size in MB: {usage[1]}")
+            table, data_size, index_size, total_size = usage
+            print(f"{table:<30} | {data_size:>15} | {index_size:>15} | {total_size:>15}")
+
+        # Footer
+        print("-" * len(header))
     else:
         print("No disk usage data available.")
 
 def display_thread_information(thread_info):
     if thread_info:
         print("\nThread Information:")
-        for info in thread_info:
-            print(f"{info[0]}: {info[1]}")
+        
+        # Formatting for a neat tabular display
+        max_metric_length = max(len(info[0]) for info in thread_info)
+        for metric, value in thread_info:
+            print(f"{metric:<{max_metric_length}} : {value}")
+
     else:
         print("No thread information available.")
