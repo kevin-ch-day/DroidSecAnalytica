@@ -1,5 +1,5 @@
 from utils import logging_utils
-from . import db_manager as dbConnect
+from . import DBConnectionManager as dbConnect
 
 def check_for_table(table_name: str) -> bool:
     try:

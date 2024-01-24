@@ -3,7 +3,7 @@
 from utils import logging_utils
 from typing import Dict, Optional
 
-from . import db_manager as dbConnect
+from . import DBConnectionManager as dbConnect
 
 def get_intent_filters(is_unusual: bool = True) -> list:
     try:

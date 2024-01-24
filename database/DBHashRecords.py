@@ -1,6 +1,6 @@
 from typing import Dict
 from utils import logging_utils
-from . import db_manager as dbConnect
+from . import DBConnectionManager as dbConnect
 
 def viewAndroidHashTableSummary():
     try:

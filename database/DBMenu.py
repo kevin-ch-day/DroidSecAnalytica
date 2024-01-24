@@ -4,7 +4,7 @@ from utils import app_display
 from utils import user_prompts
 from utils import app_utils
 from utils import logging_utils
-from . import db_manager as dbConnect
+from . import DBConnectionManager as dbConnect
 
 # Database management menu
 def database_menu():
