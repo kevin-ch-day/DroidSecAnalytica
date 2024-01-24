@@ -1,9 +1,7 @@
 # vt_androguard.py
 
 import json
-
-from adt import AndroguardADT
-from adt import PermissionADT
+from adt import AndroguardADT,  PermissionADT
 
 def display_androguard_data(attributes):
     androguard_data = parse_androguard_data(attributes)

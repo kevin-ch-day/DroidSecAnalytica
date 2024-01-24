@@ -42,6 +42,3 @@ def virustotal_menu():
         
         else:
             print("Invalid choice. Please enter a number between 1 and 3.")
-
-if __name__ == "__main__":
-    virustotal_menu()

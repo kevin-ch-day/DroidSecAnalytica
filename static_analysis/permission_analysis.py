@@ -1,5 +1,6 @@
 # permission_analysis.py
 
+from utils import user_prompts, logging_utils
 import xml.etree.ElementTree as ET
 from typing import List, Dict
 
@@ -7,7 +8,7 @@ def handle_permissions_analysis():
     try:
         # Prompt the user for the APK file path
         apk_path = user_prompts.prompt_user_enter_apk_path()
-        logging.info(f"Analyzing permissions for APK: {apk_path}")
+        print(f"Analyzing permissions for APK: {apk_path}")
 
         # Perform the permissions analysis (assuming a function for this exists)
         permissions = analyze_apk_permissions(apk_path)
@@ -19,10 +20,10 @@ def handle_permissions_analysis():
             print("No permissions found in the APK.")
 
     except FileNotFoundError:
-        logging.error(f"APK file not found at path: {apk_path}")
+        logging_utils.log_error(f"APK file not found at path: {apk_path}")
         print("Error: APK file not found. Please check the file path.")
     except Exception as e:
-        logging.error(f"Error during permissions analysis: {e}")
+        logging_utils.log_error(f"Error during permissions analysis: {e}")
         print("An error occurred during the analysis. Please check the logs for details.")
 
     finally:
