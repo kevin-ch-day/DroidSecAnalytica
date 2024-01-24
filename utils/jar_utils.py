@@ -6,11 +6,10 @@ import logging
 # Constants
 LOG_FILE = 'logs/jar_utils.log'
 ANALYSIS_RESULTS_DIR = 'output'
+DEX2JAR_TOOL = 'd2j-dex2jar'
 
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
-
-DEX2JAR_TOOL = 'd2j-dex2jar'
 
 def generate_jar(apk_path):
     try:
