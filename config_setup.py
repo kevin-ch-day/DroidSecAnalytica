@@ -1,14 +1,13 @@
-import os
 import mysql.connector
 import getpass
-import logging
+from utils import logging_utils  # Import logging_utils
 
-# Configure logging
-logging.basicConfig(filename='logs/config_setup.log', level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
+# Configure logging using logging_utils
+logging_utils.configure_logging(filename='logs/config_setup.log', level=logging_utils.INFO)
 
 # Function to get user input for database configuration
 def get_user_input():
-    print("Enter the MySQL database configuration:")
+    logging_utils.log_info("Enter the MySQL database configuration:")
     db_host = input("Database Host: ")
     db_user = input("Database User: ")
     db_password = getpass.getpass("Database Password: ")
@@ -30,7 +29,7 @@ def test_database_connection(user_config):
     db_host, db_user, db_password, db_database = user_config
     connection_attempts = 0
 
-    print("\nTesting database connection...")
+    logging_utils.log_info("Testing database connection...")
     while connection_attempts < 3:
         try:
             conn = mysql.connector.connect(
@@ -40,13 +39,13 @@ def test_database_connection(user_config):
                 database=db_database
             )
             conn.close()
-            print("Connection successful.")
+            logging_utils.log_info("Connection successful.")
             return True
         except mysql.connector.Error as err:
-            logging.error(f"Connection failed: {err}")
+            logging_utils.log_error(f"Connection failed: {err}")
             connection_attempts += 1
     
-    print("Failed to connect to the database three times. Exiting.")
+    logging_utils.log_error("Failed to connect to the database three times. Exiting.")
     return False
 
 # Function to update config
@@ -65,33 +64,30 @@ def encrypt_password(password):
     return password
 
 def main():
-    print("Database Configuration Setup")
-    print("-----------------------------")
+    logging_utils.log_info("Database Configuration Setup")
+    logging_utils.log_info("-----------------------------")
     
     user_config = get_user_input()
 
     if compare_config(user_config):
-        print("\nDatabase configuration is identical to the existing configuration.")
+        logging_utils.log_info("\nDatabase configuration is identical to the existing configuration.")
     else:
-        print("\nNew database configuration detected:")
-        print(f"Host: {user_config[0]}")
-        print(f"User: {user_config[1]}")
-        print("Password: *****")  # Mask the password
-        print(f"Database: {user_config[3]}")
+        logging_utils.log_info("\nNew database configuration detected:")
+        logging_utils.log_info(f"Host: {user_config[0]}")
+        logging_utils.log_info(f"User: {user_config[1]}")
+        logging_utils.log_info("Password: *****")  # Mask the password
+        logging_utils.log_info(f"Database: {user_config[3]}")
 
         if test_database_connection(user_config):
             confirmation = input("\nDo you want to overwrite the existing database configuration? (yes/no): ")
             
             if confirmation.lower() == "yes":
                 update_config(user_config)
-                print("Database configuration updated successfully.")
-                logging.info("Database configuration updated successfully.")
+                logging_utils.log_info("Database configuration updated successfully.")
             else:
-                print("Database configuration remains unchanged.")
-                logging.info("Database configuration unchanged.")
+                logging_utils.log_info("Database configuration remains unchanged.")
         else:
-            print("Exiting due to database connection failure.")
-            logging.error("Exiting due to database connection failure.")
+            logging_utils.log_error("Exiting due to database connection failure.")
 
 if __name__ == "__main__":
     main()
