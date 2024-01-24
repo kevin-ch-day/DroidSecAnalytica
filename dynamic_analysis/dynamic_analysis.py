@@ -9,6 +9,7 @@ LOG_FILE = 'logs/dynamic_analysis.log'
 # Configure logging
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+#Dynamic analysis menu
 def dynamic_menu():
     print(app_display.format_menu_title("Dynamic Analysis Menu"))
     print(app_display.format_menu_option(1, "Run Dynamic Analysis"))

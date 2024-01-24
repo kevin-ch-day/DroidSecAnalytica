@@ -1,10 +1,12 @@
 # database_menu.py
 
-import mysql.connector
-from utils import app_display, user_prompts, app_utils, logging_utils
+from utils import app_display
+from utils import user_prompts
+from utils import app_utils
+from utils import logging_utils
 from . import database_manager as dbConnect
 
-# Execute the database management menu
+# Database management menu
 def database_menu():
     while True:
         print(app_display.format_menu_title("Database Management Menu"))
@@ -14,8 +16,8 @@ def database_menu():
         print(app_display.format_menu_option(4, "Display Disk Usage"))
         print(app_display.format_menu_option(5, "Show Thread Information"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
-        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
 
+        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
         if menu_choice == '0':
             return
         

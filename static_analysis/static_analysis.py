@@ -1,15 +1,10 @@
 import os
 import subprocess
 import platform
-import logging
 from typing import Optional
 
-from utils import app_utils, app_display, user_prompts
+from utils import app_utils, app_display, user_prompts, logging_utils
 from . import manifest_analysis, vt_requests, vt_response_handler
-
-# Set up logging
-LOG_FILE_PATH = 'logs/static_analysis.log'
-logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
@@ -20,30 +15,32 @@ def static_menu():
         print(app_display.format_menu_title("Static Analysis Menu"))
         print(app_display.format_menu_option(1, "Check if sample has been previously analyzed"))
         print(app_display.format_menu_option(2, "Decompile APK file for detailed analysis"))
-        print(app_display.format_menu_option(3, "In-depth static analysis on APK"))
-        print(app_display.format_menu_option(4, "In-depth static analysis on Hash"))
-        print(app_display.format_menu_option(5, "Static APK Analysis II"))
-        print(app_display.format_menu_option(6, "Display available APK Files"))
-        print(app_display.format_menu_option(7, "Display APK File Hashes"))
-        print(app_display.format_menu_option(8, "Perform VirusTotal.com APK Analysis"))
-        print(app_display.format_menu_option(9, "Perform VirusTotal.com Hash IOC Analysis"))
+        print(app_display.format_menu_option(3, "Perform static analysis"))
+        print(app_display.format_menu_option(4, "Perform Permission Analysis"))
+        print(app_display.format_menu_option(4, "Perform VirusTotal.com Analysis"))
+        print(app_display.format_menu_option(5, "Display available APK Files"))
+        print(app_display.format_menu_option(6, "Display APK File Hashes"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
         menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(11)])
         
+        # Check if sample has been previously analyzed
         if menu_choice == '1':
             handle_sample_check()
         
+        # Decompile APK file
         elif menu_choice == '2':
             handle_apk_decompilation()
         
+        # Handle static analysis
         elif menu_choice == '3':
-            handle_indepth_apk_analysis()
+            handle_static_apk_analysis()
+
+        elif menu_choice == '6':
+            handle_permissions_analysis()
         
+        # Perform Virustotal.com analysis
         elif menu_choice == '4':
-            handle_indepth_hash_analysis()
-        
-        elif menu_choice == '5':
-            handle_static_apk_analysis_beta()
+            perform_virustotal_analysis()
         
         elif menu_choice == '6':
             handle_permissions_analysis()
@@ -55,10 +52,7 @@ def static_menu():
             display_apk_file_hashes()
         
         elif menu_choice == '9':
-            perform_virustotal_apk_analysis()
-        
-        elif menu_choice == '10':
-            perform_virustotal_hash_analysis()
+            perform_virustotal_analysis()
         
         elif menu_choice == '0':
             break
@@ -131,20 +125,20 @@ def handle_apk_decompilation():
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
     # Check OS and exit if Windows
     if platform.system() == "Windows":
-        logging.error("This function cannot be executed on Windows.")
+        logging_utils.log_error("This function cannot be executed on Windows.")
         return None
 
     # Check if OS is Kali Linux or Ubuntu
     if "kali" in platform.version().lower() or "ubuntu" in platform.version().lower():
         try:
             subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
-            logging.info(f"APK decompiled successfully. Output directory: {output_directory}")
+            logging_utils.log_info(f"APK decompiled successfully. Output directory: {output_directory}")
             return output_directory
         except subprocess.CalledProcessError as e:
-            logging.error(f"Error decompiling APK: {e}")
+            logging_utils.log_error(f"Error decompiling APK: {e}")
             return None
     else:
-        logging.error("This function can only be executed on Kali Linux or Ubuntu.")
+        logging_utils.log_error("This function can only be executed on Kali Linux or Ubuntu.")
         return None
 
 # Run static analysis
@@ -165,7 +159,7 @@ def perform_full_analysis(apk_path: str):
         virustotal_analysis(apk_path)
 
     except Exception as e:
-        logging.error(f"Error during static analysis: {e}")
+        logging_utils.log_error(f"Error during static analysis: {e}")
 
 # Virustotal API analysis
 def virustotal_analysis(apk_path: str):
@@ -177,33 +171,4 @@ def virustotal_analysis(apk_path: str):
             print("Error in processing the APK file request.")
 
     except Exception as e:
-        logging.error(f"Error during static analysis: {e}")
-
-def handle_permissions_analysis():
-    try:
-        # Prompt the user for the APK file path
-        apk_path = user_prompts.prompt_user_enter_apk_path()
-        logging.info(f"Analyzing permissions for APK: {apk_path}")
-
-        # Perform the permissions analysis (assuming a function for this exists)
-        permissions = analyze_apk_permissions(apk_path)
-        if permissions:
-            print("Permissions found in the APK:")
-            for perm in permissions:
-                print(f"- {perm}")
-        else:
-            print("No permissions found in the APK.")
-
-    except FileNotFoundError:
-        logging.error(f"APK file not found at path: {apk_path}")
-        print("Error: APK file not found. Please check the file path.")
-    except Exception as e:
-        logging.error(f"Error during permissions analysis: {e}")
-        print("An error occurred during the analysis. Please check the logs for details.")
-
-    finally:
-        # Pause and wait for user input before returning
-        user_prompts.pause_until_keypress()
-
-def analyze_apk_permissions():
-    pass
+        logging_utils.log_error(f"Error during static analysis: {e}")
