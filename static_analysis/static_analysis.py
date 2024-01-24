@@ -5,6 +5,7 @@ from typing import Optional
 
 from utils import app_utils, app_display, user_prompts, logging_utils
 from . import manifest_analysis, vt_analysis
+from database import database_utils_1
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
@@ -26,7 +27,7 @@ def static_menu():
         
         # Check if sample has been previously analyzed
         if menu_choice == '1':
-            handle_sample_check()
+            check_sample_menu()
         
         # Decompile APK file
         elif menu_choice == '2':
@@ -59,7 +60,7 @@ def static_menu():
             print("Invalid option. Please try again.")
         user_prompts.pause_until_keypress()
 
-def display_sample_check_menu():
+def check_sample_menu():
     print(app_display.format_menu_title("Check Previously Analyzed"))
     print(app_display.format_menu_option(1, "Check by APK Path"))
     print(app_display.format_menu_option(2, "Check by Hash IOC"))
@@ -88,7 +89,7 @@ def perform_preanalysis(apk_path: str):
     apk_hashes = app_utils.calculate_hashes(apk_path)
     app_display.display_hashes(apk_path, apk_hashes)
     
-    if not database_functions.check_for_hash_record(apk_hashes):
+    if not database_utils_1.check_for_hash_record(apk_hashes):
         # Hash does not have a record in malware_hashes
         print("IOC hash does not have a record")
         file_basename = os.path.basename(apk_path)

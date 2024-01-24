@@ -1,6 +1,5 @@
-# database_utils_1.py
-
-from . import database_manager as dbConnect
+from utils import logging_utils
+from . import db_manager as dbConnect
 
 def check_for_table(table_name: str) -> bool:
     try:
@@ -10,9 +9,9 @@ def check_for_table(table_name: str) -> bool:
             result = cursor.fetchone()
             return bool(result)
     except Exception as e:
-        dbConnect.log_error(f"Error checking for table '{table_name}'", e)
+        logging_utils.log_error(f"Error checking for table '{table_name}'", e)
         return False
-
+    
 def display_tables_info():
     tables_info = list_tables()
     if not tables_info:
@@ -22,7 +21,6 @@ def display_tables_info():
     print("\nDatabase Tables Information:")
     print(f"{'Table Name':<30} | {'# of Columns':>15} | {'# of Rows':>15}")
     print("-" * 65)
-
     for table_name, num_columns, num_rows in tables_info:
         print(f"{table_name:<30} | {str(num_columns):>15} | {str(num_rows):>15}")
 
@@ -38,17 +36,7 @@ def list_tables():
     except Exception as e:
         dbConnect.log_error("Error listing tables", e)
         return []
-
-def viewAndroidHashTableSummary():
-    try:
-        result = dbConnect.execute_query("SELECT COUNT(*) FROM android_malware_hashes", fetch=True)
-        if result:
-            print(f"Total Records in Database: {result[0][0]}")
-        else:
-            print("Failed to retrieve hash table summary.")
-    except Exception as e:
-        dbConnect.log_error("Error retrieving hash table summary", e)
-
+    
 def create_android_malware_hash_table():
     try:
         sql_create_table = """
@@ -70,8 +58,8 @@ def create_android_malware_hash_table():
     except Exception as e:
         dbConnect.log_error("Error creating table 'android_malware_hashes'", e)
         return False
-
-def update_records_no_virustotal_match(record_id):
+    
+def no_virustotal_record_match(record_id):
     try:
         sql_update = "UPDATE android_malware_hashes SET no_virustotal_match = 1 WHERE id = %s"
         dbConnect.execute_query(sql_update, (record_id,), fetch=False)
@@ -79,38 +67,11 @@ def update_records_no_virustotal_match(record_id):
     except Exception as e:
         dbConnect.log_error(f"Error updating record ID {record_id}", e)
 
-def get_total_hash_records():
+def create_apk_record(filename: str, filesize: int, md5: str, sha1: str, sha256: str):
     try:
-        records = dbConnect.execute_query("SELECT * FROM android_malware_hashes", fetch=True)
-        total_records = len(records)
-        print(f"Total records: {total_records}")
-        return records
+        sql = "INSERT INTO apk_samples (filename, filesize, md5, sha1, sha256) VALUES (%s, %s, %s, %s, %s)"
+        values = (filename, filesize, md5, sha1, sha256)
+        dbConnect.execute_query(sql, values)
+        logging_utils.log_info("APK record created successfully.")
     except Exception as e:
-        dbConnect.log_error("Error fetching total hash records", e)
-        return []
-
-def check_for_hash_record(hash_dict):
-    try:
-        sql = """
-            SELECT id, md5, sha1, sha256 
-            FROM android_malware_hashes 
-            WHERE md5 = %s OR sha1 = %s OR sha256 = %s 
-            ORDER BY id
-        """
-        params = (hash_dict['MD5'], hash_dict['SHA1'], hash_dict['SHA256'])
-        result = dbConnect.execute_query(sql, params, fetch=True)
-        return bool(result)
-    except Exception as e:
-        dbConnect.log_error("Error checking for hash record", e)
-        return False
-
-def empty_table(table_name):
-    try:
-        dbConnect.execute_query("SET FOREIGN_KEY_CHECKS = 0;", fetch=False)
-        dbConnect.execute_query(f"TRUNCATE TABLE {table_name};", fetch=False)
-        dbConnect.execute_query("SET FOREIGN_KEY_CHECKS = 1;", fetch=False)
-        print(f"Table '{table_name}' has been successfully emptied.")
-        return True
-    except Exception as e:
-        dbConnect.log_error(f"Error emptying table '{table_name}'", e)
-        return False
+        logging_utils.log_error("Error creating APK record", e)

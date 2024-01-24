@@ -4,7 +4,7 @@ import mysql.connector
 from contextlib import contextmanager
 from utils import logging_utils
 
-from database.database_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
+from database.db_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 # Context manager for database connections
 @contextmanager
@@ -105,7 +105,7 @@ def empty_table(table_name):
         execute_query("SET FOREIGN_KEY_CHECKS = 0;", fetch=False)
         execute_query(f"TRUNCATE TABLE {table_name};", fetch=False)
         execute_query("SET FOREIGN_KEY_CHECKS = 1;", fetch=False)
-        logging_utils.log_info(f"Table '{table_name}' has been successfully emptied.")
+        print(f"Table '{table_name}' has been successfully emptied.")
         return True
     except Exception as e:
         logging_utils.log_error(f"Error emptying table '{table_name}'", e)
@@ -131,59 +131,3 @@ def drop_table(table_name):
     except Exception as e:
         logging_utils.log_error(f"Error dropping table '{table_name}'", e)
         return False
-
-# Get disk usage  
-def get_disk_usage(min_size_mb: float = 0.0):
-    try:
-        query = """
-        SELECT table_name AS 'Table',
-            ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
-            ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
-            ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
-        FROM information_schema.TABLES
-        WHERE table_schema = '{}'
-        GROUP BY table_name
-        HAVING 'Total Size in MB' >= {}
-        ORDER BY 'Total Size in MB' DESC;
-        """.format(DB_DATABASE, min_size_mb)
-        return execute_query(query, fetch=True)
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error fetching disk usage", e)
-        return []
-
-# Get database information
-def get_database_info():
-    try:
-        with database_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT VERSION();")
-            version = cursor.fetchone()
-            cursor.execute("SHOW STATUS LIKE 'Uptime';")
-            uptime = cursor.fetchone()
-            cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
-            connections = cursor.fetchone()
-            return version, uptime, connections
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error fetching database information", e)
-        return None
-
-# Thread information
-def get_thread_information():
-    try:
-        sql = "SELECT VARIABLE_NAME AS 'Metric', VARIABLE_VALUE AS 'Value' "
-        sql += "FROM information_schema.GLOBAL_STATUS "
-        sql += "WHERE VARIABLE_NAME IN ('Threads_connected', 'Threads_running', 'Threads_cached', 'Threads_created', 'Threads_waiting');"
-        thread_info = execute_query(sql, fetch=True)
-        return thread_info
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error fetching thread information", e)
-        return []
-
-# Query statistics
-def get_query_statistics():
-    try:
-        sql = "SHOW STATUS LIKE 'Queries';"
-        return execute_query(sql, fetch=True)
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error fetching query statistics", e)
-        return []

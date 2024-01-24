@@ -9,7 +9,7 @@ from static_analysis import static_analysis
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
 from utils import app_display, load_data, user_prompts
-from database import database_menu
+from database import db_menu
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
@@ -46,7 +46,7 @@ def main():
                 reporting.report_menu()
             
             elif choice == '4':
-                database_menu.database_menu()
+                db_menu.database_menu()
             
             elif choice == '5':
                 utils_menu.display_app_utils()
