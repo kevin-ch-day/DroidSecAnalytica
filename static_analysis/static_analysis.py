@@ -4,7 +4,7 @@ import platform
 from typing import Optional
 
 from utils import app_utils, app_display, user_prompts, logging_utils
-from . import manifest_analysis, vt_analysis
+from . import manifest_analysis,vt_analysis, permission_analysis
 from database import database_utils_1
 
 # Constants for file paths
@@ -35,11 +35,13 @@ def static_menu():
         
         # Static analysis
         elif menu_choice == '3':
-            handle_static_apk_analysis()
+            print("Perform Full Static Analysis")
+            #handle_static_apk_analysis()
 
         # Permission analysis
         elif menu_choice == '4':
-            handle_permissions_analysis()
+            print("Perform Permissin Analysis")
+            #handle_permissions_analysis()
         
         # Virustotal.com analysis
         elif menu_choice == '5':
@@ -47,11 +49,11 @@ def static_menu():
         
         # Display available APK Files
         elif menu_choice == '6':
-            handle_permissions_analysis()
+            permission_analysis.handle_permissions_analysis
         
         # Display APK File Hashes
         elif menu_choice == '7':
-            app_utils.display_apk_files()
+            app_display.display_apk_files()
         
         elif menu_choice == '0':
             break
@@ -99,7 +101,7 @@ def perform_preanalysis(apk_path: str):
         if not database_functions.check_if_hash_analyzed(apk_hashes):
             # Hash has not been analyzed
             print("IOC hash has not been analyzed")
-            perform_full_analysis(apk_path)
+            apk_static_analysis(apk_path)
 
         else:
             # Hash has been analyzed
@@ -136,7 +138,7 @@ def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
         return None
 
 # Run static analysis
-def perform_static_analysis(apk_path: str):
+def apk_static_analysis(apk_path: str):
     file_basename = os.path.basename(apk_path)
     try:
         output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")

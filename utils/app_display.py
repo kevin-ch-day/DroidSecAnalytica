@@ -3,6 +3,8 @@
 import datetime
 import os
 
+from . import app_utils
+
 APP_NAME = "DroidSecAnalytica"
 
 # Displays all .apk files in the current directory
@@ -74,7 +76,7 @@ def display_app_name():
     reset = "\033[0m"
 
     # Enable ANSI support on Windows
-    enable_windows_ansi_support()
+    app_utils.enable_windows_ansi_support()
 
     # Define the widths and border styles
     header_width = max(len(APP_NAME), len(tagline)) + 6  # Adjust width based on content
