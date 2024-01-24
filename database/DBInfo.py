@@ -63,11 +63,11 @@ def get_query_statistics():
 # Get database table info
 def database_tables_info():
     try:
-        result = execute_query("SHOW TABLES;", fetch=True)
+        result = DBConnectionManager.execute_query("SHOW TABLES;", fetch=True)
         table_info = []
         for (table_name,) in result:
-            num_columns = len(execute_query(f"SHOW COLUMNS FROM {table_name};", fetch=True))
-            num_rows = execute_query(f"SELECT COUNT(*) FROM {table_name};", fetch=True)[0][0]
+            num_columns = len(DBConnectionManager.execute_query(f"SHOW COLUMNS FROM {table_name};", fetch=True))
+            num_rows = DBConnectionManager.execute_query(f"SELECT COUNT(*) FROM {table_name};", fetch=True)[0][0]
 
             # Calculate the size in MB for the table
             size_query = f"""
@@ -76,7 +76,7 @@ def database_tables_info():
             WHERE table_schema = '{DB_DATABASE}' AND table_name = '{table_name}'
             GROUP BY table_schema, table_name;
             """
-            size_result = execute_query(size_query, fetch=True)
+            size_result = DBConnectionManager.execute_query(size_query, fetch=True)
             size_mb = size_result[0][1] if size_result else 0.0
 
             table_info.append((table_name, num_columns, num_rows, size_mb))
