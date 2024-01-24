@@ -1,10 +1,27 @@
 # app_display.py
 
 import datetime
-import platform
-import ctypes
+import os
 
 APP_NAME = "DroidSecAnalytica"
+
+# Displays all .apk files in the current directory
+def display_apk_files():
+    apk_files = [f for f in os.listdir() if f.endswith('.apk')]
+    print("\nAvailable APK Files:" if apk_files else "No APK files found.")
+    for i, file in enumerate(apk_files, 1):
+        print(f" [{i}] {file}")
+    return apk_files
+
+# DIsplay disk usgae
+def display_disk_usage(disk_usage):
+    if not disk_usage:
+        print("No disk usage data available.")
+        return
+    print(f"\n{'Database'.ljust(20)} | {'Size in MB'.rjust(10)}")
+    print("-" * 33)
+    for db_name, size_mb in disk_usage:
+        print(f"{db_name.ljust(20)} | {str(size_mb).rjust(10)}")
 
 # Display a greeting message to the user
 def display_greeting():
@@ -46,23 +63,7 @@ def format_menu_option(number: int, description: str, number_width: int = 3, rig
     # Construct the option string with dynamic spacing
     return f" [{formatted_number}]" + " " * (padding + 1) + description
 
-# Enable ANSI escape sequence support on Windows 10 and later command prompt.
-def enable_windows_ansi_support():
-    if platform.system() == "Windows":
-        # Get standard output handle
-        stdout_handle = ctypes.windll.kernel32.GetStdHandle(-11)
-
-        # Get the current console mode
-        mode = ctypes.wintypes.DWORD()
-        ctypes.windll.kernel32.GetConsoleMode(stdout_handle, ctypes.byref(mode))
-
-        # Enable ANSI escape codes
-        ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
-        new_mode = mode.value | ENABLE_VIRTUAL_TERMINAL_PROCESSING
-
-        # Set the new mode
-        ctypes.windll.kernel32.SetConsoleMode(stdout_handle, new_mode)
-
+# Display application name
 def display_app_name():
     tagline = "Android APK Security Analyzer"
 

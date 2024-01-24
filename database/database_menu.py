@@ -11,6 +11,7 @@ def database_menu():
     while True:
         print(app_display.format_menu_title("Database Management Menu"))
         print(app_display.format_menu_option(1, "Test Database Connection"))
+        print(app_display.format_menu_option(2, "Load Android Malware Hashes"))
         print(app_display.format_menu_option(2, "Display Table Information"))
         print(app_display.format_menu_option(3, "Show Query Statistics"))
         print(app_display.format_menu_option(4, "Display Disk Usage"))
@@ -25,18 +26,21 @@ def database_menu():
             dbConnect.test_database_connection()
 
         elif menu_choice == '2':
+            load_android_hashes()
+
+        elif menu_choice == '3':
             table_data = dbConnect.database_tables_info()
             app_display.display_tables_info(table_data)
 
-        elif menu_choice == '3':
+        elif menu_choice == '4':
             query_stats = dbConnect.get_query_statistics()
             app_display.display_query_statistics(query_stats)
 
-        elif menu_choice == '4':
+        elif menu_choice == '5':
             disk_usage = dbConnect.get_disk_usage()
             app_display.display_disk_usage(disk_usage)
 
-        elif menu_choice == '5':
+        elif menu_choice == '6':
             thread_info = dbConnect.get_thread_information()
             app_display.display_thread_information(thread_info)
 
@@ -52,3 +56,9 @@ def show_query_statistics(conn):
             logging_utils.log_warning("Query statistics are not available.")
     except Exception as e:
         logging_utils.log_error("Error displaying query statistics", e)
+
+def load_android_hashes():
+    try:
+        load_data.load_android_malware_hash_data()
+    except Exception as e:
+        print(f"Error loading Android malware hashes: {e}")

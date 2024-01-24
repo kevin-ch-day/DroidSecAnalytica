@@ -8,7 +8,7 @@ import sys
 from static_analysis import static_analysis
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
-from utils import app_display, utils_menu, user_prompts
+from utils import app_display, load_data, user_prompts
 from database import database_menu
 
 # Create logs directory if it doesn't exist
@@ -27,7 +27,7 @@ def main_menu():
     print(app_display.format_menu_option(2, "Dynamic Analysis"))
     print(app_display.format_menu_option(3, "Report Generation"))
     print(app_display.format_menu_option(4, "Database Management"))
-    print(app_display.format_menu_option(5, "Utilities"))
+    print(app_display.format_menu_option(5, "Check Virustotal API Key"))
     print(app_display.format_menu_option(0, "Exit"))
 
 def main():
@@ -60,6 +60,9 @@ def main():
         except Exception as e:
             logging.error(f"An error occurred: {e}", exc_info=True)
             print("An error occurred. Please check the logs for more details.")
+
+def handle_api_integration():
+    print("Virustotal API Key Check.")
 
 if __name__ == "__main__":
     try:

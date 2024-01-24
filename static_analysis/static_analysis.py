@@ -4,7 +4,7 @@ import platform
 from typing import Optional
 
 from utils import app_utils, app_display, user_prompts, logging_utils
-from . import manifest_analysis, vt_requests, vt_response_handler
+from . import manifest_analysis, vt_analysis
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
@@ -13,13 +13,14 @@ ANALYSIS_OUTPUT_DIR = 'output'
 def static_menu():
     while True:
         print(app_display.format_menu_title("Static Analysis Menu"))
-        print(app_display.format_menu_option(1, "Check if sample has been previously analyzed"))
-        print(app_display.format_menu_option(2, "Decompile APK file for detailed analysis"))
+        print(app_display.format_menu_option(1, "Check if sample has been analyzed"))
+        print(app_display.format_menu_option(2, "Decompile APK file"))
         print(app_display.format_menu_option(3, "Perform static analysis"))
-        print(app_display.format_menu_option(4, "Perform Permission Analysis"))
-        print(app_display.format_menu_option(4, "Perform VirusTotal.com Analysis"))
-        print(app_display.format_menu_option(5, "Display available APK Files"))
-        print(app_display.format_menu_option(6, "Display APK File Hashes"))
+        print(app_display.format_menu_option(4, "Perform permission Analysis"))
+        print(app_display.format_menu_option(5, "Perform virusTotal.com Analysis"))
+        print(app_display.format_menu_option(6, "Display available APK Files"))
+        print(app_display.format_menu_option(7, "Display APK File Hashes"))
+        print(app_display.format_menu_option(1, "Check Virustotal API Key"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
         menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(11)])
         
@@ -31,28 +32,25 @@ def static_menu():
         elif menu_choice == '2':
             handle_apk_decompilation()
         
-        # Handle static analysis
+        # Static analysis
         elif menu_choice == '3':
             handle_static_apk_analysis()
 
-        elif menu_choice == '6':
-            handle_permissions_analysis()
-        
-        # Perform Virustotal.com analysis
+        # Permission analysis
         elif menu_choice == '4':
-            perform_virustotal_analysis()
+            handle_permissions_analysis()
         
+        # Virustotal.com analysis
+        elif menu_choice == '5':
+            vt_analysis.virustotal_menu()
+        
+        # Display available APK Files
         elif menu_choice == '6':
             handle_permissions_analysis()
         
+        # Display APK File Hashes
         elif menu_choice == '7':
             app_utils.display_apk_files()
-        
-        elif menu_choice == '8':
-            display_apk_file_hashes()
-        
-        elif menu_choice == '9':
-            perform_virustotal_analysis()
         
         elif menu_choice == '0':
             break
@@ -66,14 +64,9 @@ def display_sample_check_menu():
     print(app_display.format_menu_option(1, "Check by APK Path"))
     print(app_display.format_menu_option(2, "Check by Hash IOC"))
     print(app_display.format_menu_option(3, "Return to Menu"))
-    print(app_display.format_menu_option(0, "Exit Application"))
-    user_options = ['1', '2', '3', '0']
+    user_options = ['1', '2', '3']
     user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
-
-    if user_choice == '0':
-        exit()
-
-    elif user_choice == '1':
+    if user_choice == '1':
         check_analyzed_by_apk_path()
 
     elif user_choice == '2':
@@ -142,7 +135,7 @@ def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
         return None
 
 # Run static analysis
-def perform_full_analysis(apk_path: str):
+def perform_static_analysis(apk_path: str):
     file_basename = os.path.basename(apk_path)
     try:
         output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
@@ -157,18 +150,6 @@ def perform_full_analysis(apk_path: str):
         
         # Virustotal.com scan
         virustotal_analysis(apk_path)
-
-    except Exception as e:
-        logging_utils.log_error(f"Error during static analysis: {e}")
-
-# Virustotal API analysis
-def virustotal_analysis(apk_path: str):
-    try:
-        result = vt_requests.query_apk(apk_path)
-        if result:
-            vt_response_handler.parse_response(result)
-        else:
-            print("Error in processing the APK file request.")
 
     except Exception as e:
         logging_utils.log_error(f"Error during static analysis: {e}")

@@ -41,9 +41,6 @@ def extract_hashes(response_data):
     }
 
 def determine_hash_fields(hash_str):
-    hash_lengths = {"MD5": 32, "SHA1": 40, "SHA256": 64}
-
-    # Handle None or empty string input
     if not hash_str:
         print('Error: No hash string provided. The input is empty or None.')
         return None, None, None
@@ -54,6 +51,7 @@ def determine_hash_fields(hash_str):
         return None, None, None
 
     # Determine the type of hash based on its length
+    hash_lengths = {"MD5": 32, "SHA1": 40, "SHA256": 64}
     for hash_type, length in hash_lengths.items():
         if len(hash_str) == length:
             return (hash_str if hash_type == "MD5" else None,
