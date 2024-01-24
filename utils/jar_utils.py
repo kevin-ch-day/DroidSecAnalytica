@@ -1,15 +1,11 @@
 import os
 import zipfile
 import subprocess
-import logging
+from . import logging_utils  # Import the logging_utils module
 
 # Constants
-LOG_FILE = 'logs/jar_utils.log'
 ANALYSIS_RESULTS_DIR = 'output'
 DEX2JAR_TOOL = 'd2j-dex2jar'
-
-# Configure logging
-logging.basicConfig(filename=LOG_FILE, level=logging.INFO, format='%(asctime)s - %(levelname)s: %(message)s')
 
 def generate_jar(apk_path):
     try:
@@ -22,11 +18,11 @@ def generate_jar(apk_path):
         return jar_path
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"Error generating JAR file: {e}")
+        logging_utils.log_error(f"Error generating JAR file: {e}")
         return None
     
     except Exception as e:
-        logging.error(f"Unexpected error: {e}")
+        logging_utils.log_error(f"Unexpected error: {e}")
         return None
 
 def analyze_jar(apk_path):
@@ -40,9 +36,9 @@ def analyze_jar(apk_path):
         return classes_found
 
     except zipfile.BadZipfile as e:
-        logging.error(f"Error analyzing JAR file {jar_path}: {e}")
+        logging_utils.log_error(f"Error analyzing JAR file {jar_path}: {e}")
         return []
     
     except Exception as e:
-        logging.error(f"Unexpected error analyzing JAR file {jar_path}: {e}")
+        logging_utils.log_error(f"Unexpected error analyzing JAR file {jar_path}: {e}")
         return []

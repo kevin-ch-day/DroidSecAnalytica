@@ -19,7 +19,7 @@ def get_total_hash_records():
         print(f"Total records: {total_records}")
         return records
     except Exception as e:
-        dbConnect.log_error("Error fetching total hash records", e)
+        logging_utils.log_error("Error fetching total hash records", e)
         return []
 
 def check_if_hash_analyzed(hash_dict: Dict[str, str]) -> bool:
@@ -44,7 +44,7 @@ def check_for_hash_record(hash_dict):
         result = dbConnect.execute_query(sql, params, fetch=True)
         return bool(result)
     except Exception as e:
-        dbConnect.log_error("Error checking for hash record", e)
+        logging_utils.log_error("Error checking for hash record", e)
         return False
 
 def insert_data_into_malware_hashes(file_path: str, data: list):
