@@ -1,78 +1,99 @@
-# permission_analysis.py
+# APKPermissionAnalyzer.py
 
-from utils import user_prompts, logging_utils
 import xml.etree.ElementTree as ET
-from typing import List, Dict
+from typing import List
+from utils import logging_utils
+from . import permission_auditor
+from database import DBConnectionManager
 
-def handle_permissions_analysis():
+# Analyze permissions in an APK file
+def analyze_apk_permissions(apk_path: str, target_api_level: int = None) -> None:
     try:
-        # Prompt the user for the APK file path
-        apk_path = user_prompts.prompt_user_enter_apk_path()
-        print(f"Analyzing permissions for APK: {apk_path}")
+        print(f"Analyzing permissions for APK: {apk_path}\n")
 
-        # Perform the permissions analysis (assuming a function for this exists)
-        permissions = analyze_apk_permissions(apk_path)
-        if permissions:
-            print("Permissions found in the APK:")
-            for perm in permissions:
-                print(f"- {perm}")
-        else:
+        manifest_data = load_and_parse_manifest(apk_path)
+        permissions = extract_permissions_from_manifest(manifest_data)
+
+        if not permissions:
             print("No permissions found in the APK.")
+            return
 
-    except FileNotFoundError:
-        logging_utils.log_error(f"APK file not found at path: {apk_path}")
-        print("Error: APK file not found. Please check the file path.")
+        permission_summary = {
+            'total': len(permissions),
+            'risk_levels': {'low': 0, 'medium': 0, 'high': 0},
+            'api_level_issues': 0,
+            'categories': {}
+        }
+
+        print("Permissions found in the APK:")
+        for perm in permissions:
+            perm_detail = DBConnectionManager.execute_query(
+                "SELECT * FROM android_permissions WHERE permission_name = %s",
+                (perm,),
+                fetch=True
+            )
+            if perm_detail:
+                perm_detail = perm_detail[0]
+                print(f"- {perm} (Risk: {perm_detail['risk_level']}, API Level: {perm_detail['added_in_api_level']})")
+                
+                # Update summary data
+                permission_summary['risk_levels'][perm_detail['risk_level']] += 1
+                if target_api_level and perm_detail['added_in_api_level'] > target_api_level:
+                    permission_summary['api_level_issues'] += 1
+                category = perm_detail['category']
+                permission_summary['categories'].setdefault(category, []).append(perm)
+
+        # Security Assessments
+        overprivileged_info = permission_auditor.assess_overprivileged_status(permissions)
+        sensitive_perms = permission_auditor.find_sensitive_permissions(permissions)
+
+        # Display Summary
+        print("\nSecurity Assessment Summary:")
+        print(f"Total Permissions: {permission_summary['total']}")
+        print(f"Risk Levels: {permission_summary['risk_levels']}")
+        
+        if target_api_level:
+            print(f"Permissions exceeding target API level {target_api_level}: {permission_summary['api_level_issues']}")
+        print(f"Sensitive Permissions: {', '.join(sensitive_perms) if sensitive_perms else 'None'}")
+        print(f"Overprivileged Assessment: {overprivileged_info}")
+
+        for category, perms in permission_summary['categories'].items():
+            print(f"Category '{category}': {len(perms)} permissions")
+
     except Exception as e:
         logging_utils.log_error(f"Error during permissions analysis: {e}")
-        print("An error occurred during the analysis. Please check the logs for details.")
+        print("An error occurred. Please check the logs for details.")
 
-    finally:
-        # Pause and wait for user input before returning
-        user_prompts.pause_until_keypress()
+def extract_permissions_from_manifest(manifest_data: ET.Element) -> List[str]:
+    try:
+        # Namespace for Android XML
+        namespace = {'android': 'http://schemas.android.com/apk/res/android'}
+        nsmap = {key: f"{{{value}}}" for key, value in namespace.items()}
 
+        # Extract permissions, avoiding duplicates
+        permissions = list({perm.get(nsmap['android'] + 'name') for perm in manifest_data.iter('uses-permission')})
 
-def extract_all_permissions(root: ET.Element) -> List[str]:
-    """ Extracts all permissions used in the AndroidManifest.xml file. """
-    permissions = []
-    for perm in root.iter('uses-permission'):
-        permissions.append(perm.get('name'))
-    return permissions
+        return [perm for perm in permissions if perm is not None]
 
-def identify_overprivileged_apps(manifest_data: Dict) -> Dict:
-    """Identify overprivileged apps based on the number of permissions."""
-    analysis_results = {'overprivileged': False, 'overprivileged_score': 0}
-    
-    max_expected_permissions = 10
-    actual_permissions_count = len(manifest_data.get('uses-permission', []))
-    
-    if actual_permissions_count > max_expected_permissions:
-        excess_permissions = actual_permissions_count - max_expected_permissions
-        overprivilege_score = excess_permissions * 5  # You can adjust the score multiplier as needed
-        analysis_results['overprivileged'] = True
-        analysis_results['overprivileged_score'] = overprivilege_score
+    except ET.ParseError as parse_err:
+        # Handle XML parsing errors specifically
+        logging_utils.log_error(f"XML Parsing Error in extracting permissions: {parse_err}")
+    except Exception as e:
+        # Handle any other exceptions
+        logging_utils.log_error(f"Unexpected error in extracting permissions: {e}")
 
-    return analysis_results
+    return []
 
-def check_sensitive_permissions(manifest_data: Dict) -> List[str]:
-    """Identify sensitive permissions used in the manifest."""
-    sensitive_permissions = ['android.permission.SEND_SMS', 'android.permission.READ_CONTACTS']
-    return [perm for perm in manifest_data.get('uses-permission', []) if perm in sensitive_permissions]
+def load_and_parse_manifest(manifest_path: str) -> ET.Element:
+    if not manifest_path:
+        raise ValueError("No path provided for AndroidManifest.xml.")
 
-def check_network_permissions(manifest_data: Dict) -> List[str]:
-    """Identify network-related permissions used in the manifest."""
-    network_permissions = ['android.permission.INTERNET', 'android.permission.ACCESS_NETWORK_STATE']
-    return [perm for perm in manifest_data.get('uses-permission', []) if perm in network_permissions]
+    try:
+        tree = ET.parse(manifest_path)
+        return tree.getroot()
 
-def check_dangerous_permissions(manifest_data: Dict) -> List[str]:
-    """Identify dangerous permissions used in the manifest."""
-    dangerous_permissions = ['android.permission.CAMERA', 'android.permission.RECORD_AUDIO']
-    return [perm for perm in manifest_data.get('uses-permission', []) if perm in dangerous_permissions]
+    except ET.ParseError as e:
+        raise Exception(f"Failed to parse AndroidManifest.xml: {e}")
 
-def check_location_permissions(manifest_data: Dict) -> List[str]:
-    """Identify location-related permissions used in the manifest."""
-    location_permissions = ['android.permission.ACCESS_FINE_LOCATION', 'android.permission.ACCESS_COARSE_LOCATION']
-    return [perm for perm in manifest_data.get('uses-permission', []) if perm in location_permissions]
-
-def check_custom_permissions(manifest_data: Dict, custom_permissions: List[str]) -> List[str]:
-    """Identify custom-defined permissions used in the manifest."""
-    return [perm for perm in manifest_data.get('uses-permission', []) if perm in custom_permissions]
+    except FileNotFoundError:
+        raise FileNotFoundError(f"AndroidManifest.xml not found at path: {manifest_path}. Ensure the APK is properly decompiled.")
