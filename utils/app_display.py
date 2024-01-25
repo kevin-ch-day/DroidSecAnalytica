@@ -3,7 +3,7 @@
 import datetime
 import os
 
-from . import app_utils
+from . import app_utils, logging_utils
 
 APP_NAME = "DroidSecAnalytica"
 
@@ -33,8 +33,8 @@ def display_greeting():
                "Good evening"
 
     formatted_time = current_time.strftime('%I:%M %p on %A, %B %d, %Y')
-    print(f"\n{greeting}! Welcome to {APP_NAME}.")
-    print(f"The current time is {formatted_time}.")
+    print(f"\n {greeting}! Welcome to {APP_NAME}.")
+    print(f" The current time is {formatted_time}.")
 
 # Formats the menu title with borders and alignment
 def format_menu_title(title: str, width: int = 50, border_char: str = "=", align: str = 'center', padding: int = 1) -> str:
@@ -49,7 +49,7 @@ def format_menu_title(title: str, width: int = 50, border_char: str = "=", align
     # Add padding and create borders
     padded_title = f"{' ' * padding}{aligned_title}{' ' * padding}"
     border = border_char * adjusted_width
-    return f"\n{border}\n{padded_title}\n{border}\n"
+    return f"\n {border}\n {padded_title}\n {border}\n"
 
 # Formats a menu option with a dynamic adjustment for the option number spacing
 def format_menu_option(number: int, description: str, number_width: int = 3, right_align: bool = False) -> str:
@@ -89,47 +89,41 @@ def display_app_name():
     tagline_header = "║" + tagline.center(header_width - 2) + "║"
 
     # Print the formatted header
-    print("\n" + top_border)
-    print(app_name_header)
-    print(middle_border)
-    print(tagline_header)
-    print(bottom_border)
+    print("\n " + top_border)
+    print(" " + app_name_header)
+    print(" " + middle_border)
+    print(" " + tagline_header)
+    print(" " + bottom_border)
 
 def display_tables_info(database_tables_info):
     if not database_tables_info:
         print("No table information available.")
         return
 
-    # Define column headers
     table_header = "Table Name"
     columns_header = "Columns"
     rows_header = "Rows"
-    size_mb_header = "Size (MB)"
 
-    # Calculate column widths based on headers and data
-    max_table_len = max(len(table_header), max(len(table[0]) for table in database_tables_info)) + 5
-    max_columns_len = max(len(columns_header), max(len(str(table[1])) for table in database_tables_info)) + 5
-    max_rows_len = max(len(rows_header), max(len(str(table[2])) for table in database_tables_info)) + 5
-    max_size_mb_len = max(len(size_mb_header), max(len(str(table[3])) for table in database_tables_info)) + 5
+    try:
+        #print("Debug: Raw table data:", database_tables_info) # DEBUGGING
 
-    # Format the headers with proper alignment and padding
-    table_header = table_header.ljust(max_table_len)
-    columns_header = columns_header.ljust(max_columns_len)
-    rows_header = rows_header.ljust(max_rows_len)
-    size_mb_header = size_mb_header.ljust(max_size_mb_len)
+        max_table_len = max(len(table_header), max(len(table[0]) for table in database_tables_info)) + 2
+        max_columns_len = max(len(columns_header), max(len(str(table[1])) for table in database_tables_info)) + 2
+        max_rows_len = max(len(rows_header), max(len(str(table[2])) for table in database_tables_info)) + 2
 
-    # Print the table headers
-    print(f"\n{table_header} | {columns_header} | {rows_header} | {size_mb_header}")
-    print("-" * (max_table_len + max_columns_len + max_rows_len + max_size_mb_len + 10))
+        print(f"{table_header.ljust(max_table_len)} | {columns_header.ljust(max_columns_len)} | {rows_header.ljust(max_rows_len)}")
+        print("-" * (max_table_len + max_columns_len + max_rows_len + 6))
 
-    # Print table information with proper formatting
-    for table_name, num_columns, num_rows, size_mb in database_tables_info:
-        table_name = table_name.ljust(max_table_len)
-        num_columns = str(num_columns).ljust(max_columns_len)
-        num_rows = str(num_rows).ljust(max_rows_len)
-        size_mb = str(size_mb).ljust(max_size_mb_len)
+        for table in database_tables_info:
+            if len(table) < 3:
+                print(f"Debug: Incomplete table information for: {table}")
+                continue
 
-        print(f"{table_name} | {num_columns} | {num_rows} | {size_mb}")
+            table_name, num_columns, num_rows = table
+            print(f"{table_name.ljust(max_table_len)} | {str(num_columns).ljust(max_columns_len)} | {str(num_rows).ljust(max_rows_len)}")
+
+    except Exception as e:
+        print(f"Error displaying table information: {str(e)}")
 
 def display_query_statistics(query_stats):
     if query_stats:

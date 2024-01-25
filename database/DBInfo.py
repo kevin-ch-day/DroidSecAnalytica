@@ -1,3 +1,5 @@
+# DBInfo.py
+
 import mysql.connector
 
 from utils import logging_utils

@@ -7,13 +7,12 @@ import subprocess
 LOG_FILE = 'logs/android_file_system_analysis.log'
 
 # Configure logging for Android file system analysis
-logging_utils.configure_logging(LOG_FILE)
+logging_utils.setup_logger(LOG_FILE)
 
 def analyze_android_file_system():
     try:
-        logging_utils.log_info("Starting Android file system analysis...")
+        print("Starting Android file system analysis...")
         
-        # List of directories prone to Android banking trojan infections
         search_directories = [
             "/data/data",
             "/sdcard/Android/data",
@@ -26,27 +25,23 @@ def analyze_android_file_system():
             "/data/data/com.android.smspush"
         ]
 
-        # Connect to the Android device
-        logging_utils.log_info("Connecting to the Android device...")
-        subprocess.run(["adb", "start-server"])
+        print("Connecting to the Android device...")
+        subprocess.run(["adb", "start-server"], check=True)
 
         for directory in search_directories:
-            logging_utils.log_info(f"Analyzing files and directories in {directory}:")
-            
-            # Use adb shell to list files and directories in the specified path
-            adb_command = f"adb shell ls -R {directory}"
-            result = subprocess.run(adb_command, shell=True, capture_output=True, text=True)
-            
-            if result.returncode == 0:
-                file_listing = result.stdout
-                logging_utils.log_info(file_listing)
-            else:
-                logging_utils.log_error(f"Failed to list files and directories in {directory}")
+            try:
+                logging_utils.log_info(f"Analyzing files and directories in {directory}...")
+                
+                result = subprocess.run(["adb", "shell", "ls", "-R", directory], capture_output=True, text=True, check=True)
+                
+                # Consider processing or summarizing result.stdout before logging
+                print("Directory analysis completed.")
+                
+            except subprocess.CalledProcessError as e:
+                logging_utils.log_error(f"Failed to list files and directories in {directory}: {str(e)}")
 
-        # Disconnect from the Android device
-        subprocess.run(["adb", "kill-server"])
+        subprocess.run(["adb", "kill-server"], check=True)
         logging_utils.log_info("Disconnected from the Android device.")
-
         logging_utils.log_info("Android file system analysis completed.")
 
     except Exception as e:

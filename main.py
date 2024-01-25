@@ -1,5 +1,6 @@
 import os
 import sys
+import logging  # Import the logging module
 
 # Import custom libraries
 from static_analysis import static_analysis
@@ -14,7 +15,7 @@ if not os.path.exists('logs'):
     os.makedirs('logs')
 
 # Configure Logging using logging_utils
-logging_utils.configure_logging(filename='logs/main.log', level=logging_utils.INFO)
+logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
 def main_menu():
     print(app_display.format_menu_title("Main Menu", 24))

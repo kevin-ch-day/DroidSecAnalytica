@@ -1,8 +1,8 @@
 # database_menu.py
 
 from utils import app_display, user_prompts, logging_utils
-from . import DBConnectionManager as dbConnect
-from . import load_data  # Assuming load_data is a module for loading Android malware hashes
+from . import DBConnectionManager as dbConnect, DBTableManagement as dbTables, DBInfo
+# from . import load_data # load malware hash data
 
 # Database management menu
 def database_menu():
@@ -21,7 +21,7 @@ def database_menu():
             break
         
         elif menu_choice == '1':
-            dbConnect.test_database_connection()
+            dbConnect.test_connection()
 
         elif menu_choice == '2':
             load_android_hashes()
@@ -42,34 +42,35 @@ def database_menu():
 
 def show_table_information():
     try:
-        table_data = dbConnect.database_tables_info()
+        table_data = dbTables.list_tables()
         app_display.display_tables_info(table_data)
     except Exception as e:
         logging_utils.log_error("Error displaying table information", e)
 
 def show_query_statistics():
     try:
-        query_stats = dbConnect.get_query_statistics()
+        query_stats = DBInfo.get_query_statistics()
         app_display.display_query_statistics(query_stats)
     except Exception as e:
         logging_utils.log_error("Error displaying query statistics", e)
 
 def display_disk_usage():
     try:
-        disk_usage = dbConnect.get_disk_usage()
+        disk_usage = DBInfo.get_disk_usage()
         app_display.display_disk_usage(disk_usage)
     except Exception as e:
         logging_utils.log_error("Error displaying disk usage", e)
 
 def display_thread_information():
     try:
-        thread_info = dbConnect.get_thread_information()
+        thread_info = DBInfo.get_thread_information()
         app_display.display_thread_information(thread_info)
     except Exception as e:
         logging_utils.log_error("Error displaying thread information", e)
 
 def load_android_hashes():
     try:
-        load_data.load_android_malware_hash_data()
+        #load_data.load_android_malware_hash_data()
+        pass
     except Exception as e:
         logging_utils.log_error(f"Error loading Android malware hashes: {e}")

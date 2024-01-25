@@ -13,19 +13,7 @@ def execute_sql(query: str, params: tuple = None, should_fetch: bool = False):
 
 # Checks if a specific table exists in the database
 def check_for_table(table_name: str) -> bool:
-    return bool(execute_sql("SHOW TABLES LIKE %s;", (table_name,), True))
-
-# Displays information about all tables in the database
-def display_tables_info():
-    tables_info = list_tables()
-    if not tables_info:
-        print("No table information available.")
-        return
-
-    header = f"{'Table Name':<30} | {'# of Columns':>15} | {'# of Rows':>15}"
-    print(f"\nDatabase Tables Information:\n{header}\n{'-' * len(header)}")
-    for table_name, num_columns, num_rows in tables_info:
-        print(f"{table_name:<30} | {num_columns:>15} | {num_rows:>15}")
+    return bool(execute_sql("SHOW TABLES LIKE %s;", (table_name,), True))\
 
 # Lists all tables in the database with their column and row counts
 def list_tables() -> list:

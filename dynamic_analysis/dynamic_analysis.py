@@ -9,7 +9,7 @@ from . import device_manager, app_manager, file_system_analysis
 LOG_FILE = 'logs/dynamic_analysis.log'
 
 # Configure logging
-logging_utils.configure_logging(LOG_FILE)
+logging_utils.setup_logger(LOG_FILE)
 
 # Dynamic analysis menu
 def dynamic_menu():
