@@ -3,9 +3,9 @@ import subprocess
 import platform
 from typing import Optional
 
-from utils import app_utils, app_display, user_prompts, logging_utils
-from . import manifest_analysis,vt_analysis, permission_analysis
-from database import database_utils_1
+from utils import app_utils, app_display, user_prompts, logging_utils, hash_utils
+from . import manifest_analysis, permission_analyzer,vt_analysis
+from database import DBTableManagement, DBHashRecords
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
@@ -49,7 +49,7 @@ def static_menu():
         
         # Display available APK Files
         elif menu_choice == '6':
-            permission_analysis.handle_permissions_analysis
+            permission_analyzer.handle_permissions_analysis
         
         # Display APK File Hashes
         elif menu_choice == '7':
@@ -88,17 +88,17 @@ def check_analyzed_by_hash_ioc():
 
 # Run static analysis
 def perform_preanalysis(apk_path: str):
-    apk_hashes = app_utils.calculate_hashes(apk_path)
-    app_display.display_hashes(apk_path, apk_hashes)
+    apk_hashes = hash_utils.calculate_hashes(apk_path)
+    hash_utils.display_hashes(apk_path, apk_hashes)
     
-    if not database_utils_1.check_for_hash_record(apk_hashes):
+    if not DBHashRecords.check_for_hash_record(apk_hashes):
         # Hash does not have a record in malware_hashes
         print("IOC hash does not have a record")
         file_basename = os.path.basename(apk_path)
         file_size_bytes = os.path.getsize(apk_path)
-        database_functions.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
+        DBTableManagement.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
         
-        if not database_functions.check_if_hash_analyzed(apk_hashes):
+        if not DBHashRecords.check_if_hash_analyzed(apk_hashes):
             # Hash has not been analyzed
             print("IOC hash has not been analyzed")
             apk_static_analysis(apk_path)
@@ -152,7 +152,7 @@ def apk_static_analysis(apk_path: str):
             print("Error decompiling the APK file")
         
         # Virustotal.com scan
-        virustotal_analysis(apk_path)
+        #virustotal_analysis(apk_path)
 
     except Exception as e:
         logging_utils.log_error(f"Error during static analysis: {e}")
