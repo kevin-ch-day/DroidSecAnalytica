@@ -67,26 +67,6 @@ def check_virustotal_access():
         print(f"HTTP request to VirusTotal failed: {e}")
         return False
 
-def display_list(title, items):
-    print(f"\n{title}:")
-    if items:
-        for item in items:
-            print(f"  {item}")
-    else:
-        print("  None found")
-
-def display_dict(data):
-    if data:
-        for k, v in data.items():
-            if isinstance(v, dict):
-                print(f"  {k}:")
-                for sub_key, sub_val in v.items():
-                    print(f"    {sub_key}: {sub_val}")
-            else:
-                print(f"  {k}: {v}")
-    else:
-        print("  None found")
-
 def set_data_if_key_exists(key, setter_function, data):
     if key in data:
         setter_function(data[key])
