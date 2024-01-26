@@ -15,15 +15,13 @@ def static_menu():
     while True:
         print(app_display.format_menu_title("Static Analysis Menu"))
         print(app_display.format_menu_option(1, "Check if sample has been analyzed"))
-        print(app_display.format_menu_option(2, "Decompile APK file"))
-        print(app_display.format_menu_option(3, "Perform static analysis"))
-        print(app_display.format_menu_option(4, "Perform permission Analysis"))
-        print(app_display.format_menu_option(5, "Perform virusTotal.com Analysis"))
-        print(app_display.format_menu_option(6, "Display available APK Files"))
-        print(app_display.format_menu_option(7, "Display APK File Hashes"))
-        print(app_display.format_menu_option(1, "Check Virustotal API Key"))
+        print(app_display.format_menu_option(2, "Decompile APK File"))
+        print(app_display.format_menu_option(3, "Perform Static Analysis"))
+        print(app_display.format_menu_option(4, "Perform Permission Analysis"))
+        print(app_display.format_menu_option(5, "Display Available APK Files"))
+        print(app_display.format_menu_option(6, "Display APK File Hashes"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
-        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(11)])
+        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
         
         # Check if sample has been previously analyzed
         if menu_choice == '1':
@@ -43,16 +41,12 @@ def static_menu():
             print("Perform Permissin Analysis")
             #handle_permissions_analysis()
         
-        # Virustotal.com analysis
-        elif menu_choice == '5':
-            vt_analysis.virustotal_menu()
-        
         # Display available APK Files
-        elif menu_choice == '6':
+        elif menu_choice == '5':
             permission_analyzer.handle_permissions_analysis
         
         # Display APK File Hashes
-        elif menu_choice == '7':
+        elif menu_choice == '6':
             app_display.display_apk_files()
         
         elif menu_choice == '0':
