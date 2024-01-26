@@ -20,7 +20,7 @@ def parse_androguard_data(attributes):
         logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
         return None
     
-def display_data(attributes):
+def display_attributes(attributes):
     try:
         androguard_data = parse_androguard_data(attributes)
         if androguard_data:

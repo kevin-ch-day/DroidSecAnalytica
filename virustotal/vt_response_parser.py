@@ -1,34 +1,23 @@
 import json
 import os
 from tabulate import tabulate
-from . import vt_androguard, vt_response_processor
+from . import vt_androguard
 from utils import logging_utils
 
-def parse_response(response, debug=False):
-    if not response:
-        logging_utils.log_error("Received an empty response.")
-        return
-
+def parse_response(response):
     if 'data' not in response:
-        logging_utils.log_error("No 'data' key in response.")
+        print("No 'data' key in response.")
         return
 
     data = response.get('data', {})
-    response_id = data.get('id', 'N/A')
-    virus_total_link = data.get('links', {}).get('self', 'N/A')
-
-    if debug:
-        logging_utils.log_debug(f"Response ID: {response_id}")
-        logging_utils.log_debug(f"VirusTotal Link: {virus_total_link}")
-
     attributes = data.get('attributes', {})
     if not attributes:
-        logging_utils.log_warning("No attributes found in the data.")
+        print("No attributes found in the data.")
         return
-
+    
     try:
         #summary_statistics(attributes)
-        vt_androguard.display_androguard_data(attributes)
+        vt_androguard.display_attributes(attributes)
         #vt_response_processor.historical_analysis(attributes)
         #vt_response_processor.behavior_analysis(attributes)
         #vt_response_processor.network_traffic_analysis(attributes)
@@ -36,7 +25,6 @@ def parse_response(response, debug=False):
         
     except Exception as e:
         logging_utils.log_error(f"Error processing response attributes: {e}")
-
 
 def save_json_response(response, filename, overwrite=True):
     if not isinstance(response, dict):
@@ -99,3 +87,36 @@ def display_hash_values(attributes):
         hash_value = attributes.get(hash_type, 'N/A')
         if hash_value != 'N/A':
             print(f"{hash_type.upper()}: {hash_value}")
+
+def historical_analysis(attributes):
+    if 'first_seen' in attributes or 'last_seen' in attributes or 'detection_history' in attributes:
+        print("\nHistorical Analysis:")
+        print(f"  First Seen: {attributes.get('first_seen', 'N/A')}")
+        print(f"  Last Seen: {attributes.get('last_seen', 'N/A')}")
+        
+        print("\nDetection History:")
+        for detection in attributes.get('detection_history', []):
+            print(f"  Date: {detection.get('date', 'N/A')}")
+            print(f"  Detected: {detection.get('detected', 'N/A')}")
+            print(f"  Detection Count: {detection.get('detection_count', 'N/A')}")
+
+def behavior_analysis(attributes):
+    behaviors = attributes.get('behaviours', [])
+    if behaviors:
+        print("\nBehavior Analysis:")
+        for behavior in behaviors:
+            print(f"  Behavior Name: {behavior.get('name', 'N/A')}")
+            print(f"  Description: {behavior.get('description', 'N/A')}")
+            print(f"  Severity: {behavior.get('severity', 'N/A')}")
+            print(f"  Confidence: {behavior.get('confidence', 'N/A')}")
+
+def network_traffic_analysis(attributes):
+    network_traffic = attributes.get('network_traffic', [])
+    if network_traffic:
+        print("\nNetwork Traffic Analysis:")
+        for entry in network_traffic:
+            print(f"  Timestamp: {entry.get('timestamp', 'N/A')}")
+            print(f"  Protocol: {entry.get('protocol', 'N/A')}")
+            print(f"  Source IP: {entry.get('src_ip', 'N/A')}")
+            print(f"  Destination IP: {entry.get('dst_ip', 'N/A')}")
+            print(f"  Destination Port: {entry.get('dst_port', 'N/A')}")

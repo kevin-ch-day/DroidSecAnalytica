@@ -73,7 +73,7 @@ def hash_analysis():
     try:
         result = vt_requests.query_hash(hash_value)
         if result:
-            vt_response_parser.save_json_response(result, "output/hash_analysis.json")
+            #vt_response_parser.save_json_response(result, "output/hash_analysis.json")
             vt_response_parser.parse_response(result)
         else:
             print("Error in processing the hash.")
