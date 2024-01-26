@@ -1,78 +1,97 @@
 # vt_androguard.py
 
-import json
-from . import vt_utils, AndroguardADT, PermissionADT
+from . import vt_utils
+from adt.AndroguardADT import AndroguardADT
+from adt.PermissionADT import PermissionADT
 from utils import logging_utils
 
 def display_androguard_data(attributes):
-    androguard_data = parse_androguard_data(attributes)
-    if androguard_data:
-        print("\n-- Main Analysis --")
-        print(f"Main Activity    : {androguard_data.get_main_activity()}")
-        print(f"Package          : {androguard_data.get_package()}")
-        print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
+    try:
+        androguard_data = parse_androguard_data(attributes)
+        if androguard_data:
+            print("\n-- Main Analysis --")
+            print(f"Main Activity    : {androguard_data.get_main_activity()}")
+            print(f"Package          : {androguard_data.get_package()}")
+            print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
 
-        display_sections(androguard_data)
-        display_certificate_details(androguard_data)
-        display_permissions(androguard_data.get_permissions())
-        display_intent_filters(androguard_data)
-    else:
-        logging_utils.log_error("Error: no androguard data found.")
+            display_sections(androguard_data)
+            display_certificate_details(androguard_data)
+            display_permissions(androguard_data.get_permissions())
+            display_intent_filters(androguard_data)
+        
+        else:
+            logging_utils.log_error("Error: no androguard data found.")
+
+    except Exception as e:
+        logging_utils.log_error(f"Error processing response attributes: {str(e)}")
 
 def display_sections(androguard_data):
-    sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-    for section in sections:
-        items = getattr(androguard_data, f'get_{section.lower()}')()
-        vt_utils.display_list(section, items)
+    try:
+        sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
+        for section in sections:
+            items = getattr(androguard_data, f'get_{section.lower()}')()
+            vt_utils.display_list(section, items)
+    except Exception as e:
+        logging_utils.log_error(f"Error processing sections: {str(e)}")
 
 def display_certificate_details(androguard_data):
-    if not androguard_data or not hasattr(androguard_data, 'get_certificate_data'):
-        logging_utils.log_error("Invalid or no androguard data provided for certificate details.")
-        return
+    try:
+        print("\n-- Certificate Details --")
+        if not androguard_data or not hasattr(androguard_data, 'get_certificate_data'):
+            logging_utils.log_error("Invalid or no androguard data provided for certificate details.")
+            return
 
-    print("\n-- Certificate Details --")
-    certificate_data = androguard_data.get_certificate_data()
-    if not certificate_data:
-        print("  No certificate data available.")
-        return
-    vt_utils.display_dict(certificate_data.items())
+        certificate_data = androguard_data.get_certificate_data()
+        if not certificate_data:
+            print("  No certificate data available.")
+            return
+        vt_utils.display_dict(certificate_data.items())
+    except Exception as e:
+        logging_utils.log_error(f"Error processing certificate details: {str(e)}")
 
 def display_permissions(permissions):
-    if not permissions:
-        logging_utils.log_warning("No permissions data provided to display.")
-        return
+    try:
+        print("\nPermissions:")
+        if not permissions:
+            logging_utils.log_warning("No permissions data provided to display.")
+            return
 
-    print("\nPermissions:")
-    max_name_width = 50  # Maximum width for permission names
-    max_type_width = 20  # Maximum width for permission types
+        max_name_width = 50  # Maximum width for permission names
+        max_type_width = 20  # Maximum width for permission types
 
-    header = "NAME".ljust(max_name_width) + "Type".ljust(max_type_width) + "Description"
-    print(header)
-    print("-" * len(header))  # Print a separator line
+        header = "NAME".ljust(max_name_width) + "Type".ljust(max_type_width) + "Description"
+        print(header)
+        print("-" * len(header))  # Print a separator line
 
-    if permissions:
         for perm in permissions:
             display_name = (perm.name[:max_name_width - 3] + '...') if len(perm.name) > max_name_width else perm.name
             display_type = (perm.permission_type[:max_type_width - 3] + '...') if len(perm.permission_type) > max_type_width else perm.permission_type
             print(f"{display_name.ljust(max_name_width)}{display_type.ljust(max_type_width)}{perm.short_desc}")
-    else:
-        print("  None found")
-
-def export_data_to_json(androguard_data, filename='androguard_data.json'):
-    with open(filename, 'w') as file:
-        json.dump(androguard_data.to_dict(), file, indent=4)
+    except Exception as e:
+        logging_utils.log_error(f"Error processing permissions: {str(e)}")
 
 def parse_androguard_data(attributes):
-    data = attributes.get('androguard', None)
-    if not data:
+    try:
+        data = attributes.get('androguard', None)
+        if not data:
+            return None
+
+        # Check if 'AndroguardADT' is mistakenly used as a callable object
+        if callable(AndroguardADT):
+            raise ValueError("Error: 'AndroguardADT' is incorrectly used as a callable object. Check your import statements.")
+
+        androguard_data = AndroguardADT()
+        parse_basic_data(androguard_data, data)
+        parse_permissions(androguard_data, data)
+        parse_certificate_data(androguard_data, data)
+        parse_intent_filters(androguard_data, data)
+        return androguard_data
+
+    except Exception as e:
+        # Handle the exception here (e.g., print an error message or log it)
+        logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
         return None
 
-    androguard_data = AndroguardADT.AndroguardADT()
-    parse_basic_data(androguard_data, data)
-    parse_permissions(androguard_data, data)
-    parse_certificate_data(androguard_data, data)
-    parse_intent_filters(androguard_data, data)
-    return androguard_data
 
 def parse_basic_data(androguard_data, data):
     for key, setter_function in [
@@ -97,12 +116,12 @@ def parse_permissions(androguard_data, data):
             androguard_data.add_permission(p)
 
 def parse_intent_filters(androguard_data, data):
-    if not androguard_data or not hasattr(androguard_data, 'add_intent_filter'):
-        logging_utils.log_error("Invalid or no androguard data provided for intent filters.")
+    if not data or 'intent_filters' not in data:
+        print("No intent filter data found.")
         return
 
-    if 'intent_filters' not in data:
-        logging_utils.log_warning("No intent filter data found in the provided data.")
+    if androguard_data and not hasattr(androguard_data, 'add_intent_filter'):
+        print("Error: androguard_data does not support adding intent filters.")
         return
 
     for entity_type, entities in data['intent_filters'].items():
@@ -117,7 +136,7 @@ def display_intent_filters(androguard_data):
     print("\nIntent Filters:")
 
     if not androguard_data or not hasattr(androguard_data, 'get_all_intent_filters'):
-        logging_utils.log_error("Invalid or no data provided.")
+        print("Invalid or no data provided.")
         return
 
     intent_filters = androguard_data.get_all_intent_filters()
@@ -197,3 +216,6 @@ def parse_certificate(certificate_data):
     parsed_info['validfrom'] = certificate_data.get('validfrom', 'N/A')
     
     return parsed_info
+
+# Debugging: Add print statements to track function calls
+print("Debugging: vt_androguard.py loaded")
