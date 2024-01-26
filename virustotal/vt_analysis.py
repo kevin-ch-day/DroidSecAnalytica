@@ -68,7 +68,8 @@ def apk_analysis():
         print("Invalid APK file path.")
 
 def hash_analysis():
-    hash_value = user_prompts.user_enter_hash_ioc()
+    #hash_value = user_prompts.user_enter_hash_ioc()
+    hash_value = '4593635ba742e49a64293338a383f482f0f1925871157b5c4b1222e79909e838'
     try:
         result = vt_requests.query_hash(hash_value)
         if result:

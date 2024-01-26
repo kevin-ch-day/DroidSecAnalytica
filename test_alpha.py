@@ -1,11 +1,12 @@
 import sys
 
 from virustotal import vt_analysis
+
 from utils import logging_utils
 
 if __name__ == "__main__":
     try:
-        vt_analysis.virustotal_menu()
+        vt_analysis.hash_analysis()
 
     except KeyboardInterrupt:
         logging_utils.log_info("Program interrupted by the user. Exiting...")

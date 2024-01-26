@@ -14,14 +14,15 @@ class AndroguardADT:
         self.services = []
         self.libraries = []
         self.certificate = {}
-        self.intent_filters = IntentFilterADT() 
+        self.intent_filters = IntentFilterADT.IntentFilterADT() 
         self.permissions = []  # PermissionADT objects
 
     # Add a permission object to the permissions list
     def add_permission(self, permission_data):
-        if not isinstance(permission_data, PermissionADT):
+        if not isinstance(permission_data, PermissionADT.PermissionADT):
             raise TypeError("permission_data must be an instance of PermissionADT")
         self.permissions.append(permission_data)
+
 
     # Return the list of permissions
     def get_permissions(self):

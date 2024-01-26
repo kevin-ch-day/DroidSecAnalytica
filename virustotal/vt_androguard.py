@@ -1,9 +1,25 @@
 # vt_androguard.py
 
-from . import vt_utils
-from adt.AndroguardADT import AndroguardADT
-from adt.PermissionADT import PermissionADT
+from . import vt_utils, AndroguardADT, PermissionADT
 from utils import logging_utils
+
+def parse_androguard_data(attributes):
+    try:
+        data = attributes.get('androguard', None)
+        if not data:
+            return None
+
+        androguard_data = AndroguardADT.AndroguardADT()
+        parse_basic_data(androguard_data, data)
+        parse_permissions(androguard_data, data)
+        parse_certificate_data(androguard_data, data)
+        parse_intent_filters(androguard_data, data)
+        return androguard_data
+
+    except Exception as e:
+        # Handle the exception here (e.g., print an error message or log it)
+        logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
+        return None
 
 def display_androguard_data(attributes):
     try:
@@ -70,43 +86,27 @@ def display_permissions(permissions):
     except Exception as e:
         logging_utils.log_error(f"Error processing permissions: {str(e)}")
 
-def parse_androguard_data(attributes):
+def parse_basic_data(androguard_data, data):
     try:
-        data = attributes.get('androguard', None)
-        if not data:
-            return None
+        for key, setter_function in [
+            ('main_activity', androguard_data.set_main_activity),
+            ('Package', androguard_data.set_package),
+            ('TargetSdkVersion', androguard_data.set_target_sdk_version)]:
+            vt_utils.set_data_if_key_exists(key, setter_function, data)
 
-        # Check if 'AndroguardADT' is mistakenly used as a callable object
-        if callable(AndroguardADT):
-            raise ValueError("Error: 'AndroguardADT' is incorrectly used as a callable object. Check your import statements.")
-
-        androguard_data = AndroguardADT()
-        parse_basic_data(androguard_data, data)
-        parse_permissions(androguard_data, data)
-        parse_certificate_data(androguard_data, data)
-        parse_intent_filters(androguard_data, data)
-        return androguard_data
+        for key, add_function in [
+            ('Activities', androguard_data.add_activity),
+            ('Receivers', androguard_data.add_receiver),
+            ('Providers', androguard_data.add_provider),
+            #('Services', androguard_data.add_service),
+            ('Libraries', androguard_data.add_library)]:
+            if key in data:
+                add_function(data[key])
 
     except Exception as e:
         # Handle the exception here (e.g., print an error message or log it)
         logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
-        return None
 
-
-def parse_basic_data(androguard_data, data):
-    for key, setter_function in [
-        ('main_activity', androguard_data.set_main_activity),
-        ('Package', androguard_data.set_package),
-        ('TargetSdkVersion', androguard_data.set_target_sdk_version)]:
-        vt_utils.set_data_if_key_exists(key, setter_function, data)
-
-    for key, add_function in [
-        ('Activities', androguard_data.add_activity),
-        ('Receivers', androguard_data.add_receiver),
-        ('Providers', androguard_data.add_provider),
-        ('Services', androguard_data.add_service),
-        ('Libraries', androguard_data.add_library)]:
-        vt_utils.add_items_to_list_if_key_exists(key, add_function, data)
 
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:
@@ -216,6 +216,3 @@ def parse_certificate(certificate_data):
     parsed_info['validfrom'] = certificate_data.get('validfrom', 'N/A')
     
     return parsed_info
-
-# Debugging: Add print statements to track function calls
-print("Debugging: vt_androguard.py loaded")
