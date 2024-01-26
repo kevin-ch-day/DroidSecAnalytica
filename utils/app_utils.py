@@ -4,6 +4,7 @@ import time
 import datetime
 import platform
 import ctypes
+import ctypes.wintypes
 import subprocess
 import requests
 

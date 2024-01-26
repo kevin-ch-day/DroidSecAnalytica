@@ -1,7 +1,8 @@
 # vt_androguard.py
 
 import json
-from adt import AndroguardADT,  PermissionADT
+from . import vt_utils, AndroguardADT, PermissionADT
+from utils import logging_utils
 
 def display_androguard_data(attributes):
     androguard_data = parse_androguard_data(attributes)
@@ -16,38 +17,31 @@ def display_androguard_data(attributes):
         display_permissions(androguard_data.get_permissions())
         display_intent_filters(androguard_data)
     else:
-        print("Error: no androguard data found.")
+        logging_utils.log_error("Error: no androguard data found.")
 
 def display_sections(androguard_data):
     sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
     for section in sections:
         items = getattr(androguard_data, f'get_{section.lower()}')()
-        display_list(section, items)
-
-def display_list(title, items):
-    print(f"\n-- {title} --")
-    if items:
-        for item in items:
-            print(f"  {item}")
-    else:
-        print("  None found")
+        vt_utils.display_list(section, items)
 
 def display_certificate_details(androguard_data):
+    if not androguard_data or not hasattr(androguard_data, 'get_certificate_data'):
+        logging_utils.log_error("Invalid or no androguard data provided for certificate details.")
+        return
+
     print("\n-- Certificate Details --")
     certificate_data = androguard_data.get_certificate_data()
     if not certificate_data:
         print("  No certificate data available.")
         return
-
-    for key, value in certificate_data.items():
-        if isinstance(value, dict):
-            print(f"\n{key}:")
-            for subkey, subvalue in value.items():
-                print(f"  {subkey}: {subvalue}")
-        else:
-            print(f"{key}: {value}")
+    vt_utils.display_dict(certificate_data.items())
 
 def display_permissions(permissions):
+    if not permissions:
+        logging_utils.log_warning("No permissions data provided to display.")
+        return
+
     print("\nPermissions:")
     max_name_width = 50  # Maximum width for permission names
     max_type_width = 20  # Maximum width for permission types
@@ -58,30 +52,9 @@ def display_permissions(permissions):
 
     if permissions:
         for perm in permissions:
-            # Truncate the permission name and type if they are too long
             display_name = (perm.name[:max_name_width - 3] + '...') if len(perm.name) > max_name_width else perm.name
             display_type = (perm.permission_type[:max_type_width - 3] + '...') if len(perm.permission_type) > max_type_width else perm.permission_type
             print(f"{display_name.ljust(max_name_width)}{display_type.ljust(max_type_width)}{perm.short_desc}")
-    else:
-        print("  None found")
-
-def display_list(title, items):
-    print(f"\n{title}:")
-    if items:
-        for item in items:
-            print(f"  {item}")
-    else:
-        print("  None found")
-
-def display_dict(data):
-    if data:
-        for k, v in data.items():
-            if isinstance(v, dict):
-                print(f"  {k}:")
-                for sub_key, sub_val in v.items():
-                    print(f"    {sub_key}: {sub_val}")
-            else:
-                print(f"  {k}: {v}")
     else:
         print("  None found")
 
@@ -106,7 +79,7 @@ def parse_basic_data(androguard_data, data):
         ('main_activity', androguard_data.set_main_activity),
         ('Package', androguard_data.set_package),
         ('TargetSdkVersion', androguard_data.set_target_sdk_version)]:
-        set_data_if_key_exists(key, setter_function, data)
+        vt_utils.set_data_if_key_exists(key, setter_function, data)
 
     for key, add_function in [
         ('Activities', androguard_data.add_activity),
@@ -114,7 +87,7 @@ def parse_basic_data(androguard_data, data):
         ('Providers', androguard_data.add_provider),
         ('Services', androguard_data.add_service),
         ('Libraries', androguard_data.add_library)]:
-        add_items_to_list_if_key_exists(key, add_function, data)
+        vt_utils.add_items_to_list_if_key_exists(key, add_function, data)
 
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:
@@ -124,13 +97,12 @@ def parse_permissions(androguard_data, data):
             androguard_data.add_permission(p)
 
 def parse_intent_filters(androguard_data, data):
-    # Validate the input data
-    if not data or 'intent_filters' not in data:
-        print("No intent filter data found.")
+    if not androguard_data or not hasattr(androguard_data, 'add_intent_filter'):
+        logging_utils.log_error("Invalid or no androguard data provided for intent filters.")
         return
 
-    if androguard_data and not hasattr(androguard_data, 'add_intent_filter'):
-        print("Error: androguard_data does not support adding intent filters.")
+    if 'intent_filters' not in data:
+        logging_utils.log_warning("No intent filter data found in the provided data.")
         return
 
     for entity_type, entities in data['intent_filters'].items():
@@ -145,7 +117,7 @@ def display_intent_filters(androguard_data):
     print("\nIntent Filters:")
 
     if not androguard_data or not hasattr(androguard_data, 'get_all_intent_filters'):
-        print("Invalid or no data provided.")
+        logging_utils.log_error("Invalid or no data provided.")
         return
 
     intent_filters = androguard_data.get_all_intent_filters()
@@ -179,7 +151,6 @@ def print_intent_filters_summary(intent_filters):
     print(f"Total Actions  : {total_actions}")
     print(f"Total Categories: {total_categories}")
 
-    # Additional breakdown by entity type
     for entity_type, entities in intent_filters.items():
         entity_count = len(entities)
         action_count = sum(len(filters.get('action', [])) for filters in entities.values())
@@ -195,15 +166,6 @@ def parse_certificate_data(androguard_data, data):
         cert_data = parse_certificate(data['certificate'])
         androguard_data.set_certificate_data(cert_data)
 
-def set_data_if_key_exists(key, setter_function, data):
-    if key in data:
-        setter_function(data[key])
-
-def add_items_to_list_if_key_exists(key, add_function, data):
-    if key in data:
-        for item in data[key]:
-            add_function(item)
-
 def parse_permission_details(permission_details):
     parsed_data = []
     for permission, details in permission_details.items():
@@ -215,7 +177,6 @@ def parse_permission_details(permission_details):
 
 def parse_certificate(certificate_data):
     parsed_info = {}
-    
     subject_info = certificate_data.get('Subject', {})
     parsed_info['Subject'] = {
         'DN': subject_info.get('DN', 'N/A'),

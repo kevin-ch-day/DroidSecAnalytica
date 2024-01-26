@@ -7,6 +7,7 @@ def user_menu_choice(prompt, valid_choices):
     while True:
         try:
             choice = input(prompt).strip()
+            
             # Check if the user's choice is in the list of valid choices
             if choice in valid_choices:
                 return choice
@@ -18,18 +19,28 @@ def user_menu_choice(prompt, valid_choices):
 
 # Prompt user to enter a valid file path for an APK and validate it
 def user_enter_apk_path():
+    cnt = 0
     while True:
+        cnt += 1
         user_data = input("Enter the path to the APK file: ").strip()
+
         # Validate that the path is not empty, exists, and is a file
         if user_data and os.path.exists(user_data) and os.path.isfile(user_data):
             return user_data
         else:
             print("Invalid path or file. Please enter a valid path.")
 
+        if cnt == 3:
+            print("Returning to menu")
+            return False
+
 # Prompt user to enter a hash Indicator of Compromise (IOC) and validate it
 def user_enter_hash_ioc():
+    cnt = 0
     while True:
+        cnt += 1
         user_data = input("Enter the hash IOC: ").strip()
+
         # Validate if the input is a non-empty hexadecimal string of common hash lengths
         if user_data:
             if all(c in '0123456789abcdefABCDEF' for c in user_data):
@@ -41,6 +52,10 @@ def user_enter_hash_ioc():
                 print("Invalid hash. Hashes should contain hexadecimal characters only.")
         else:
             print("Please enter a valid hash.")
+
+        if cnt == 3:
+            print("Returning to menu")
+            return False
 
 # Prompt user for a yes/no confirmation
 def user_for_confirmation(prompt):

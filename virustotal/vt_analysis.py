@@ -1,6 +1,6 @@
 import os
 
-from . import vt_requests, vt_response_handler, vt_utils
+from . import vt_requests, vt_utils, vt_response_parser
 from utils import user_prompts, app_display
 
 def display_menu():
@@ -57,10 +57,11 @@ def apk_analysis():
         try:
             result = vt_requests.query_apk(apk_file_path)
             if result:
-                vt_response_handler.save_json_response(result, "output/apk_analysis.json")
-                vt_response_handler.parse_response(result)
+                vt_response_parser.save_json_response(result, "output/apk_analysis.json")
+                vt_response_parser.parse_response(result)
             else:
                 print("Error in processing the APK file request.")
+                
         except Exception as e:
             print(f"An error occurred during APK analysis: {e}")
     else:
@@ -71,10 +72,11 @@ def hash_analysis():
     try:
         result = vt_requests.query_hash(hash_value)
         if result:
-            vt_response_handler.save_json_response(result, "output/hash_analysis.json")
-            vt_response_handler.parse_response(result)
+            vt_response_parser.save_json_response(result, "output/hash_analysis.json")
+            vt_response_parser.parse_response(result)
         else:
             print("Error in processing the hash.")
+
     except Exception as e:
         print(f"An error occurred during hash analysis: {e}")
 

@@ -55,7 +55,7 @@ def main():
             user_prompts.pause_until_keypress()
 
         except Exception as e:
-            logging_utils.log_error(f"An error occurred: {e}", exc_info=True)
+            logging_utils.log_critical(f"An error occurred: {e}", exc_info=True)
             print("An error occurred. Please check the logs for more details.")
 
 if __name__ == "__main__":
@@ -69,6 +69,6 @@ if __name__ == "__main__":
         print("\nProgram interrupted by the user. Exiting...")
 
     except Exception as e:
-        logging_utils.log_error(f"Critical error on startup: {e}", exc_info=True)
+        logging_utils.log_critical(f"Critical error on startup: {e}", exc_info=True)
         print("A critical error occurred on startup. Please check the logs for more details.")
         sys.exit(1)
