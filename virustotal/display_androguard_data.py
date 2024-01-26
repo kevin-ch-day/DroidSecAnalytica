@@ -1,20 +1,29 @@
 from utils import logging_utils
-from . import vt_utils
 
 def display_sections(androguard_data):
     try:
         sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-        print()
+        
+        is_data_present = False
+
         for section in sections:
             items = getattr(androguard_data, f'get_{section.lower()}')()
-            print(section)
-            for x in items:
-                for y in x:
-                    print(y)
-            print()
+            if items:
+                is_data_present = True
+                print(f"{section} ({len(items)} items):")
+                for item in items:
+                    print(item)
+                print()
+
+        if not is_data_present:
+            print("No data available in any section.")
+
+    except AttributeError as e:
+        print(f"Attribute Error: {str(e)} - Check if the method exists in androguard_data.")
     
     except Exception as e:
         logging_utils.log_error(f"Error processing sections: {str(e)}")
+
 
 def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")

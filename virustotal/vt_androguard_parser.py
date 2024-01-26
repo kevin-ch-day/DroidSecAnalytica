@@ -1,39 +1,52 @@
+import re
 from utils import logging_utils
 from . import vt_utils, PermissionADT
 
 def parse_basic_data(androguard_data, data):
+    if not androguard_data:
+        print("Error: androguard_data is None or invalid.")
+        return
+
     try:
-        for key, setter_function in [
+        # Setting basic data using setter functions
+        basic_data_settings = [
             ('main_activity', androguard_data.set_main_activity),
             ('Package', androguard_data.set_package),
-            ('TargetSdkVersion', androguard_data.set_target_sdk_version)]:
-            vt_utils.set_data_if_key_exists(key, setter_function, data)
+            ('TargetSdkVersion', androguard_data.set_target_sdk_version)
+        ]
 
-        for key, add_function in [
+        for key, setter_function in basic_data_settings:
+            if key in data and data[key] is not None:
+                print(f"Setting {key} to {data[key]}")
+                setter_function(data[key])
+            else:
+                print(f"Key '{key}' not found or is None in data.")
+
+        # Adding items to Androguard data
+        add_functions = [
             ('Activities', androguard_data.add_activity),
             ('Receivers', androguard_data.add_receiver),
             ('Providers', androguard_data.add_provider),
             ('Services', androguard_data.add_service),
-            ('Libraries', androguard_data.add_library)]:
-            if key in data:
-                add_function(data[key])
+            ('Libraries', androguard_data.add_library)
+        ]
 
-        # Special handling for intent filters
-        if 'IntentFilters' in data:
-            for entity_type, entity_data in data['IntentFilters'].items():
-                for entity, filters in entity_data.items():
-                    for filter_data in filters:
-                        action = filter_data.get('Action', '')
-                        category = filter_data.get('Category', '')
-                        androguard_data.add_intent_filter(entity_type, entity, action, category)
-                        print(f"Added IntentFilter - Entity Type: {entity_type}, Entity: {entity}, Action: {action}, Category: {category}")
+        for key, add_function in add_functions:
+            if key in data:
+                if isinstance(data[key], list):
+                    for item in data[key]:
+                        if item:
+                            add_function(item)
+                        else:
+                            print(f"Found empty item in {key}. Skipping.")
+                else:
+                    print(f"Data for {key} is not in list format.")
+            else:
+                print(f"Key '{key}' not found in data.")
 
     except Exception as e:
-        # Handle the exception here (e.g., print an error message or log it)
         print(f"Error parsing Androguard data: {str(e)}")
-        logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
 
-import re
 
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:
