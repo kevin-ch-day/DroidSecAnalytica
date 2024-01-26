@@ -4,7 +4,7 @@ from tabulate import tabulate
 from . import vt_androguard, vt_response_processor
 from utils import logging_utils
 
-def parse_response(response, debug=True):
+def parse_response(response, debug=False):
     if not response:
         logging_utils.log_error("Received an empty response.")
         return
