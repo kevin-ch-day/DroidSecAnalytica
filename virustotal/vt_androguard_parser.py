@@ -33,43 +33,40 @@ def parse_basic_data(androguard_data, data):
         print(f"Error parsing Androguard data: {str(e)}")
         logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
 
+import re
+
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:
         permission_data = parse_permission_details(data['permission_details'])
         for permission in permission_data:
-            p = PermissionADT.PermissionADT(*permission)
-            androguard_data.add_permission(p)
+            permission_obj = PermissionADT.PermissionADT(*permission)
+            
+            # Remove newline characters and replace multiple spaces with a single space
+            cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))
+            permission_obj.short_desc = cleaned_short_desc.strip()
+            androguard_data.add_permission(permission_obj)
 
 def parse_intent_filters(androguard_data, data):
-    try:
-        if not data or 'intent_filters' not in data:
-            print("No intent filter data found.")
-            return
+    if 'intent_filters' not in data:
+        print("No 'intent_filters' key found in the data.")
+        return
 
-        if not androguard_data:
-            print("Error: androguard_data is not provided.")
-            return
+    for filter_type, components in data['intent_filters'].items():
+        if filter_type not in androguard_data.intent_filters.valid_entity_types:
+            print(f"Invalid filter type: {filter_type}")
+            continue
 
-        if not hasattr(androguard_data, 'add_intent_filter'):
-            print("Error: androguard_data does not support adding intent filters.")
-            return
+        print(f"\n{filter_type}")  # Print the filter type heading
+        for component, filters in components.items():
+            # Extract actions and categories
+            action = filters.get('action', []) if isinstance(filters.get('action'), list) else []
+            category = filters.get('category', []) if isinstance(filters.get('category'), list) else []
 
-        for entity_type, entities in data['intent_filters'].items():
-            for entity, filters in entities.items():
-                action = filters.get('action', [])
-                category = filters.get('category', [])
-                
-                # Check if the entity type is valid (e.g., 'Services')
-                if entity_type not in ['Services', 'OtherValidEntityTypes']:
-                    print(f"Warning: Invalid entity type '{entity_type}' in intent filter data.")
-                    continue
-                
-                # Add the intent filter to androguard_data
-                androguard_data.add_intent_filter(entity_type, entity, action, category)
+            # Store the results in androguard_data
+            androguard_data.add_intent_filter(filter_type, component, action, category)
 
-    except Exception as e:
-        # Handle the exception here (e.g., print an error message or log it)
-        print(f"Error parsing intent filters: {str(e)}")
+            # Print the intent filters
+            #print_intent_filters(component, action, category)
 
 def parse_certificate_data(androguard_data, data):
     if 'certificate' in data:

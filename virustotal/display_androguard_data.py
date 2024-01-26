@@ -16,6 +16,12 @@ def display_sections(androguard_data):
     except Exception as e:
         logging_utils.log_error(f"Error processing sections: {str(e)}")
 
+def display_main_activity(androguard_data):
+    print("\n-- Main Analysis --")
+    print(f"Main Activity: {androguard_data.get_main_activity()}")
+    print(f"Package: {androguard_data.get_package()}")
+    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
+
 def display_certificate_details(androguard_data):
     try:
         print("\n-- Certificate Details --")
@@ -46,10 +52,27 @@ def display_permissions(permissions):
             logging_utils.log_warning("No permissions data provided to display.")
             return
 
-        for perm in permissions:
-            print(f"{perm.name}")
-            print(f"{perm.permission_type}")
-            print(f"{perm.short_desc}\n")
+        # Sort permissions by name
+        sorted_permissions = sorted(permissions, key=lambda perm: perm.name)
+
+        # Determine dynamic column widths based on maximum data length
+        max_name_width = max(len("Permission Name"), max(len(perm.name) for perm in sorted_permissions)) + 2
+        max_type_width = max(len("Permission Type"), max(len(perm.permission_type) for perm in sorted_permissions)) + 2
+        max_desc_width = max(len("Description"), max(len(perm.short_desc) for perm in sorted_permissions)) + 2
+
+        # Create header with column labels
+        header = f"Permission Name".ljust(max_name_width) + f"Permission Type".ljust(max_type_width) + f"Description".ljust(max_desc_width)
+        print(header)
+        print("-" * len(header))  # Print a separator line
+
+        for perm in sorted_permissions:
+            # Format and print permission details in a tabular format
+            permission_name = perm.name[:max_name_width - 1].ljust(max_name_width)
+            permission_type = perm.permission_type[:max_type_width - 1].ljust(max_type_width)
+            permission_desc = perm.short_desc[:max_desc_width - 1].ljust(max_desc_width)
+
+            # Add line separator after each permission for better readability
+            print(f"{permission_name}{permission_type}{permission_desc}")
 
     except Exception as e:
         logging_utils.log_error(f"Error processing permissions: {str(e)}")
@@ -97,13 +120,22 @@ def print_intent_filters_summary(intent_filters):
         action_count = sum(len(filters.get('action', [])) for filters in entities.values())
         category_count = sum(len(filters.get('category', [])) for filters in entities.values())
 
-        print(f"\n{entity_type} Breakdown:")
-        print(f"  Entities: {entity_count} ({entity_count / total_entities * 100:.2f}%)")
-        print(f"  Actions: {action_count} ({action_count / total_actions * 100:.2f}%)")
-        print(f"  Categories: {category_count} ({category_count / total_categories * 100:.2f}%)")
+        if total_entities > 0:
+            entity_percentage = entity_count / total_entities * 100
+        else:
+            entity_percentage = 0
 
-def display_main_activity(androguard_data):
-    print("\n-- Main Analysis --")
-    print(f"Main Activity: {androguard_data.get_main_activity()}")
-    print(f"Package: {androguard_data.get_package()}")
-    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
+        if total_actions > 0:
+            action_percentage = action_count / total_actions * 100
+        else:
+            action_percentage = 0
+
+        if total_categories > 0:
+            category_percentage = category_count / total_categories * 100
+        else:
+            category_percentage = 0
+
+        print(f"\n{entity_type} Breakdown:")
+        print(f"  Entities: {entity_count} ({entity_percentage:.2f}%)")
+        print(f"  Actions: {action_count} ({action_percentage:.2f}%)")
+        print(f"  Categories: {category_count} ({category_percentage:.2f}%)")

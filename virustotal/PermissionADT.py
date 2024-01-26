@@ -27,7 +27,7 @@ class PermissionADT:
 
     @short_desc.setter
     def short_desc(self, value: str):
-        # Sets a new short description for the permission
+        # Sets a new short description for the permission, removing newline characters
         if not isinstance(value, str):
             raise ValueError("Short description must be a string")
         self._short_desc = value
@@ -58,7 +58,7 @@ class PermissionADT:
 
     def __str__(self) -> str:
         # String representation of the PermissionADT object
-        return f"PermissionADT(Name: {self._name}, Type: {self._permission_type})"
+        return f"PermissionADT(Name: {self._name}, Type: {self._permission_type}, Desc: {self._short_desc})"
 
     def __eq__(self, other) -> bool:
         # Equality comparison for PermissionADT objects

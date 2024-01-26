@@ -110,12 +110,15 @@ class AndroguardADT:
     def get_certificate_data(self):
         return self.certificate
 
+    # Add an intent filter
     def add_intent_filter(self, entity_type, entity, action, category):
         self.intent_filters.add_intent_filter(entity_type, entity, action, category)
 
+    # Get an intent filter for a specific entity
     def get_intent_filter(self, entity_type, entity):
         return self.intent_filters.get_intent_filter(entity_type, entity)
 
+    # Get all intent filters
     def get_all_intent_filters(self):
         return self.intent_filters.get_all_intent_filters()
 
