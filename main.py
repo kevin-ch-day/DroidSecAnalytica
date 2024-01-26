@@ -3,7 +3,8 @@ import sys
 import logging
 
 # Import custom libraries
-from static_analysis import static_analysis, vt_analysis
+from static_analysis import static_analysis
+from virustotal import vt_analysis
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
 from utils import app_display, user_prompts
@@ -39,17 +40,16 @@ def main():
                 dynamic_analysis.dynamic_menu()
             
             elif choice == '3':
-                reporting.report_menu()
+                vt_analysis.virustotal_menu()
             
             elif choice == '4':
-                vt_analysis.virustotal_menu()
+                reporting.report_menu()
             
             elif choice == '5':
                 DBMenu.database_menu()
             
             elif choice == '0':
-                logging_utils.log_info("Exiting the program.")
-                print("Exiting. Goodbye!\n")
+                print("\nExiting. Goodbye!\n")
                 break
 
             user_prompts.pause_until_keypress()

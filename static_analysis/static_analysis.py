@@ -4,7 +4,7 @@ import platform
 from typing import Optional
 
 from utils import app_utils, app_display, user_prompts, logging_utils, hash_utils
-from . import manifest_analysis, permission_analyzer,vt_analysis
+from . import manifest_analysis, permission_analyzer
 from database import DBTableManagement, DBHashRecords
 
 # Constants for file paths

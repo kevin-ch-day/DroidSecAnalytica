@@ -58,9 +58,9 @@ def test_connection():
     try:
         with database_connection() as conn:
             if conn.is_connected():
-                logging_utils.log_info("Database connection successful.")
+                print("Database connection successful.")
     except mysql.connector.Error as e:
-        logging_utils.log_error("Database connection failed", e)
+        print("Database connection failed")
 
 def empty_table(table_name):
     try:
