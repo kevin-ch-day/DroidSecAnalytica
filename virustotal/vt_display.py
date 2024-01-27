@@ -146,3 +146,25 @@ def intent_filters_summary(intent_filters):
         print(f"  Entities: {entity_count} ({entity_percentage:.2f}%)")
         print(f"  Actions: {action_count} ({action_percentage:.2f}%)")
         print(f"  Categories: {category_count} ({category_percentage:.2f}%)")
+
+def view_summary_statistics(report_data):
+    if "Analysis Result" in report_data:
+        summary_statistics = report_data["Analysis Result"].get("summary_statistics", {})
+        print("\nSummary Statistics:")
+        for key, value in summary_statistics.items():
+            print(f"{key}:".ljust(25), value)
+    else:
+        print("Summary statistics not available.")
+
+def view_detection_breakdown(report_data):
+    if "Analysis Result" in report_data:
+        detection_breakdown = report_data["Analysis Result"].get("engine_detection", [])
+        if detection_breakdown:
+            print("\nDetection Breakdown:")
+            for item in detection_breakdown:
+                engine_name, detection_label = item[0], item[1]
+                print(f"{engine_name.ljust(30)}: {detection_label}")
+        else:
+            print("Detection breakdown not available.")
+    else:
+        print("Detection breakdown not available.")

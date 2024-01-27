@@ -2,7 +2,7 @@ from . import vt_response
 from . import vt_utils
 from . import vt_database_analysis
 from . import vt_androguard
-from . import vt_androguard_display
+from . import vt_display
 from utils import user_prompts, app_display
 
 def display_menu(menu_title, menu_options):
@@ -43,12 +43,13 @@ def virustotal_menu():
 
 def handle_sample_submission():
     while True:
-        print("\nSubmit a sample to VirusTotal")
-        print("1. Submit APK File")
-        print("2. Submit Hash IOC")
-        print("0. Return")
-
-        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
+        menu_title = "Submit a sample to VirusTotal"
+        menu_options = {
+            1: "Submit APK File",
+            2: "Submit Hash IOC"
+        }
+        display_menu(menu_title, menu_options)
+        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
 
         if choice == '0':
             return
@@ -69,15 +70,17 @@ def handle_response_data(response):
     report_data = vt_response.generate_report(response)
 
     while True:
-        print("\nData Results")
-        print("1. Display results")
-        print("2. Write results to file")
-        print("3. Display Androguard data")
-        print("4. View summary statistics")
-        print("5. View detection breakdown")
-        print("0. Return")
+        menu_title = "Data Results"
+        menu_options = {
+            1: "Display results",
+            2: "Write results to file",
+            3: "Display Androguard data",
+            4: "View summary statistics",
+            5: "View detection breakdown"
+        }
+        display_menu(menu_title, menu_options)
 
-        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
+        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
         if choice == "0":
             return
@@ -89,59 +92,39 @@ def handle_response_data(response):
         elif choice == "3":
             display_androguard_data(response)
         elif choice == "4":
-            view_summary_statistics(report_data)
+            vt_display.view_summary_statistics(report_data)
         elif choice == "5":
-            view_detection_breakdown(report_data)
+            vt_display.view_detection_breakdown(report_data)
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")
-
-def view_summary_statistics(report_data):
-    if "Analysis Result" in report_data:
-        summary_statistics = report_data["Analysis Result"].get("summary_statistics", {})
-        print("\nSummary Statistics:")
-        for key, value in summary_statistics.items():
-            print(f"{key}:".ljust(25), value)
-    else:
-        print("Summary statistics not available.")
-
-def view_detection_breakdown(report_data):
-    if "Analysis Result" in report_data:
-        detection_breakdown = report_data["Analysis Result"].get("engine_detection", [])
-        if detection_breakdown:
-            print("\nDetection Breakdown:")
-            for item in detection_breakdown:
-                engine_name, detection_label = item[0], item[1]
-                print(f"{engine_name.ljust(30)}: {detection_label}")
-        else:
-            print("Detection breakdown not available.")
-    else:
-        print("Detection breakdown not available.")
 
 def display_androguard_data(response):
     androguard = vt_androguard.androguard_data(response)
     if androguard:
         while True:
-            print("\nAndroguard Data")
-            print("1. Display Main Activity and Package Info")
-            print("2. Display Manifest Components")
-            print("3. Display Certificate Details")
-            print("4. Display Permissions")
-            print("5. Display Intent Filters")
-            print("0. Return to Sample Submission")
+            menu_title = "Androguard Data"
+            menu_options = {
+                1: "Main Activity and Package Info",
+                2: "Manifest Components",
+                3: "Certificate Details",
+                4: "Permissions",
+                5: "Intent Filters"
+            }
+            display_menu(menu_title, menu_options)
 
-            choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
+            choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
             if choice == "0":
                 break
             elif choice == "1":
-                vt_androguard_display.display_main_activity(androguard)
+                vt_display.display_main_activity(androguard)
             elif choice == "2":
-                vt_androguard_display.display_manifest_components(androguard)
+                vt_display.display_manifest_components(androguard)
             elif choice == "3":
-                vt_androguard_display.display_certificate_details(androguard)
+                vt_display.display_certificate_details(androguard)
             elif choice == "4":
-                vt_androguard_display.display_permissions(androguard)
+                vt_display.display_permissions(androguard)
             elif choice == "5":
-                vt_androguard_display.display_intent_filters(androguard)
+                vt_display.display_intent_filters(androguard)
             else:
                 print("Invalid choice.")
