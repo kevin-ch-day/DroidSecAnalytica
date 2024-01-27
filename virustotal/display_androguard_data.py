@@ -28,7 +28,7 @@ def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")
     print(f"Main Activity: {androguard_data.get_main_activity()}")
     print(f"Package: {androguard_data.get_package()}")
-    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}")
+    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}\n")
 
 def display_certificate_details(androguard_data):
     try:

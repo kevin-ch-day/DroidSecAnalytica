@@ -15,12 +15,8 @@ def parse_basic_data(androguard_data, data):
 
         for key, setter_function in basic_data_settings:
             if key in data and data[key] is not None:
-                print(f"Setting {key} to {data[key]}")
                 setter_function(data[key])
-            else:
-                print(f"Key '{key}' not found or is None in data.")
 
-        # Adding items to Androguard data
         add_functions = [
             ('Activities', androguard_data.add_activity),
             ('Receivers', androguard_data.add_receiver),
@@ -54,7 +50,7 @@ def parse_permissions(androguard_data, data):
             permission_type = permission_type.title()
 
             # Create a PermissionADT object
-            permission_obj = PermissionADT(permission, short_description, full_description, permission_type)
+            permission_obj = PermissionADT.PermissionADT(permission, short_description, full_description, permission_type)
 
             # Clean short description
             cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))
