@@ -1,5 +1,5 @@
 import os
-from . import vt_requests, vt_response, vt_utils
+from . import vt_requests, vt_response, vt_utils, vt_database_analysis
 from utils import user_prompts, app_display
 
 def display_menu():
@@ -21,7 +21,7 @@ def virustotal_menu():
         elif user_choice == '1':
             handle_sample_submission()
         elif user_choice == '2':
-            vt_response.run_analysis()
+            vt_database_analysis.run_analysis()
         elif user_choice == '3':
             print("Check Virustotal API Key")
         elif user_choice == '4':

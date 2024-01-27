@@ -1,6 +1,4 @@
 from utils import logging_utils
-from database import DBFunctions
-from . import vt_requests
 
 def analyze_response(response):
     try:
@@ -23,10 +21,10 @@ def analyze_response(response):
             }
 
         # Adding additional analysis
-        analysis_result['historical_analysis'] = perform_historical_analysis(attributes)
-        analysis_result['behavior_analysis'] = perform_behavior_analysis(attributes)
-        analysis_result['network_traffic_analysis'] = perform_network_traffic_analysis(attributes)
-        analysis_result['detection_breakdown'] = perform_detailed_detection_breakdown(attributes)
+        analysis_result['historical_analysis'] = parse_historical_analysis(attributes)
+        analysis_result['behavior_analysis'] = parse_behavior_analysis(attributes)
+        analysis_result['network_traffic_analysis'] = parse_network_traffic(attributes)
+        analysis_result['detection_breakdown'] = parse_engine_detection(attributes)
 
         return analysis_result
 
@@ -34,7 +32,7 @@ def analyze_response(response):
         logging_utils.log_error(f"Error in analyze_virus_total_response: {e}")
         return None
 
-def perform_historical_analysis(attributes):
+def parse_historical_analysis(attributes):
     historical_analysis = {}
     if 'first_seen' in attributes or 'last_seen' in attributes or 'detection_history' in attributes:
         historical_analysis['first_seen'] = attributes.get('first_seen', 'N/A')
@@ -42,7 +40,7 @@ def perform_historical_analysis(attributes):
         historical_analysis['detection_history'] = attributes.get('detection_history', [])
     return historical_analysis
 
-def perform_behavior_analysis(attributes):
+def parse_behavior_analysis(attributes):
     behaviors = attributes.get('behaviours', [])
     behavior_analysis = []
     for behavior in behaviors:
@@ -54,7 +52,7 @@ def perform_behavior_analysis(attributes):
         })
     return behavior_analysis
 
-def perform_network_traffic_analysis(attributes):
+def parse_network_traffic(attributes):
     network_traffic = attributes.get('network_traffic', [])
     network_analysis = []
     for entry in network_traffic:
@@ -67,7 +65,7 @@ def perform_network_traffic_analysis(attributes):
         })
     return network_analysis
 
-def perform_detailed_detection_breakdown(attributes, table_format="fancy_grid"):
+def parse_engine_detection(attributes, table_format="fancy_grid"):
     detailed_breakdown = []
     if 'last_analysis_results' in attributes:
         sorted_results = sorted(attributes['last_analysis_results'].items(), key=lambda engine_data: engine_data[0])
@@ -76,18 +74,3 @@ def perform_detailed_detection_breakdown(attributes, table_format="fancy_grid"):
             if result:
                 detailed_breakdown.append([engine, result])
     return detailed_breakdown
-
-def run_analysis():
-    apk_sample_records = DBFunctions.get_apk_samples()
-    malware_hash_samples = DBFunctions.get_malware_hash_samples()
-
-    for record in apk_sample_records:
-        # Using file_name as the hash key for VirusTotal analysis
-        hash_key = record['file_name']
-        result = vt_requests.query_hash(hash_key)
-        if result:
-            data = analyze_response(result)
-            md5 = data.get('md5')
-            sha1 = data.get('sha1')
-            sha256 = data.get('sha256')
-            vt_link = data.get('permalink')
