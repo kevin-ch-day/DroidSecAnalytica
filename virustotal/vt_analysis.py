@@ -1,21 +1,22 @@
 import os
 
-from . import vt_requests, vt_response, vt_utils
+from . import vt_requests, vt_response, vt_utils, vt_database_hash_analysis
 from utils import user_prompts, app_display
 
 def display_menu():
     print(app_display.format_menu_title("VirusTotal Analysis Menu"))
     print(app_display.format_menu_option(1, "APK Analysis"))
     print(app_display.format_menu_option(2, "Hash Analysis"))
-    print(app_display.format_menu_option(3, "Check Virustotal API Key"))
-    print(app_display.format_menu_option(4, "Check Virustotal.com"))
-    print(app_display.format_menu_option(5, "Check Internet Connection"))
+    print(app_display.format_menu_option(3, "Hash Analysis"))
+    print(app_display.format_menu_option(4, "Check Virustotal API Key"))
+    print(app_display.format_menu_option(5, "Check Virustotal.com"))
+    print(app_display.format_menu_option(6, "Check Internet Connection"))
     print(app_display.format_menu_option(0, "Return"))
 
 def virustotal_menu():
     while True:
         display_menu()
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])  # range updated to 6
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])  # range updated to 6
 
         # Return to static analysis menu
         if user_choice == '0':
@@ -33,13 +34,17 @@ def virustotal_menu():
         elif user_choice == '3':
             check_api_key()
 
-        # Check connection to virustotal.com
+        # Run analysis on database samples
         elif user_choice == '4':
+            vt_database_hash_analysis.run_analysis()
+
+        # Check connection to virustotal.com
+        elif user_choice == '5':
             print("Checking connection to Virustotal.com...")
             vt_utils.check_virustotal_access()
 
         # Check Internet connection
-        elif user_choice == '5':
+        elif user_choice == '6':
             print("Checking Internet connection...")
             vt_utils.check_ping()
 
@@ -71,6 +76,7 @@ def hash_analysis():
     #hash_value = user_prompts.user_enter_hash_ioc()
     hash_value = '4593635ba742e49a64293338a383f482f0f1925871157b5c4b1222e79909e838'
     try:
+        # Check if data already exists for this hash
         result = vt_requests.query_hash(hash_value)
         if result:
             #vt_response_parser.save_json_response(result, "output/hash_analysis.json")
@@ -82,4 +88,5 @@ def hash_analysis():
         print(f"An error occurred during hash analysis: {e}")
 
 def check_api_key():
+    
     vt_utils.handle_api_integration()

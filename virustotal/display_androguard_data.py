@@ -1,5 +1,11 @@
 from utils import logging_utils
 
+def display_main_activity(androguard_data):
+    print("\n-- Main Analysis --")
+    print(f"Main Activity: {androguard_data.get_main_activity()}")
+    print(f"Package: {androguard_data.get_package()}")
+    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}\n")
+
 def display_manifest_components(androguard_data):
     try:
         sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
@@ -21,12 +27,6 @@ def display_manifest_components(androguard_data):
     
     except Exception as e:
         logging_utils.log_error(f"Error processing sections: {str(e)}")
-
-def display_main_activity(androguard_data):
-    print("\n-- Main Analysis --")
-    print(f"Main Activity: {androguard_data.get_main_activity()}")
-    print(f"Package: {androguard_data.get_package()}")
-    print(f"Target SDK Version: {androguard_data.get_target_sdk_version()}\n")
 
 def display_certificate_details(androguard_data):
     try:
