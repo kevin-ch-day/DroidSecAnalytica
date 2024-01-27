@@ -44,9 +44,9 @@ def handle_sample_submission():
     if sample_choice == '0':
         return
     elif sample_choice == '1':
-        submit_and_display_results(submit_apk)
+        test_alpha(submit_apk)
     elif sample_choice == '2':
-        submit_and_display_results(submit_hash)
+        test_alpha(submit_hash)
     else:
         print("Invalid choice. Please try again.")
 
@@ -67,10 +67,19 @@ def submit_hash():
     except Exception as e:
         print(f"Error submitting the hash: {e}")
 
+def test_alpha(submit_function):
+    result = submit_function()
+    if result:
+        report_data = vt_response.generate_report(result)
+        vt_response.print_report(report_data)
+
+    else:
+        print("No data to analyze.")
+
 def submit_and_display_results(submit_function):
     result = submit_function()
     if result:
-        data = vt_response.analyze_response(result)
+        data = vt_response.generate_report(result)
         print("\nAnalysis Results:")
 
         # Displaying Summary Statistics
