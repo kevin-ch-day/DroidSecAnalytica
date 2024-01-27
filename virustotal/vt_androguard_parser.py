@@ -7,7 +7,6 @@ def parse_basic_data(androguard_data, data):
         return
 
     try:
-        # Setting basic data using setter functions
         basic_data_settings = [
             ('main_activity', androguard_data.set_main_activity),
             ('Package', androguard_data.set_package),
@@ -82,9 +81,6 @@ def parse_intent_filters(androguard_data, data):
 
             # Store the results in androguard_data
             androguard_data.add_intent_filter(filter_type, component, action, category)
-
-            # Print the intent filters
-            #print_intent_filters(component, action, category)
 
 def parse_certificate_data(androguard_data, data):
     if 'certificate' in data:

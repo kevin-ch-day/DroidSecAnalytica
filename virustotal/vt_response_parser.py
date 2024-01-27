@@ -1,11 +1,36 @@
-import json
-import os
 from tabulate import tabulate
 from utils import logging_utils
 
 from . import AndroguardADT
 from . import vt_androguard_parser
 from . import display_androguard_data
+
+def parse_response(response):
+    if 'data' not in response:
+        print("No 'data' key in response.")
+        return
+
+    data = response.get('data', {})
+    attributes = data.get('attributes', {})
+    if not attributes or not isinstance(attributes, dict):
+        print("No valid attributes found in the data.")
+        return
+    
+    try:
+        summary_statistics(attributes)
+        if androguard_data := parse_androguard_data(attributes):
+            display_androguard_data.display_main_activity(androguard_data)
+            display_androguard_data.display_manifest_components(androguard_data)
+            display_androguard_data.display_certificate_details(androguard_data)
+            display_androguard_data.display_permissions(androguard_data.get_permissions())
+            display_androguard_data.display_intent_filters(androguard_data)
+        historical_analysis(attributes)
+        behavior_analysis(attributes)
+        network_traffic_analysis(attributes)
+        detailed_detection_breakdown(attributes)
+        
+    except Exception as e:
+        logging_utils.log_error(f"Error processing response attributes: {e}")
 
 def parse_androguard_data(attributes):
     try:
@@ -23,81 +48,13 @@ def parse_androguard_data(attributes):
     except Exception as e:
         logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
         return None
-    
-def display_attributes(attributes):
-    try:
-        androguard_data = parse_androguard_data(attributes)
-        if androguard_data:
-            display_androguard_data.display_main_activity(androguard_data)
-            display_androguard_data.display_manifest_components(androguard_data)
-            display_androguard_data.display_certificate_details(androguard_data)
-            display_androguard_data.display_permissions(androguard_data.get_permissions())
-            display_androguard_data.display_intent_filters(androguard_data)
-        else:
-            logging_utils.log_error("Error: no androguard data found.")
-
-    except Exception as e:
-        logging_utils.log_error(f"Error processing response attributes: {str(e)}")
-
-def parse_response(response):
-    if 'data' not in response:
-        print("No 'data' key in response.")
-        return
-
-    data = response.get('data', {})
-    attributes = data.get('attributes', {})
-    if not attributes:
-        print("No attributes found in the data.")
-        return
-    
-    try:
-        summary_statistics(attributes)
-        display_attributes(attributes)
-        historical_analysis(attributes)
-        behavior_analysis(attributes)
-        network_traffic_analysis(attributes)
-        detailed_detection_breakdown(attributes)
-        
-    except Exception as e:
-        logging_utils.log_error(f"Error processing response attributes: {e}")
-
-def save_json_response(response, filename, overwrite=True):
-    if not isinstance(response, dict):
-        print("Error: Response must be a dictionary.")
-        return
-
-    try:
-        if os.path.exists(filename) and not overwrite:
-            print(f"File '{filename}' already exists. Use 'overwrite=True' to overwrite.")
-            return
-
-        with open(filename, 'w') as file:
-            json.dump(response, file, indent=4)
-        print(f"Response saved to '{filename}'")
-    except Exception as e:
-        print(f"Error saving response to file: {e}")
 
 def summary_statistics(attributes):
-    if not isinstance(attributes, dict):
-        print("Error: Attributes must be a dictionary.")
-        return
-
     if 'last_analysis_stats' in attributes:
         stats = attributes['last_analysis_stats']
         print("\nSummary Statistics:")
         for key, value in stats.items():
             print(f"  Total {key.capitalize()}: {value}")
-
-def display_hash_values(attributes):
-    if not isinstance(attributes, dict):
-        print("Error: Attributes must be a dictionary.")
-        return
-
-    print("\nHash Values:")
-    for hash_type in ['md5', 'sha1', 'sha256']:
-        hash_value = attributes.get(hash_type, 'N/A')
-        if hash_value != 'N/A':
-            print(f"{hash_type.upper()}: {hash_value}")
 
 def historical_analysis(attributes):
     if 'first_seen' in attributes or 'last_seen' in attributes or 'detection_history' in attributes:
@@ -133,10 +90,6 @@ def network_traffic_analysis(attributes):
             print(f"  Destination Port: {entry.get('dst_port', 'N/A')}")
 
 def detailed_detection_breakdown(attributes, table_format="fancy_grid"):
-    if not isinstance(attributes, dict):
-        print("Error: Attributes must be a dictionary.")
-        return
-
     if 'last_analysis_results' in attributes:
         print("\nDetailed Detection Breakdown:")
         headers = ["Engine", "Detected", "Result", "Engine Update"]

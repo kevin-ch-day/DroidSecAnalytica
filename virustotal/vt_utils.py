@@ -2,6 +2,8 @@ import requests
 import socket
 import subprocess
 import platform
+import json
+import os
 
 from utils import logging_utils
 
@@ -75,3 +77,19 @@ def add_items_to_list_if_key_exists(key, add_function, data):
     if key in data:
         for item in data[key]:
             add_function(item)
+
+def save_json_response(response, filename, overwrite=True):
+    if not isinstance(response, dict):
+        print("Error: Response must be a dictionary.")
+        return
+
+    try:
+        if os.path.exists(filename) and not overwrite:
+            print(f"File '{filename}' already exists. Use 'overwrite=True' to overwrite.")
+            return
+
+        with open(filename, 'w') as file:
+            json.dump(response, file, indent=4)
+        print(f"Response saved to '{filename}'")
+    except Exception as e:
+        print(f"Error saving response to file: {e}")
