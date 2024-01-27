@@ -46,7 +46,7 @@ def handle_sample_submission():
         print("\nSubmit a sample to VirusTotal")
         print("1. Submit APK File")
         print("2. Submit Hash IOC")
-        print("0. Return to Main Menu")
+        print("0. Return")
 
         choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
 

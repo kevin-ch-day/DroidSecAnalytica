@@ -22,7 +22,7 @@ def user_enter_apk_path():
     cnt = 0
     while True:
         cnt += 1
-        user_data = input("Enter the path to the APK file: ").strip()
+        user_data = input("\nEnter the path to the APK file: ").strip()
 
         # Validate that the path is not empty, exists, and is a file
         if user_data and os.path.exists(user_data) and os.path.isfile(user_data):
@@ -39,7 +39,7 @@ def user_enter_hash_ioc():
     cnt = 0
     while True:
         cnt += 1
-        user_data = input("Enter the hash IOC: ").strip()
+        user_data = input("\nEnter the hash IOC: ").strip()
 
         # Validate if the input is a non-empty hexadecimal string of common hash lengths
         if user_data:
