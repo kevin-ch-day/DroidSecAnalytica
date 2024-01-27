@@ -1,12 +1,43 @@
 import re
-from . import PermissionADT
+from . import AndroguardADT, PermissionADT
+from utils import logging_utils
 
-def parse_basic_data(androguard_data, data):
+def androguard_data(response):
+    try:
+        attributes = extract_attributes_from_response(response)
+        androguard_data = populate_androguard_data(attributes)
+
+        return androguard_data
+
+    except Exception as e:
+        logging_utils.log_error(f"Error in generate_androguard_data: {e}")
+        return None
+
+def extract_attributes_from_response(response):
+    data = response.get('data', {})
+    if not data:
+        raise ValueError("No 'data' key in response.")
+    return data.get('attributes', {})
+
+def populate_androguard_data(attributes):
+    json_data = attributes.get('androguard', None)
+    if not json_data:
+        return None
+
+    androguard = AndroguardADT.AndroguardADT()
+    populate_manifest_data(androguard, json_data)
+    populate_permissions(androguard, json_data)
+    populate_certificate_data(androguard, json_data)
+    populate_intent_filters(androguard, json_data)
+    return androguard
+
+def populate_manifest_data(androguard_data, data):
     if not androguard_data:
         print("Error: androguard_data is None or invalid.")
         return
 
     try:
+        # Setting basic manifest data
         basic_data_settings = [
             ('main_activity', androguard_data.set_main_activity),
             ('Package', androguard_data.set_package),
@@ -17,6 +48,7 @@ def parse_basic_data(androguard_data, data):
             if key in data and data[key] is not None:
                 setter_function(data[key])
 
+        # Adding manifest components like Activities, Receivers, etc.
         add_functions = [
             ('Activities', androguard_data.add_activity),
             ('Receivers', androguard_data.add_receiver),
@@ -26,16 +58,14 @@ def parse_basic_data(androguard_data, data):
         ]
 
         for key, add_function in add_functions:
-            if key in data:
-                if isinstance(data[key], list):
-                    for item in data[key]:
-                        if item:
-                            add_function(item)
+            for item in data.get(key, []):
+                if item:
+                    add_function(item)
 
     except Exception as e:
         print(f"Error parsing Androguard data: {str(e)}")
 
-def parse_permissions(androguard_data, data):
+def populate_permissions(androguard_data, data):
     if 'permission_details' in data:
         permission_details = data['permission_details']
 
@@ -59,26 +89,7 @@ def parse_permissions(androguard_data, data):
             # Add permission object to androguard_data
             androguard_data.add_permission(permission_obj)
 
-def parse_intent_filters(androguard_data, data):
-    if 'intent_filters' not in data:
-        print("No 'intent_filters' key found in the data.")
-        return
-
-    for filter_type, components in data['intent_filters'].items():
-        if filter_type not in androguard_data.intent_filters.valid_entity_types:
-            print(f"Invalid filter type: {filter_type}")
-            continue
-
-        print(f"\n{filter_type}")  # Print the filter type heading
-        for component, filters in components.items():
-            # Extract actions and categories
-            action = filters.get('action', []) if isinstance(filters.get('action'), list) else []
-            category = filters.get('category', []) if isinstance(filters.get('category'), list) else []
-
-            # Store the results in androguard_data
-            androguard_data.add_intent_filter(filter_type, component, action, category)
-
-def parse_certificate_data(androguard_data, data):
+def populate_certificate_data(androguard_data, data):
     if 'certificate' in data:
         certificate_data = data['certificate']
         parsed_info = {}
@@ -107,3 +118,22 @@ def parse_certificate_data(androguard_data, data):
         
         # Setting parsed certificate data
         androguard_data.set_certificate_data(parsed_info)
+
+def populate_intent_filters(androguard_data, data):
+    if 'intent_filters' not in data:
+        print("No 'intent_filters' key found in the data.")
+        return
+
+    for filter_type, components in data['intent_filters'].items():
+        if filter_type not in androguard_data.intent_filters.valid_entity_types:
+            print(f"Invalid filter type: {filter_type}")
+            continue
+
+        print(f"\n{filter_type}")  # Print the filter type heading
+        for component, filters in components.items():
+            # Extract actions and categories
+            action = filters.get('action', []) if isinstance(filters.get('action'), list) else []
+            category = filters.get('category', []) if isinstance(filters.get('category'), list) else []
+
+            # Store the results in androguard_data
+            androguard_data.add_intent_filter(filter_type, component, action, category)

@@ -1,5 +1,3 @@
-from typing import Dict
-from utils import logging_utils
 from . import DBConnectionManager as dbConnect
 
 def get_apk_samples():
