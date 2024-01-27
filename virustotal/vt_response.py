@@ -29,6 +29,7 @@ def parse_response(response):
             display_androguard_data.display_certificate_details(androguard_data)
             display_androguard_data.display_permissions(androguard_data.get_permissions())
             display_androguard_data.display_intent_filters(androguard_data)
+        
         historical_analysis(attributes)
         behavior_analysis(attributes)
         network_traffic_analysis(attributes)

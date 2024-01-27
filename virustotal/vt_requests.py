@@ -17,14 +17,19 @@ def query_hash(hash_value):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
         return response.json()
+    
     except requests.HTTPError as e:
         handle_api_error(e)
+    
     except requests.ConnectionError:
         print("Connection Error. Please check your network connection.")
+    
     except requests.Timeout:
         print("Request Timed Out.")
+    
     except requests.RequestException as e:
         print(f"Error occurred: {e}")
+    
     return None
 
 def query_apk(file_path):
@@ -36,7 +41,15 @@ def query_apk(file_path):
             response = requests.post(url, headers=headers, files=files)
             response.raise_for_status()
             return response.json()
+    
     except requests.HTTPError as e:
         handle_api_error(e)
+    
+    except requests.ConnectionError:
+        print("Connection Error. Please check your network connection.")
+    
+    except requests.Timeout:
+        print("Request Timed Out.")
+    
     except requests.RequestException as e:
-        print(f"Error: {e}")
+        print(f"Error occurred: {e}")
