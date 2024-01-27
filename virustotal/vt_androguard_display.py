@@ -1,3 +1,5 @@
+from utils import logging_utils
+
 def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")
     print(f"Main Activity: {androguard_data.get_main_activity()}")

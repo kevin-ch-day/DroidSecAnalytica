@@ -4,8 +4,10 @@ import subprocess
 import platform
 import json
 import os
+from datetime import datetime
 
-from utils import logging_utils
+from utils import user_prompts
+from . import vt_requests
 
 def check_ping():
     ip = "8.8.8.8"
@@ -23,23 +25,6 @@ def check_ping():
     except Exception as e:
         print(f"An error occurred while trying to ping: {e}")
         return False
-    
-def handle_api_integration():
-    try:
-        #virustotal_checker = VirustotalChecker()
-        virustotal_checker = None
-        api_key_valid = virustotal_checker.check_api_key()
-
-        if api_key_valid:
-            logging_utils.log_info("Virustotal API Key is valid.")
-            print("Virustotal API Key is valid.")
-        else:
-            logging_utils.log_error("Virustotal API Key is invalid or exceeded the rate limit.")
-            print("Virustotal API Key is invalid or exceeded the rate limit.")
-    
-    except Exception as e:
-        logging_utils.log_error(f"An error occurred during Virustotal API Key check: {e}", exc_info=True)
-        print("An error occurred during Virustotal API Key check. Please check the logs for more details.")
 
 def check_virustotal_access():
     url = 'https://www.virustotal.com'
@@ -93,3 +78,37 @@ def save_json_response(response, filename, overwrite=True):
         print(f"Response saved to '{filename}'")
     except Exception as e:
         print(f"Error saving response to file: {e}")
+
+def submit_apk():
+    apk_file_path = user_prompts.user_enter_apk_path()
+    if os.path.isfile(apk_file_path):
+        try:
+            return vt_requests.query_apk(apk_file_path)
+        except Exception as e:
+            print(f"Error submitting the APK: {e}")
+    else:
+        print("Invalid APK file path.")
+
+def submit_hash():
+    hash_value = user_prompts.user_enter_hash_ioc()
+    try:
+        return vt_requests.query_hash(hash_value)
+    except Exception as e:
+        print(f"Error submitting the hash: {e}")
+
+def format_timestamp(timestamp):
+    try:
+        # Check if the timestamp is in milliseconds and convert to seconds if necessary
+        if isinstance(timestamp, (int, float)) and timestamp > 1e10:
+            timestamp /= 1000
+
+        return datetime.fromtimestamp(timestamp).strftime('%I:%M:%S %p %m-%d-%Y') if timestamp else 'N/A'
+    except (TypeError, ValueError, OverflowError):
+        return 'Invalid Timestamp'
+
+def format_file_size(size):
+    for unit in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if size < 1024.0:
+            return f"{size:.2f} {unit}"
+        size /= 1024.0
+    return f"{size:.2f} TB"

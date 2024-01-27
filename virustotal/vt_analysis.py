@@ -1,19 +1,27 @@
-import os
-from . import vt_requests, vt_response, vt_utils, vt_database_analysis
+from . import vt_response
+from . import vt_utils
+from . import vt_database_analysis
+from . import vt_androguard
+from . import vt_androguard_display
 from utils import user_prompts, app_display
 
-def display_menu():
-    print(app_display.format_menu_title("VirusTotal Analysis Menu"))
-    print(app_display.format_menu_option(1, "Submit a sample"))
-    print(app_display.format_menu_option(2, "Run VirusTotal Database Analysis"))
-    print(app_display.format_menu_option(3, "Check Virustotal API Key"))
-    print(app_display.format_menu_option(4, "Check Virustotal.com"))
-    print(app_display.format_menu_option(5, "Check Internet Connection"))
+def display_menu(menu_title, menu_options):
+    print(app_display.format_menu_title(menu_title))
+    for key, option in menu_options.items():
+        print(app_display.format_menu_option(key, option))
     print(app_display.format_menu_option(0, "Return"))
 
 def virustotal_menu():
     while True:
-        display_menu()
+        menu_title = "VirusTotal Analysis Menu"
+        menu_options = {
+            1: "Submit a sample",
+            2: "Run VirusTotal Database Analysis",
+            3: "Check Virustotal API Key",
+            4: "Check Virustotal.com",
+            5: "Check Internet Connection"
+        }
+        display_menu(menu_title, menu_options)
         user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
 
         if user_choice == '0':
@@ -34,113 +42,106 @@ def virustotal_menu():
         user_prompts.pause_until_keypress()
 
 def handle_sample_submission():
-    print("\nSubmit a sample to VirusTotal")
-    print("1. APK File")
-    print("2. Hash IOC")
-    print("0. Exit")
+    while True:
+        print("\nSubmit a sample to VirusTotal")
+        print("1. Submit APK File")
+        print("2. Submit Hash IOC")
+        print("0. Return to Main Menu")
 
-    sample_choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
-    
-    if sample_choice == '0':
-        return
-    elif sample_choice == '1':
-        test_alpha(submit_apk)
-    elif sample_choice == '2':
-        test_alpha(submit_hash)
-    else:
-        print("Invalid choice. Please try again.")
+        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
 
-def submit_apk():
-    apk_file_path = user_prompts.user_enter_apk_path()
-    if os.path.isfile(apk_file_path):
-        try:
-            return vt_requests.query_apk(apk_file_path)                
-        except Exception as e:
-            print(f"Error submitting the APK: {e}")
-    else:
-        print("Invalid APK file path.")
+        if choice == '0':
+            return
+        
+        elif choice == '1':
+            response = vt_utils.submit_apk()
+            
+        elif choice == '2':
+            response = vt_utils.submit_hash()
+        
+        else:
+            print("Invalid choice. Please try again.")
 
-def submit_hash():
-    hash_value = user_prompts.user_enter_hash_ioc()
-    try:
-        return vt_requests.query_hash(hash_value)
-    except Exception as e:
-        print(f"Error submitting the hash: {e}")
+        if response:
+            handle_response_data(response)
 
-def test_alpha(submit_function):
-    result = submit_function()
-    if result:
-        report_data = vt_response.generate_report(result)
-        vt_response.print_report(report_data)
+def handle_response_data(response, output_directory):
+    report_data = vt_response.generate_report(response)
 
-    else:
-        print("No data to analyze.")
+    while True:
+        print("Data Results")
+        print("1. Display results")
+        print("2. Write results to file")
+        print("3. Display Androguard data")
+        print("4. View summary statistics")
+        print("5. View detection breakdown")
+        print("0. Return")
 
-def submit_and_display_results(submit_function):
-    result = submit_function()
-    if result:
-        data = vt_response.generate_report(result)
-        print("\nAnalysis Results:")
+        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
-        # Displaying Summary Statistics
-        print_summary_statistics(data.get('summary_statistics', {}))
+        if choice == "0":
+            return
+        elif choice == "1":
+            vt_response.display_report(report_data)
+        elif choice == "2":
+            vt_response.write_report_to_file(report_data, output_directory)
+            print("Report saved to file.")
+        elif choice == "3":
+            display_androguard_data(response)
+        elif choice == "4":
+            view_summary_statistics(report_data)
+        elif choice == "5":
+            view_detection_breakdown(report_data)
+        else:
+            print("Invalid choice. Please enter a number between 0 and 5.")
 
-        # Displaying Historical Analysis
-        print_historical_analysis(data.get('historical_analysis', {}))
-
-        # Displaying Behavior Analysis
-        print_behavior_analysis(data.get('behavior_analysis', []))
-
-        # Displaying Network Traffic Analysis
-        print_network_traffic_analysis(data.get('network_traffic_analysis', []))
-
-        # Displaying Detection Breakdown
-        print_detection_breakdown(data.get('detection_breakdown', []))
-
-    else:
-        print("No data to analyze.")
-
-def print_summary_statistics(summary_statistics):
-    if summary_statistics:
+def view_summary_statistics(report_data):
+    if "Analysis Result" in report_data:
+        summary_statistics = report_data["Analysis Result"].get("summary_statistics", {})
         print("\nSummary Statistics:")
         for key, value in summary_statistics.items():
-            print(f"  {key}: {value}")
-
-def print_network_traffic_analysis(network_traffic_analysis):
-    if network_traffic_analysis:
-        print("\nNetwork Traffic Analysis:")
-        for record in network_traffic_analysis:
-            print(f"  Timestamp: {record.get('timestamp', 'N/A')}")
-            print(f"  Protocol: {record.get('protocol', 'N/A')}")
-            print(f"  Source IP: {record.get('src_ip', 'N/A')}")
-            print(f"  Destination IP: {record.get('dst_ip', 'N/A')}")
-            print(f"  Destination Port: {record.get('dst_port', 'N/A')}")
+            print(f"{key}:".ljust(25), value)
     else:
-        print("No network traffic analysis data.")
+        print("Summary statistics not available.")
 
-def print_behavior_analysis(behavior_analysis):
-    if behavior_analysis:
-        print("\nBehavior Analysis:")
-        for behavior in behavior_analysis:
-            print(f"  Behavior Name: {behavior.get('name', 'N/A')}")
-            print(f"  Description: {behavior.get('description', 'N/A')}")
-            print(f"  Severity: {behavior.get('severity', 'N/A')}")
+def view_detection_breakdown(report_data):
+    if "Analysis Result" in report_data:
+        detection_breakdown = report_data["Analysis Result"].get("engine_detection", [])
+        if detection_breakdown:
+            print("\nDetection Breakdown:")
+            for item in detection_breakdown:
+                engine_name, detection_label = item[0], item[1]
+                print(f"{engine_name.ljust(30)}: {detection_label}")
+        else:
+            print("Detection breakdown not available.")
     else:
-        print("No behavior analysis data.")
+        print("Detection breakdown not available.")
 
+def display_androguard_data(response):
+    androguard = vt_androguard.androguard_data(response)
+    if androguard:
+        while True:
+            print("\nAndroguard Data")
+            print("1. Display Main Activity and Package Info")
+            print("2. Display Manifest Components")
+            print("3. Display Certificate Details")
+            print("4. Display Permissions")
+            print("5. Display Intent Filters")
+            print("0. Return to Sample Submission")
 
-def print_historical_analysis(historical_analysis):
-    if historical_analysis:
-        print("\nHistorical Analysis:")
-        # Assuming historical_analysis is a dictionary with relevant keys
-        for key, value in historical_analysis.items():
-            print(f"  {key}: {value}")
-    else:
-        print("No historical analysis data.")
+            choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
-
-def print_detection_breakdown(detection_breakdown):
-    if detection_breakdown:
-        print("\nDetection Breakdown:")
-        for detection in detection_breakdown:
-            print(f"  {detection[0]}: {detection[1]}")
+            if choice == "0":
+                break
+            elif choice == "1":
+                vt_androguard_display.display_main_activity(androguard)
+            elif choice == "2":
+                vt_androguard_display.display_manifest_components(androguard)
+            elif choice == "3":
+                vt_androguard_display.display_certificate_details(androguard)
+            elif choice == "4":
+                vt_androguard_display.display_permissions(androguard)
+            elif choice == "5":
+                vt_androguard_display.display_intent_filters(androguard)
+            else:
+                print("Invalid choice.")
