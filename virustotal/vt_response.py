@@ -42,7 +42,6 @@ def generate_report(response):
         return None
 
 def display_report(report):
-    print("\nVirusTotal Report:")
 
     # General Information
     print("\nGeneral Information:")
@@ -108,7 +107,7 @@ def write_report_to_file(report):
             summary_statistics = report["Analysis Result"].get("summary_statistics", {})
             file.write("\n\nSummary Statistics:")
             for key, value in summary_statistics.items():
-                file.write(f"\n{key}:".ljust(25) + value)
+                file.write(f"\n{key}:".ljust(25) + str(value))
 
         # Detection Breakdown Section
         if "Analysis Result" in report:

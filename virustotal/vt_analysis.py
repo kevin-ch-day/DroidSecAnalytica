@@ -48,7 +48,7 @@ def handle_sample_submission():
         print("2. Submit Hash IOC")
         print("0. Return")
 
-        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
 
         if choice == '0':
             return
@@ -65,11 +65,11 @@ def handle_sample_submission():
         if response:
             handle_response_data(response)
 
-def handle_response_data(response, output_directory):
+def handle_response_data(response):
     report_data = vt_response.generate_report(response)
 
     while True:
-        print("Data Results")
+        print("\nData Results")
         print("1. Display results")
         print("2. Write results to file")
         print("3. Display Androguard data")
@@ -77,14 +77,14 @@ def handle_response_data(response, output_directory):
         print("5. View detection breakdown")
         print("0. Return")
 
-        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
         if choice == "0":
             return
         elif choice == "1":
             vt_response.display_report(report_data)
         elif choice == "2":
-            vt_response.write_report_to_file(report_data, output_directory)
+            vt_response.write_report_to_file(report_data)
             print("Report saved to file.")
         elif choice == "3":
             display_androguard_data(response)
@@ -129,7 +129,7 @@ def display_androguard_data(response):
             print("5. Display Intent Filters")
             print("0. Return to Sample Submission")
 
-            choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
+            choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
             if choice == "0":
                 break

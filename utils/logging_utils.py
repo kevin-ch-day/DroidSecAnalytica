@@ -55,3 +55,9 @@ def log_debug(message: str):
         logger.debug(message)
     except Exception as e:
         print(f"Error logging debug: {e}\n{traceback.format_exc()}")
+
+def log_critical(message: str):
+    try:
+        logger.critical(message)
+    except Exception as e:
+        print(f"Error logging critical: {e}\n{traceback.format_exc()}")
