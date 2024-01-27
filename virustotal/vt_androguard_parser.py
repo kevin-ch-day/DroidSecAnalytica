@@ -37,16 +37,9 @@ def parse_basic_data(androguard_data, data):
                     for item in data[key]:
                         if item:
                             add_function(item)
-                        else:
-                            print(f"Found empty item in {key}. Skipping.")
-                else:
-                    print(f"Data for {key} is not in list format.")
-            else:
-                print(f"Key '{key}' not found in data.")
 
     except Exception as e:
         print(f"Error parsing Androguard data: {str(e)}")
-
 
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:

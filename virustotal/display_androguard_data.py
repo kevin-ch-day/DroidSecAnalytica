@@ -3,7 +3,7 @@ from utils import logging_utils
 def display_sections(androguard_data):
     try:
         sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-        
+
         is_data_present = False
 
         for section in sections:
@@ -23,7 +23,6 @@ def display_sections(androguard_data):
     
     except Exception as e:
         logging_utils.log_error(f"Error processing sections: {str(e)}")
-
 
 def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")

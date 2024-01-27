@@ -11,9 +11,9 @@ def parse_androguard_data(attributes):
 
         androguard_data = AndroguardADT.AndroguardADT()
         vt_androguard_parser.parse_basic_data(androguard_data, data)
-        #vt_androguard_parser.parse_permissions(androguard_data, data)
-        #vt_androguard_parser.parse_certificate_data(androguard_data, data)
-        #vt_androguard_parser.parse_intent_filters(androguard_data, data)
+        vt_androguard_parser.parse_permissions(androguard_data, data)
+        vt_androguard_parser.parse_certificate_data(androguard_data, data)
+        vt_androguard_parser.parse_intent_filters(androguard_data, data)
         return androguard_data
 
     except Exception as e:
@@ -24,12 +24,11 @@ def display_attributes(attributes):
     try:
         androguard_data = parse_androguard_data(attributes)
         if androguard_data:
-            #display_androguard_data.display_main_activity(androguard_data)
+            display_androguard_data.display_main_activity(androguard_data)
             display_androguard_data.display_sections(androguard_data)
-            #display_androguard_data.display_certificate_details(androguard_data)
-            #display_androguard_data.display_permissions(androguard_data.get_permissions())
-            #display_androguard_data.display_intent_filters(androguard_data)
-            pass
+            display_androguard_data.display_certificate_details(androguard_data)
+            display_androguard_data.display_permissions(androguard_data.get_permissions())
+            display_androguard_data.display_intent_filters(androguard_data)
         else:
             logging_utils.log_error("Error: no androguard data found.")
 
