@@ -3,9 +3,7 @@ from utils import logging_utils
 def display_manifest_components(androguard_data):
     try:
         sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-
         is_data_present = False
-
         for section in sections:
             items = getattr(androguard_data, f'get_{section.lower()}')()
             if items:
