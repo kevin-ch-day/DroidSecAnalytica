@@ -1,6 +1,5 @@
 import re
-from utils import logging_utils
-from . import vt_utils, PermissionADT
+from . import PermissionADT
 
 def parse_basic_data(androguard_data, data):
     if not androguard_data:
@@ -43,13 +42,26 @@ def parse_basic_data(androguard_data, data):
 
 def parse_permissions(androguard_data, data):
     if 'permission_details' in data:
-        permission_data = parse_permission_details(data['permission_details'])
-        for permission in permission_data:
-            permission_obj = PermissionADT.PermissionADT(*permission)
-            
-            # Remove newline characters and replace multiple spaces with a single space
+        permission_details = data['permission_details']
+
+        for permission, details in permission_details.items():
+            # Extract permission details
+            short_description = details.get('short_description', 'N/A')
+            full_description = details.get('full_description', 'N/A')
+            permission_type = details.get('permission_type', 'N/A')
+
+            # Capitalize and title-casing
+            short_description = short_description.capitalize()
+            permission_type = permission_type.title()
+
+            # Create a PermissionADT object
+            permission_obj = PermissionADT(permission, short_description, full_description, permission_type)
+
+            # Clean short description
             cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))
             permission_obj.short_desc = cleaned_short_desc.strip()
+
+            # Add permission object to androguard_data
             androguard_data.add_permission(permission_obj)
 
 def parse_intent_filters(androguard_data, data):
@@ -76,37 +88,30 @@ def parse_intent_filters(androguard_data, data):
 
 def parse_certificate_data(androguard_data, data):
     if 'certificate' in data:
-        cert_data = parse_certificate(data['certificate'])
-        androguard_data.set_certificate_data(cert_data)
+        certificate_data = data['certificate']
+        parsed_info = {}
 
-def parse_permission_details(permission_details):
-    parsed_data = []
-    for permission, details in permission_details.items():
-        short_description = details.get('short_description', 'N/A')
-        full_description = details.get('full_description', 'N/A')
-        permission_type = details.get('permission_type', 'N/A')
-        parsed_data.append([permission, short_description.capitalize(), full_description, permission_type.title()])
-    return parsed_data
-
-def parse_certificate(certificate_data):
-    parsed_info = {}
-    subject_info = certificate_data.get('Subject', {})
-    parsed_info['Subject'] = {
-        'DN': subject_info.get('DN', 'N/A'),
-        'C': subject_info.get('C', 'N/A'),
-        'CN': subject_info.get('CN', 'N/A')
-    }
-    
-    issuer_info = certificate_data.get('Issuer', {})
-    parsed_info['Issuer'] = {
-        'DN': issuer_info.get('DN', 'N/A'),
-        'C': issuer_info.get('C', 'N/A'),
-        'CN': issuer_info.get('CN', 'N/A')
-    }
-    
-    parsed_info['validto'] = certificate_data.get('validto', 'N/A')
-    parsed_info['serialnumber'] = certificate_data.get('serialnumber', 'N/A')
-    parsed_info['thumbprint'] = certificate_data.get('thumbprint', 'N/A')
-    parsed_info['validfrom'] = certificate_data.get('validfrom', 'N/A')
-    
-    return parsed_info
+        # Parsing subject information
+        subject_info = certificate_data.get('Subject', {})
+        parsed_info['Subject'] = {
+            'DN': subject_info.get('DN', 'N/A'),
+            'C': subject_info.get('C', 'N/A'),
+            'CN': subject_info.get('CN', 'N/A')
+        }
+        
+        # Parsing issuer information
+        issuer_info = certificate_data.get('Issuer', {})
+        parsed_info['Issuer'] = {
+            'DN': issuer_info.get('DN', 'N/A'),
+            'C': issuer_info.get('C', 'N/A'),
+            'CN': issuer_info.get('CN', 'N/A')
+        }
+        
+        # Parsing additional certificate details
+        parsed_info['validto'] = certificate_data.get('validto', 'N/A')
+        parsed_info['serialnumber'] = certificate_data.get('serialnumber', 'N/A')
+        parsed_info['thumbprint'] = certificate_data.get('thumbprint', 'N/A')
+        parsed_info['validfrom'] = certificate_data.get('validfrom', 'N/A')
+        
+        # Setting parsed certificate data
+        androguard_data.set_certificate_data(parsed_info)

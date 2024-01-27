@@ -1,6 +1,6 @@
 from utils import logging_utils
 
-def display_sections(androguard_data):
+def display_manifest_components(androguard_data):
     try:
         sections = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
 

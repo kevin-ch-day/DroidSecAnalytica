@@ -1,8 +1,43 @@
 import json
 import os
 from tabulate import tabulate
-from . import vt_androguard
 from utils import logging_utils
+
+from . import AndroguardADT
+from . import vt_androguard_parser
+from . import display_androguard_data
+
+def parse_androguard_data(attributes):
+    try:
+        data = attributes.get('androguard', None)
+        if not data:
+            return None
+
+        androguard_data = AndroguardADT.AndroguardADT()
+        vt_androguard_parser.parse_basic_data(androguard_data, data)
+        vt_androguard_parser.parse_permissions(androguard_data, data)
+        vt_androguard_parser.parse_certificate_data(androguard_data, data)
+        vt_androguard_parser.parse_intent_filters(androguard_data, data)
+        return androguard_data
+
+    except Exception as e:
+        logging_utils.log_error(f"Error parsing Androguard data: {str(e)}")
+        return None
+    
+def display_attributes(attributes):
+    try:
+        androguard_data = parse_androguard_data(attributes)
+        if androguard_data:
+            display_androguard_data.display_main_activity(androguard_data)
+            display_androguard_data.display_manifest_components(androguard_data)
+            display_androguard_data.display_certificate_details(androguard_data)
+            display_androguard_data.display_permissions(androguard_data.get_permissions())
+            display_androguard_data.display_intent_filters(androguard_data)
+        else:
+            logging_utils.log_error("Error: no androguard data found.")
+
+    except Exception as e:
+        logging_utils.log_error(f"Error processing response attributes: {str(e)}")
 
 def parse_response(response):
     if 'data' not in response:
@@ -16,12 +51,12 @@ def parse_response(response):
         return
     
     try:
-        #summary_statistics(attributes)
-        vt_androguard.display_attributes(attributes)
-        #vt_response_processor.historical_analysis(attributes)
-        #vt_response_processor.behavior_analysis(attributes)
-        #vt_response_processor.network_traffic_analysis(attributes)
-        #detailed_detection_breakdown(attributes)
+        summary_statistics(attributes)
+        display_attributes(attributes)
+        historical_analysis(attributes)
+        behavior_analysis(attributes)
+        network_traffic_analysis(attributes)
+        detailed_detection_breakdown(attributes)
         
     except Exception as e:
         logging_utils.log_error(f"Error processing response attributes: {e}")
@@ -41,30 +76,6 @@ def save_json_response(response, filename, overwrite=True):
         print(f"Response saved to '{filename}'")
     except Exception as e:
         print(f"Error saving response to file: {e}")
-
-def detailed_detection_breakdown(attributes, table_format="fancy_grid"):
-    if not isinstance(attributes, dict):
-        print("Error: Attributes must be a dictionary.")
-        return
-
-    if 'last_analysis_results' in attributes:
-        print("\nDetailed Detection Breakdown:")
-        headers = ["Engine", "Detected", "Result", "Engine Update"]
-        data = []
-
-        sorted_results = sorted(attributes['last_analysis_results'].items(), key=lambda x: x[0])
-
-        for engine, result in sorted_results:
-            detected = result.get('category', 'N/A')
-            detection_result = result.get('result', 'N/A')
-
-            if detection_result:
-                data.append([engine, detected, detection_result])
-
-        if data:
-            print(tabulate(data, headers=headers, tablefmt=table_format))
-        else:
-            print("No data available for detailed detection breakdown.")
 
 def summary_statistics(attributes):
     if not isinstance(attributes, dict):
@@ -120,3 +131,27 @@ def network_traffic_analysis(attributes):
             print(f"  Source IP: {entry.get('src_ip', 'N/A')}")
             print(f"  Destination IP: {entry.get('dst_ip', 'N/A')}")
             print(f"  Destination Port: {entry.get('dst_port', 'N/A')}")
+
+def detailed_detection_breakdown(attributes, table_format="fancy_grid"):
+    if not isinstance(attributes, dict):
+        print("Error: Attributes must be a dictionary.")
+        return
+
+    if 'last_analysis_results' in attributes:
+        print("\nDetailed Detection Breakdown:")
+        headers = ["Engine", "Detected", "Result", "Engine Update"]
+        data = []
+
+        sorted_results = sorted(attributes['last_analysis_results'].items(), key=lambda x: x[0])
+
+        for engine, result in sorted_results:
+            detected = result.get('category', 'N/A')
+            detection_result = result.get('result', 'N/A')
+
+            if detection_result:
+                data.append([engine, detected, detection_result])
+
+        if data:
+            print(tabulate(data, headers=headers, tablefmt=table_format))
+        else:
+            print("No data available for detailed detection breakdown.")
