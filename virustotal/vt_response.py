@@ -1,6 +1,8 @@
 from utils import logging_utils
+from database import DBFunctions
+from . import vt_requests
 
-def analyze_virus_total_response(response):
+def analyze_response(response):
     try:
         data = response.get('data', {})
         if not data:
@@ -74,3 +76,18 @@ def perform_detailed_detection_breakdown(attributes, table_format="fancy_grid"):
             if result:
                 detailed_breakdown.append([engine, result])
     return detailed_breakdown
+
+def run_analysis():
+    apk_sample_records = DBFunctions.get_apk_samples()
+    malware_hash_samples = DBFunctions.get_malware_hash_samples()
+
+    for record in apk_sample_records:
+        # Using file_name as the hash key for VirusTotal analysis
+        hash_key = record['file_name']
+        result = vt_requests.query_hash(hash_key)
+        if result:
+            data = analyze_response(result)
+            md5 = data.get('md5')
+            sha1 = data.get('sha1')
+            sha256 = data.get('sha256')
+            vt_link = data.get('permalink')
