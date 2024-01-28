@@ -16,7 +16,7 @@ def virustotal_menu():
         menu_title = "VirusTotal Analysis Menu"
         menu_options = {
             1: "Submit a sample",
-            2: "Run VirusTotal Database Analysis",
+            2: "Run Database Analysis",
             3: "Check Virustotal API Key",
             4: "Check Virustotal.com",
             5: "Check Internet Connection"
@@ -42,32 +42,31 @@ def virustotal_menu():
         user_prompts.pause_until_keypress()
 
 def handle_sample_submission():
-    while True:
-        menu_title = "Submit a sample to VirusTotal"
-        menu_options = {
-            1: "Submit APK File",
-            2: "Submit Hash IOC"
-        }
-        display_menu(menu_title, menu_options)
-        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2'])
+    menu_title = "Sample Submission"
+    menu_options = {
+        1: "Submit APK File",
+        2: "Submit Hash IOC"
+    }
+    display_menu(menu_title, menu_options)
+    choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
 
-        if choice == '0':
-            return
+    if choice == '0':
+        return
+    
+    elif choice == '1':
+        response = vt_utils.submit_apk()
         
-        elif choice == '1':
-            response = vt_utils.submit_apk()
-            
-        elif choice == '2':
-            response = vt_utils.submit_hash()
-        
-        else:
-            print("Invalid choice. Please try again.")
+    elif choice == '2':
+        response = vt_utils.submit_hash()
+    
+    else:
+        print("Invalid choice. Please try again.")
 
-        if response:
-            handle_response_data(response)
+    if response:
+        handle_response_data(response)
 
 def handle_response_data(response):
-    report_data = vt_response.generate_report(response)
+    report_data = vt_response.parse_virustotal_response(response)
 
     while True:
         menu_title = "Data Results"
@@ -80,7 +79,7 @@ def handle_response_data(response):
         }
         display_menu(menu_title, menu_options)
 
-        choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
         if choice == "0":
             return
@@ -112,7 +111,7 @@ def display_androguard_data(response):
             }
             display_menu(menu_title, menu_options)
 
-            choice = user_prompts.user_menu_choice("Enter your choice: ", ['0', '1', '2', '3', '4', '5'])
+            choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
             if choice == "0":
                 break

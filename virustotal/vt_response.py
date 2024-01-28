@@ -1,7 +1,7 @@
 from utils import logging_utils
 from . import vt_utils
 
-def generate_report(response):
+def parse_virustotal_response(response):
     try:
         data = response.get('data', {})
         if not data:
@@ -24,7 +24,8 @@ def generate_report(response):
         report = {
             "Report URL": data['links']['self'],
             "VirusTotal Threat Label": attributes['popular_threat_classification']['suggested_threat_label'],
-            "File Size": vt_utils.format_file_size(attributes['size']),
+            "Size": attributes['size'],
+            "Formatted Size": vt_utils.format_file_size(attributes['size']),
             "MD5": attributes['md5'],
             "SHA1": attributes['sha1'],
             "SHA256": attributes['sha256'],
