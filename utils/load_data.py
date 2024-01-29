@@ -21,7 +21,7 @@ def read_file_lines(file_path):
 
 def load_android_malware_hash_data():
     try:
-        if not dbu.check_for_table('malware_hashes'):
+        if not dbu.check_for_table('malware_threat_metadata'):
             dbu.create_android_malware_hash_table()
         
         input_directory = 'input'
@@ -48,7 +48,7 @@ def load_data_from_files(files):
         try:
             data = parse_file(file_path)
             if data:
-                dbu.insert_data_into_malware_hashes(file_path, data)
+                dbu.insert_data_into_malware_threat_metadata(file_path, data)
             else:
                 logging_utils.log_warning(f"No valid data parsed from {file_path}.")
         except Exception as e:

@@ -1,4 +1,4 @@
-# database_manager.py
+# DBConnectionManager.py
 
 import mysql.connector
 from contextlib import contextmanager

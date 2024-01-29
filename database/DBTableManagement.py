@@ -31,7 +31,7 @@ def list_tables() -> list:
 # Creates a table for storing Android malware hashes
 def create_android_malware_hash_table() -> bool:
     sql_create_table = """
-        CREATE TABLE IF NOT EXISTS android_malware_hashes (
+        CREATE TABLE IF NOT EXISTS android_malware_threat_metadata (
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             malware_name_1 VARCHAR(255) DEFAULT NULL,
             malware_name_2 VARCHAR(250) DEFAULT NULL,
@@ -45,12 +45,12 @@ def create_android_malware_hash_table() -> bool:
     """
     success = execute_sql(sql_create_table, should_fetch=False)
     if success:
-        print("Table 'android_malware_hashes' created successfully.")
+        print("Table 'android_malware_threat_metadata' created successfully.")
     return success
 
-# Updates a record in android_malware_hashes to indicate no VirusTotal match
+# Updates a record in android_malware_threat_metadata to indicate no VirusTotal match
 def no_virustotal_record_match(record_id):
-    if execute_sql("UPDATE android_malware_hashes SET no_virustotal_match = 1 WHERE id = %s", (record_id,)):
+    if execute_sql("UPDATE android_malware_threat_metadata SET no_virustotal_match = 1 WHERE id = %s", (record_id,)):
         print("Database record updated.")
 
 # Creates a record for an APK sample

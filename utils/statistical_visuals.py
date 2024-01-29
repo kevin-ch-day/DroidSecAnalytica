@@ -93,7 +93,7 @@ def visualize_category_distribution(df, category_column):
 
 def advanced_category_analysis(cursor, file, category_column):
     """ Advanced helper function to write category data with predictive analytics and visualization. """
-    sql = f"SELECT {category_column}, COUNT(*) FROM android_malware_hashes GROUP BY {category_column}"
+    sql = f"SELECT {category_column}, COUNT(*) FROM android_malware_threat_metadata GROUP BY {category_column}"
     cursor.execute(sql)
     category_data = cursor.fetchall()
 

@@ -86,7 +86,7 @@ def perform_preanalysis(apk_path: str):
     hash_utils.display_hashes(apk_path, apk_hashes)
     
     if not DBFunctions.check_for_hash_record(apk_hashes):
-        # Hash does not have a record in malware_hashes
+        # Hash does not have a record in malware_threat_metadata
         print("IOC hash does not have a record")
         file_basename = os.path.basename(apk_path)
         file_size_bytes = os.path.getsize(apk_path)
@@ -103,7 +103,7 @@ def perform_preanalysis(apk_path: str):
             return
 
     else:
-        # Hash has a record in malware_hashes
+        # Hash has a record in malware_threat_metadata
         print("IOC hash has a record")
 
     input("Press any button to continue...")
