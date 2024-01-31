@@ -23,7 +23,7 @@ def parse_virustotal_response(response):
 
         report = {
             "Report URL": data['links']['self'],
-            "VirusTotal Threat Label": attributes['popular_threat_classification']['suggested_threat_label'],
+            #"VirusTotal Threat Label": attributes['popular_threat_classification']['suggested_threat_label'],
             "Size": attributes['size'],
             "Formatted Size": vt_utils.format_file_size(attributes['size']),
             "MD5": attributes['md5'],
