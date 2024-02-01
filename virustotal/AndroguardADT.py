@@ -1,9 +1,9 @@
 from . import PermissionADT
+from . import PermissionManager
 from . import IntentFilterADT
 
 class AndroguardADT:
 
-    # Initialize AndroguardADT with default values
     def __init__(self, main_activity=None, package=None, target_sdk_version=None):
         self.main_activity = main_activity
         self.package = package
@@ -15,28 +15,24 @@ class AndroguardADT:
         self.libraries = []
         self.certificate = {}
         self.intent_filters = IntentFilterADT.IntentFilterADT() 
-        self.permissions = []  # PermissionADT objects
+        self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
 
-    # Add a permission object to the permissions list
     def add_permission(self, permission_data):
         if not isinstance(permission_data, PermissionADT.PermissionADT):
             raise TypeError("permission_data must be an instance of PermissionADT")
-        self.permissions.append(permission_data)
+        self.permissions_manager.add_permission(permission_data)
 
-
-    # Return the list of permissions
     def get_permissions(self):
-        return self.permissions
+        return self.permissions_manager.list_permissions()
 
-    # Find a permission by name
-    def find_permission(self, p_name):
-        if not p_name or not isinstance(p_name, str):
-            return None
-        p_name = p_name.lower()
-        for p in self.permissions:
-            if p.get_name().lower() == p_name:
-                return p
-        return None
+    def get_permission(self, name):
+        return self.permissions_manager.get_permission(name)
+
+    def remove_permission(self, name):
+        self.permissions_manager.remove_permission(name)
+
+    def search_permissions(self, search_term):
+        return self.permissions_manager.search_permissions(search_term)
 
     # Set the main activity
     def set_main_activity(self, main_activity):
@@ -150,30 +146,25 @@ class AndroguardADT:
         except ValueError:
             pass  # Optionally handle the error or log it
 
-    def __str__(self):
-        """ User-friendly string representation of the AndroguardADT object. """
-        info_lines = [
-            f"AndroguardADT Object Summary:",
-            f"  Main Activity: {self.main_activity or 'Not Set'}",
-            f"  Package: {self.package or 'Not Set'}",
-            f"  Target SDK Version: {self.target_sdk_version or 'Not Set'}",
-            f"  Total Receivers: {len(self.receivers)}",
-            f"  Total Activities: {len(self.activities)}",
-            f"  Total Providers: {len(self.providers)}",
-            f"  Total Services: {len(self.services)}",
-            f"  Total Libraries: {len(self.libraries)}",
-            f"  Total Permissions: {len(self.permissions)}"
-        ]
+    def __str__(self) -> str:
+        """
+        Provides a detailed string representation of the AndroguardADT object,
+        summarizing its main attributes and components with more details.
+        """
+        components_summary = {
+            "Main Activity": self.main_activity or "Not Set",
+            "Package": self.package or "Not Set",
+            "Target SDK Version": self.target_sdk_version or "Not Set",
+            "Receivers": f"{len(self.receivers)}" + (f" (e.g. {self.receivers[0]})" if self.receivers else ""),
+            "Activities": f"{len(self.activities)}" + (f" (e.g. {self.activities[0]})" if self.activities else ""),
+            "Providers": f"{len(self.providers)}" + (f" (e.g. {self.providers[0]})" if self.providers else ""),
+            "Services": f"{len(self.services)}" + (f" (e.g. {self.services[0]})" if self.services else ""),
+            "Libraries": f"{len(self.libraries)}" + (f" (e.g. {self.libraries[0]})" if self.libraries else ""),
+            "Permissions": f"{len(self.permissions_manager.list_permissions())}" + (f" (e.g. {self.permissions_manager.list_permissions()[0]})" if self.permissions_manager.list_permissions() else "")
+        }
 
-        # Adding a line about the presence of certificate data
-        cert_status = 'Available' if self.certificate else 'Not Available'
-        info_lines.append(f"  Certificate Data: {cert_status}")
-
-        # Adding a line about the presence of intent filter data
-        intent_filter_status = 'Available' if self.intent_filters else 'Not Available'
-        info_lines.append(f"  Intent Filters Data: {intent_filter_status}")
-
-        return "\n".join(info_lines)
+        summary_parts = [f"{key}: {value}" for key, value in components_summary.items()]
+        return "\n".join(summary_parts)
 
 
     def remove_activity(self, activity):

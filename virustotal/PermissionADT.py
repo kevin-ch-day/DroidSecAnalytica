@@ -1,12 +1,19 @@
 # PermissionADT.py
 
 class PermissionADT:
+    _instances = {}
+
     def __init__(self, name: str = "", short_desc: str = "", long_desc: str = "", permission_type: str = ""):
         # Initialize a new PermissionADT instance
         self._name = name
         self._short_desc = short_desc
         self._long_desc = long_desc
         self._permission_type = permission_type
+        PermissionADT._instances[name] = self
+
+    @classmethod
+    def get_instance(cls, name):
+        return cls._instances.get(name)
 
     @property
     def name(self) -> str:
@@ -56,10 +63,31 @@ class PermissionADT:
             raise ValueError("Permission type must be a string")
         self._permission_type = value
 
+    def to_dict(self) -> dict:
+        return {
+            "name": self.name,
+            "short_desc": self.short_desc,
+            "long_desc": self.long_desc,
+            "perm_type": self.permission_type
+        }
+
     def __str__(self) -> str:
-        # String representation of the PermissionADT object
-        return f"PermissionADT(Name: {self._name}, Type: {self._permission_type}, Desc: {self._short_desc})"
+        return f"PermissionADT(Name: {self.name}, Type: {self.permission_type}, Desc: {self.short_desc})"
+
+    def __repr__(self) -> str:
+        return f"PermissionADT(name='{self.name}', short_desc='{self.short_desc}', long_desc='{self.long_desc}', permission_type='{self.permission_type}')"
 
     def __eq__(self, other) -> bool:
-        # Equality comparison for PermissionADT objects
-        return isinstance(other, PermissionADT) and self.__dict__ == other.__dict__
+        return isinstance(other, PermissionADT) and self.to_dict() == other.to_dict()
+    
+    def __iter__(self):
+        for attr_name in ["name", "short_desc", "long_desc", "permission_type"]:
+            yield getattr(self, attr_name)
+
+    def __repr__(self):
+        # Official string representation of the PermissionADT object
+        return f"PermissionADT(name='{self._name}', short_desc='{self._short_desc}', long_desc='{self._long_desc}', permission_type='{self._permission_type}')"
+
+    def display_summary(self):
+        # Display a summary of the permission
+        return f"Name: {self._name}, Short Description: {self._short_desc}, Type: {self._permission_type}"
