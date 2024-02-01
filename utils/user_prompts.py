@@ -71,7 +71,7 @@ def user_for_confirmation(prompt):
 # Pauses the program execution and waits for the user to press any key to continue.
 def pause_until_keypress():
     try:
-        input("Press any key to continue...")
+        input("\nPress any key to continue...")
     except KeyboardInterrupt:
         print("\nOperation cancelled by user.")
         exit(0)

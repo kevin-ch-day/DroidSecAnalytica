@@ -2,14 +2,13 @@ from typing import Optional, Any
 from database import DBConnectionManager as dbConnect
 from utils import logging_utils
 
-def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool = False) -> Optional[Any]:
+def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool = False) -> Optional[bool]:
     try:
-        # Using execute_query from DBConnectionManager, assuming it's the correct function based on DBConnectionManager content
-        result = dbConnect.execute_query(query, params, fetch=should_fetch)
-        return result
+        dbConnect.execute_query(query, params, fetch=should_fetch)
+        return True  # Return True to indicate success
     except Exception as e:
         logging_utils.log_error(f"Error executing query: {query}", e)
-        return None
+        return False  # Return False to indicate failure
 
 def insert_apk_analysis(analysis_id: int, sha256_hash: str, num_receivers: int, num_activities: int, num_services: int, num_providers: int, num_libraries: int, num_permissions: int, analysis_status: str, additional_info: Optional[str] = None) -> Optional[bool]:
     query = """
@@ -35,6 +34,11 @@ def insert_vt_receivers(analysis_id: int, receiver_name: str, apk_id: int) -> Op
     return execute_sql(query, params)
 
 def insert_unknown_permission(permission_name: str) -> Optional[bool]:
-    query = "INSERT INTO unknown_android_permissions (constant_value) VALUES (%s)"
+    query = "INSERT INTO unknown_permissions (constant_value) VALUES (%s)"
     params = (permission_name,)
+    return execute_sql(query, params)
+
+def insert_android_permission(permission_name: str) -> Optional[bool]:
+    query = "INSERT INTO android_permissions (permission_name, constant_value) VALUES (%s, %s)"
+    params = (permission_name, permission_name)  # Using the permission_name for both columns
     return execute_sql(query, params)

@@ -30,7 +30,7 @@ def parse_virustotal_response(response):
             "SHA1": attributes['sha1'],
             "SHA256": attributes['sha256'],
             "Last Submission Date": vt_utils.format_timestamp(attributes['last_submission_date']),
-            "First Seen": vt_utils.format_timestamp(attributes['first_seen_itw_date']),
+            #"First Seen": vt_utils.format_timestamp(attributes['first_seen_itw_date']),
             "Last Analysis Date": vt_utils.format_timestamp(attributes['last_analysis_date']),
             "Other Names": sorted(attributes['names']),
         }

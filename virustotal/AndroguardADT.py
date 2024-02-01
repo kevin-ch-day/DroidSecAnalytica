@@ -152,15 +152,15 @@ class AndroguardADT:
         summarizing its main attributes and components with more details.
         """
         components_summary = {
-            "Main Activity": self.main_activity or "Not Set",
-            "Package": self.package or "Not Set",
-            "Target SDK Version": self.target_sdk_version or "Not Set",
-            "Receivers": f"{len(self.receivers)}" + (f" (e.g. {self.receivers[0]})" if self.receivers else ""),
-            "Activities": f"{len(self.activities)}" + (f" (e.g. {self.activities[0]})" if self.activities else ""),
-            "Providers": f"{len(self.providers)}" + (f" (e.g. {self.providers[0]})" if self.providers else ""),
-            "Services": f"{len(self.services)}" + (f" (e.g. {self.services[0]})" if self.services else ""),
-            "Libraries": f"{len(self.libraries)}" + (f" (e.g. {self.libraries[0]})" if self.libraries else ""),
-            "Permissions": f"{len(self.permissions_manager.list_permissions())}" + (f" (e.g. {self.permissions_manager.list_permissions()[0]})" if self.permissions_manager.list_permissions() else "")
+            "Main Activity": self.main_activity or "N/A",
+            "Package": self.package or "N/A",
+            "Target SDK Version": self.target_sdk_version or "N/A",
+            "Receivers": f"{len(self.receivers)}",
+            "Activities": f"{len(self.activities)}",
+            "Providers": f"{len(self.providers)}",
+            "Services": f"{len(self.services)}",
+            "Libraries": f"{len(self.libraries)}",
+            "Permissions": f"{len(self.permissions_manager.list_permissions())}"
         }
 
         summary_parts = [f"{key}: {value}" for key, value in components_summary.items()]
