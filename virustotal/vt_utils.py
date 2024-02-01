@@ -9,6 +9,11 @@ from datetime import datetime
 from utils import user_prompts
 from . import vt_requests
 
+def test_virustotal_request():
+    hash = "64ebe9b975de022b888f17db429af3a93d3db95db5af274e3eefd3ca7f24e350"
+    response = vt_requests.query_hash(hash)
+    print(response)
+
 def check_ping():
     ip = "8.8.8.8"
     param = '-n' if platform.system().lower() == 'windows' else '-c'
