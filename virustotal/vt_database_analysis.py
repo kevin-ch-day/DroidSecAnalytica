@@ -28,12 +28,8 @@ def process_apk_sample(record):
     parsed_data = vt_response.parse_virustotal_response(response)
     andro_data = vt_androguard.androguard_data(response)
     if andro_data:
-        #permissions = andro_data.get_permissions()
-        print(andro_data)
-        #print(permissions)
-    
-    
-    #handle_detected_permissions(permissions)
+        permissions = andro_data.get_permissions()
+        handle_detected_permissions(permissions)
 
 def handle_detected_permissions(permissions):
     known_permissions = list()
@@ -46,7 +42,7 @@ def handle_detected_permissions(permissions):
             unknown_id = DBFunctions.get_unknown_permission_id(index.name)
             unknown_permissions.append([unknown_id, index])
             if not unknown_id:
-                process_unknown_permission(index)
+                process_unknown_permission_v2(index)
 
     # if known_permissions:
     #     print("\nPermissions:")
@@ -56,7 +52,7 @@ def handle_detected_permissions(permissions):
     if unknown_permissions:
         print("\nUnknown permissions:")
         for index in unknown_permissions:
-            print(f" [{index[0]}] {index[1].name} {index[1].permission_type}") # PermissionADT Object
+            print(f" {index[1].name} {index[1].permission_type}") # PermissionADT Object
 
 def process_unknown_permission(permission):
     print(f"\nUnknown permission: {permission.name}")
@@ -79,7 +75,11 @@ def process_unknown_permission(permission):
             break
 
         else:
-            print("Invalid choice, please enter 1, 2, or 3.")
+            print("Invalid choice, please enter 1, 2, or 3.")\
+            
+def process_unknown_permission_v2(permission):
+    print(f"\nUnknown permission: {permission.name}")
+    record_unknown_permission(permission)
 
 def add_permission(permission):
     # This function needs to be defined or updated accordingly
@@ -117,7 +117,7 @@ def pause_with_progress(wait_time, update_interval=1, display_text="Pausing...")
 
 def alpha():
     try:
-        apk_records = DBFunctions.get_apk_samples_sha256()
+        apk_records = DBFunctions.get_apk_records_sha256(16)
         if not apk_records:
             print("No APK samples found in the database.")
             return
@@ -125,14 +125,21 @@ def alpha():
     except Exception as e:
         print(f"Error running the analysis: {e}")
 
+def beta():
+    file_path = "output/unknown_permissions_output.txt"
+    results = DBFunctions.check_uknown_permissions_alpha()
+    for perm_id, constant_value in results:
+        print(f"ID: {perm_id} {constant_value}")
+
 def check_apk_sample_process():
     record_id = 11
-    sha256 = DBFunctions.get_apk_record_sha256_by_id(record_id, 12)
+    sha256 = DBFunctions.get_apk_record_sha256_by_id(12)
     process_apk_sample(sha256)
 
 def run_analysis():
     try:
-        alpha()
+        #alpha()
+        beta()
         #check_apk_sample_process()
     except Exception as e:
         print(f"Error running the analysis: {e}")

@@ -1,6 +1,6 @@
 # DBFunctions.py
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from . import DBConnectionManager as dbConnect
 from utils import logging_utils
@@ -47,6 +47,25 @@ def is_unknown_perm_table_empty() -> bool:
         logging_utils.log_error("Error checking if 'unknown_android_permissions' table is empty", e)
         return True  # Assume empty in case of error to handle gracefully
 
+def get_apk_records_sha256(apk_id: int) -> Optional[Tuple[int, str]]:
+    query = """
+    SELECT a.apk_id, a.sha256
+    FROM apk_samples a
+    JOIN malware_ioc_threats b ON a.sha256 = b.sha256
+    WHERE b.no_virustotal_data IS NULL AND a.apk_id >= %s
+    ORDER BY a.apk_id ASC
+    """
+    params = (apk_id,)
+    try:
+        result = dbConnect.execute_query(query, params, fetch=True)
+        if result:
+            return result
+        else:
+            return None
+    except Exception as e:
+        logging_utils.log_error(f"Error retrieving record for apk_id {apk_id}", e)
+        return None
+
 def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
     query = """
     SELECT a.apk_id, a.sha256
@@ -55,7 +74,7 @@ def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
     WHERE b.no_virustotal_data IS NULL AND a.apk_id = %s
     ORDER BY a.apk_id ASC
     """
-    params = (apk_id,)
+    params = (apk_id,)  # Keep apk_id as an int, the database driver handles conversion
     try:
         result = dbConnect.execute_query(query, params, fetch=True)
         if result:
@@ -64,4 +83,40 @@ def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
             return None
     except Exception as e:
         logging_utils.log_error(f"Error retrieving record for apk_id {apk_id}", e)
+        return None
+
+def check_unknown_permissions_duplicates() -> Optional[List[Tuple[str, int]]]:
+    query = """
+    SELECT constant_value, GROUP_CONCAT(permission_id) as permission_ids
+    FROM unknown_permissions
+    GROUP BY constant_value
+    HAVING COUNT(permission_id) > 1
+    """
+    try:
+        result = dbConnect.execute_query(query, fetch=True)
+        if result:
+            non_unique_values = [(row[0], row[1]) for row in result]
+            for value, ids in non_unique_values:
+                print(f"Non-unique constant_value: {value}, Permission IDs: {ids}")
+            return non_unique_values
+        else:
+            print("No non-unique constant_values found.")
+            return None
+    except Exception as e:
+        logging_utils.log_error("Error finding non-unique constant_values", e)
+        return None
+
+def check_uknown_permissions_alpha() -> Optional[List[Tuple[int, str]]]:
+    query = "SELECT permission_id, constant_value FROM unknown_permissions"
+    query += " WHERE constant_value LIKE 'android.permission.%' order by constant_value"
+    try:
+        result = dbConnect.execute_query(query, fetch=True)
+        if result:
+            permissions = [(row[0], row[1]) for row in result]
+            return permissions
+        else:
+            print("No permissions found matching 'android.permission.*' format.")
+            return None
+    except Exception as e:
+        logging_utils.log_error("Error retrieving 'android.permission.*' formatted permissions", e)
         return None
