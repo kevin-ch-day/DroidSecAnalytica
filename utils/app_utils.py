@@ -7,6 +7,7 @@ import ctypes
 import ctypes.wintypes
 import subprocess
 import requests
+from typing import Optional
 
 from . import user_prompts, app_display, logging_utils
 
@@ -19,33 +20,6 @@ def android_apk_selection():
         return
     apk_choice = user_prompts.user_menu_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files) + 1)])
     return apk_files[int(apk_choice) - 1]
-
-def wait_for_next_batch(batch_interval):
-    try:      
-        time_left = batch_interval
-        for j in range(3, 0, -1):
-            minutes_left = time_left // 60
-            if minutes_left > 0:
-                print(f"{minutes_left} minutes left.")
-            time_left -= 60
-            time.sleep(60)
-
-    except KeyboardInterrupt:
-        logging_utils.log_info("Batch process interrupted by user.")
-        exit()
-
-def format_timestamp(timestamp, format='%Y-%m-%d %H:%M:%S'):
-    try:
-        return datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
-    except ValueError:
-        logging_utils.log_error("Invalid timestamp format.")
-        return 'Invalid Timestamp format.'
-    
-def format_seconds_to_dhms(seconds):
-    days, remainder = divmod(seconds, 86400)
-    hours, remainder = divmod(remainder, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return f"{days}d {hours}h {minutes}m {seconds}s"
 
 def enable_windows_ansi_support():
     if platform.system() == "Windows":
@@ -78,3 +52,37 @@ def check_virustotal_connection():
     except requests.RequestException as e:
         logging_utils.log_error(f"Request to VirusTotal failed: {e}")
         return False
+
+def format_timestamp(timestamp, format='%Y-%m-%d %H:%M:%S'):
+    try:
+        formatted_time = datetime.datetime.fromtimestamp(int(timestamp)).strftime(format)
+        return formatted_time
+    except (ValueError, TypeError):
+        logging_utils.log_error("Invalid timestamp format.")
+        return 'Invalid Timestamp format.'
+
+def format_seconds_to_dhms(seconds):
+    days, remainder = divmod(seconds, 86400)
+    hours, remainder = divmod(remainder, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{days}d {hours}h {minutes}m {seconds}s"
+
+def pause_with_updates(wait_time: int, update_interval: int = 60, display_text: Optional[str] = None):
+    # Pauses execution while providing updates on the remaining time. Can be used to pause
+    # with progress feedback or wait for the next batch with less frequent updates.
+
+    try:
+        if not display_text:
+            display_text = "Pausing..." if update_interval == 1 else "Waiting for next batch..."
+        print(display_text)
+
+        for remaining_time in range(wait_time, 0, -update_interval):
+            minutes, seconds = divmod(remaining_time, 60)
+            time_display = f"Time remaining: {minutes:02d} minutes {seconds:02d} seconds"
+            print(f"\r{time_display}", end="")
+            # Sleep for the update_interval or the remaining time if it's less than the update_interval
+            time.sleep(min(update_interval, remaining_time))
+
+        print("\nProcess completed.")
+    except KeyboardInterrupt:
+        print("\nProcess interrupted by user.")

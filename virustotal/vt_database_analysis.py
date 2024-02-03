@@ -2,7 +2,7 @@
 
 from database import DBFunctions, DBRecordInserts
 from virustotal import vt_requests, vt_response, vt_utils, vt_androguard
-from utils import user_prompts
+from utils import user_prompts, app_utils
 import time
 
 def process_apk_samples(apk_sample_records, iterative_mode=False):
@@ -14,7 +14,7 @@ def process_apk_samples(apk_sample_records, iterative_mode=False):
         
         if iterative_mode and iteration == 4:
             iteration = 0
-            pause_with_progress(wait_time)
+            app_utils.pause_with_updates(wait_time)
         else:
             iteration += 1
 
@@ -91,22 +91,6 @@ def add_permission(permission):
     result = DBRecordInserts.insert_android_permission(permission.name)
     if not result:
         print("Failed to add permission.")
-
-def pause_with_progress(wait_time, update_interval=1, display_text="Pausing..."):
-    try:
-        print(display_text)
-        remaining_time = wait_time
-        while remaining_time > 0:
-            minutes, seconds = divmod(remaining_time, 60)
-            time_display = f"Time remaining: {minutes:02d} minutes {seconds:02d} seconds"
-            print(f"\r{time_display}", end="")
-            time.sleep(update_interval)
-            remaining_time -= update_interval
-
-        print("\nPause completed.")
-    except KeyboardInterrupt:
-        print("\nPause interrupted by user.")
-        raise
 
 def alpha():
     try:
