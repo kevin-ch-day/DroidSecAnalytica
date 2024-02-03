@@ -72,7 +72,12 @@ def populate_permissions(androguard_data, data):
         for permission, details in permission_details.items():
             # Extract permission details
             short_description = details.get('short_description', 'N/A')
+            
             full_description = details.get('full_description', 'N/A')
+            full_description = full_description.strip()
+            full_description = " ".join(full_description.split())
+            full_description = full_description.replace("\n", " ").replace("\r", " ")
+            
             permission_type = details.get('permission_type', 'N/A')
 
             # Capitalize and title-casing

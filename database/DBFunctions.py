@@ -28,7 +28,7 @@ def get_permission_id_by_name(perm_name):
     result = dbConnect.execute_query(query, params, fetch=True)
     return result[0][0] if result else None
 
-def get_unknown_permission_id(perm_name):
+def get_unknown_permission_id(perm_obj):
     query = "SELECT permission_id FROM unknown_permissions WHERE constant_value = %s"
     params = (perm_name,)
     result = dbConnect.execute_query(query, params, fetch=True)

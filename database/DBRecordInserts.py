@@ -41,16 +41,31 @@ def get_next_unknown_permission_permission_id() -> int:
     else:
         return 1
 
-def insert_unknown_permission(permission_name: str) -> Optional[bool]:
+def insert_unknown_permission(index) -> Optional[bool]:
+    # Inserts a new permission record into the 'unknown_permissions'
+    # table with details provided in the index object.
+
     next_permission_id = get_next_unknown_permission_permission_id()
-    print(f"\nNext Id: {next_permission_id}")
     if not next_permission_id:
-        print("Error: permission id")
+        print("Error: Could not retrieve the next permission ID.")
         return None
     
-    query = "INSERT INTO unknown_permissions (permission_id, constant_value) VALUES (%s, %s)"
-    params = (next_permission_id, permission_name)
-    return execute_sql(query, params)
+    query = "INSERT INTO unknown_permissions ("
+    query += " permission_id, constant_value, protection_level, andro_short_desc, andro_long_desc"
+    query += " ) VALUES (%s, %s, %s, %s, %s)"
+    params = (next_permission_id,
+            index.constant_value,
+            index.protection_level,
+            index.andro_short_desc,
+            index.andro_long_desc)
+    
+    try:
+        result = execute_sql(query, params)
+        print(f"Permission {index.constant_value} inserted successfully.")
+        return result
+    except Exception as e:
+        logging_utils.log_error(f"Error inserting unknown permission {index.constant_value}", e)
+        return False
 
 def insert_android_permission(permission_name: str) -> Optional[bool]:
     query = "INSERT INTO android_permissions (permission_name, constant_value) VALUES (%s, %s)"

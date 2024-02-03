@@ -34,6 +34,11 @@ def handle_detected_permissions(permissions):
     known_permissions = list()
     unknown_permissions = list()
     for index in permissions:
+        print(f"\n{index.name}")
+        print(f"Type: {index.permission_type}")
+        print(f"Info: {index.short_desc}")
+        print(f"Desc: {index.long_desc}")
+
         perm_id = DBFunctions.get_permission_id_by_name(index.name)
         if perm_id:
             known_permissions.append((perm_id, index.name))
@@ -42,11 +47,6 @@ def handle_detected_permissions(permissions):
             unknown_permissions.append([unknown_id, index])
             if not unknown_id:
                 process_unknown_permission_v2(index)
-
-    # if known_permissions:
-    #     print("\nPermissions:")
-    #     for index in known_permissions:
-    #         print(f" [{index[0]}] {index[1]}")
     
     if unknown_permissions:
         print("\nUnknown permissions:")
@@ -83,7 +83,7 @@ def process_unknown_permission_v2(permission):
     print(f"\nUnknown permission: {permission.name}")
     unknown_id = DBFunctions.get_unknown_permission_id(permission.name)
     if not unknown_id:
-        result = DBRecordInserts.insert_unknown_permission(permission.name)
+        result = DBRecordInserts.insert_unknown_permission(permission)
         if not result:
             print("Failed to add permission.")
 

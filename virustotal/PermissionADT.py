@@ -90,4 +90,4 @@ class PermissionADT:
 
     def display_summary(self):
         # Display a summary of the permission
-        return f"Name: {self._name}, Short Description: {self._short_desc}, Type: {self._permission_type}"
+        return f"Name: {self._name} Description: {self._short_desc} Type: {self._permission_type}"
