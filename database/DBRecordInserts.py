@@ -37,7 +37,7 @@ def get_next_unknown_permission_permission_id() -> int:
     query = "SELECT MAX(permission_id) FROM unknown_permissions"
     result = execute_sql(query, should_fetch=True)
     if result and result[0][0] is not None:
-        return result[0][0] + 1  # Increment the highest permission_id by 1
+        return result[0][0] + 1 
     else:
         return 1
 
@@ -45,26 +45,25 @@ def insert_unknown_permission(index) -> Optional[bool]:
     # Inserts a new permission record into the 'unknown_permissions'
     # table with details provided in the index object.
 
-    next_permission_id = get_next_unknown_permission_permission_id()
-    if not next_permission_id:
+    id = get_next_unknown_permission_permission_id()
+    if not id:
         print("Error: Could not retrieve the next permission ID.")
         return None
     
     query = "INSERT INTO unknown_permissions ("
     query += " permission_id, constant_value, protection_level, andro_short_desc, andro_long_desc"
     query += " ) VALUES (%s, %s, %s, %s, %s)"
-    params = (next_permission_id,
-            index.constant_value,
-            index.protection_level,
-            index.andro_short_desc,
-            index.andro_long_desc)
+    params = (id, index.name,
+            index.permission_type,
+            index.short_desc,
+            index.long_desc)
     
     try:
         result = execute_sql(query, params)
-        print(f"Permission {index.constant_value} inserted successfully.")
+        print(f"Permission {index.name} inserted successfully.")
         return result
     except Exception as e:
-        logging_utils.log_error(f"Error inserting unknown permission {index.constant_value}", e)
+        logging_utils.log_error(f"Error inserting unknown permission {index.name}", e)
         return False
 
 def insert_android_permission(permission_name: str) -> Optional[bool]:

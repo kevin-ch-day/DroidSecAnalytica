@@ -28,7 +28,7 @@ def get_permission_id_by_name(perm_name):
     result = dbConnect.execute_query(query, params, fetch=True)
     return result[0][0] if result else None
 
-def get_unknown_permission_id(perm_obj):
+def get_unknown_permission_id(perm_name):
     query = "SELECT permission_id FROM unknown_permissions WHERE constant_value = %s"
     params = (perm_name,)
     result = dbConnect.execute_query(query, params, fetch=True)
@@ -48,12 +48,10 @@ def is_unknown_perm_table_empty() -> bool:
         return True  # Assume empty in case of error to handle gracefully
 
 def get_apk_records_sha256(apk_id: Optional[int] = None) -> Optional[List[Tuple[int, str]]]:
-    query = """
-    SELECT a.apk_id, a.sha256
-    FROM apk_samples a
-    JOIN malware_ioc_threats b ON a.sha256 = b.sha256
-    WHERE b.no_virustotal_data IS NULL
-    """
+    query = "SELECT a.apk_id, a.sha256 FROM apk_samples a"
+    query += " JOIN malware_ioc_threats b ON a.sha256 = b.sha256"
+    query += " WHERE b.no_virustotal_data IS NULL"
+
     params = ()
     if apk_id is not None:
         query += " AND a.apk_id >= %s"
@@ -91,12 +89,9 @@ def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
         return None
 
 def check_unknown_permissions_duplicates() -> Optional[List[Tuple[str, int]]]:
-    query = """
-    SELECT constant_value, GROUP_CONCAT(permission_id) as permission_ids
-    FROM unknown_permissions
-    GROUP BY constant_value
-    HAVING COUNT(permission_id) > 1
-    """
+    query = "SELECT constant_value, GROUP_CONCAT(permission_id) as permission_ids"
+    query += " FROM unknown_permissions GROUP BY constant_value HAVING COUNT(permission_id) > 1"
+
     try:
         result = dbConnect.execute_query(query, fetch=True)
         if result:

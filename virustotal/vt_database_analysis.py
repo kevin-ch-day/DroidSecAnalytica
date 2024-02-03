@@ -34,14 +34,17 @@ def handle_detected_permissions(permissions):
     known_permissions = list()
     unknown_permissions = list()
     for index in permissions:
-        print(f"\n{index.name}")
-        print(f"Type: {index.permission_type}")
-        print(f"Info: {index.short_desc}")
-        print(f"Desc: {index.long_desc}")
+        #print(f"\n{index.name}")
+        #print(f"Type: {index.permission_type}")
+        #print(f"Info: {index.short_desc}")
+        #print(f"Desc: {index.long_desc}")
 
+        # check if standard android permissions
         perm_id = DBFunctions.get_permission_id_by_name(index.name)
         if perm_id:
             known_permissions.append((perm_id, index.name))
+        
+        # permission is non-standard or unknown
         else:
             unknown_id = DBFunctions.get_unknown_permission_id(index.name)
             unknown_permissions.append([unknown_id, index])
@@ -51,7 +54,7 @@ def handle_detected_permissions(permissions):
     if unknown_permissions:
         print("\nUnknown permissions:")
         for index in unknown_permissions:
-            print(f" {index[1].name} {index[1].permission_type}") # PermissionADT Object
+            print(index[1].name)
 
 def process_unknown_permission(permission):
     print(f"\nUnknown permission: {permission.name}")
@@ -77,7 +80,7 @@ def process_unknown_permission(permission):
             break
 
         else:
-            print("Invalid choice, please enter 1, 2, or 3.")\
+            print("Invalid choice, please enter 1, 2, or 3.")
             
 def process_unknown_permission_v2(permission):
     print(f"\nUnknown permission: {permission.name}")
