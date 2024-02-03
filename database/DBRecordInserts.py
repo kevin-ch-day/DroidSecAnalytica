@@ -60,7 +60,6 @@ def insert_unknown_permission(index) -> Optional[bool]:
     
     try:
         result = execute_sql(query, params)
-        print(f"Permission {index.name} inserted successfully.")
         return result
     except Exception as e:
         logging_utils.log_error(f"Error inserting unknown permission {index.name}", e)

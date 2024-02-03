@@ -18,7 +18,7 @@ def process_apk_samples(apk_sample_records, iterative_mode=False):
         else:
             iteration += 1
 
-        user_prompts.pause_until_keypress()
+        #user_prompts.pause_until_keypress()
 
 def process_apk_sample(record):
     print(f"ID: {record[0]} SHA-256: {record[1]}")
@@ -51,10 +51,10 @@ def handle_detected_permissions(permissions):
             if not unknown_id:
                 process_unknown_permission_v2(index)
     
-    if unknown_permissions:
-        print("\nUnknown permissions:")
-        for index in unknown_permissions:
-            print(index[1].name)
+    # if unknown_permissions:
+    #     print("\nUnknown permissions:")
+    #     for index in unknown_permissions:
+    #         print(index[1].name)
 
 def process_unknown_permission(permission):
     print(f"\nUnknown permission: {permission.name}")
@@ -83,7 +83,7 @@ def process_unknown_permission(permission):
             print("Invalid choice, please enter 1, 2, or 3.")
             
 def process_unknown_permission_v2(permission):
-    print(f"\nUnknown permission: {permission.name}")
+    #print(f"\nUnknown permission: {permission.name}")
     unknown_id = DBFunctions.get_unknown_permission_id(permission.name)
     if not unknown_id:
         result = DBRecordInserts.insert_unknown_permission(permission)
@@ -97,7 +97,7 @@ def add_permission(permission):
 
 def alpha():
     try:
-        apk_records = DBFunctions.get_apk_records_sha256()
+        apk_records = DBFunctions.get_apk_records_sha256(422)
         if not apk_records:
             print("No APK samples found in the database.")
             return
