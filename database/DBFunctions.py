@@ -47,15 +47,20 @@ def is_unknown_perm_table_empty() -> bool:
         logging_utils.log_error("Error checking if 'unknown_android_permissions' table is empty", e)
         return True  # Assume empty in case of error to handle gracefully
 
-def get_apk_records_sha256(apk_id: int) -> Optional[Tuple[int, str]]:
+def get_apk_records_sha256(apk_id: Optional[int] = None) -> Optional[List[Tuple[int, str]]]:
     query = """
     SELECT a.apk_id, a.sha256
     FROM apk_samples a
     JOIN malware_ioc_threats b ON a.sha256 = b.sha256
-    WHERE b.no_virustotal_data IS NULL AND a.apk_id >= %s
-    ORDER BY a.apk_id ASC
+    WHERE b.no_virustotal_data IS NULL
     """
-    params = (apk_id,)
+    params = ()
+    if apk_id is not None:
+        query += " AND a.apk_id >= %s"
+        params = (apk_id,)
+
+    query += " ORDER BY a.apk_id ASC"
+
     try:
         result = dbConnect.execute_query(query, params, fetch=True)
         if result:
@@ -63,7 +68,7 @@ def get_apk_records_sha256(apk_id: int) -> Optional[Tuple[int, str]]:
         else:
             return None
     except Exception as e:
-        logging_utils.log_error(f"Error retrieving record for apk_id {apk_id}", e)
+        logging_utils.log_error(f"Error retrieving records", e)
         return None
 
 def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:

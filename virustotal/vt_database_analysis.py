@@ -9,7 +9,6 @@ def process_apk_samples(apk_sample_records, iterative_mode=False):
     print("\nProcessing APK Samples")
     wait_time = 4 * 60 if iterative_mode else 0
     iteration = 0
-
     for record in apk_sample_records:
         process_apk_sample(record)
         
@@ -62,13 +61,16 @@ def process_unknown_permission(permission):
         print("2. Unknown permission table")
         print("3. Skip")
         choice = input("Enter your choice: ").strip()
-
         if choice == '1':
             add_permission(permission)
             break
         
         elif choice == '2':
-            record_unknown_permission(permission)
+            unknown_id = DBFunctions.get_unknown_permission_id(permission.name)
+            if not unknown_id:
+                result = DBRecordInserts.insert_unknown_permission(permission.name)
+                if not result:
+                    print("Failed to add permission.")
             break
 
         elif choice == '3':
@@ -79,30 +81,21 @@ def process_unknown_permission(permission):
             
 def process_unknown_permission_v2(permission):
     print(f"\nUnknown permission: {permission.name}")
-    record_unknown_permission(permission)
-
-def add_permission(permission):
-    # This function needs to be defined or updated accordingly
-    add_permission_result = DBRecordInserts.insert_android_permission(permission.name)
-    if add_permission_result:
-        print("Permission added.")
-    else:
-        print("Failed.")
-
-def record_unknown_permission(permission):
     unknown_id = DBFunctions.get_unknown_permission_id(permission.name)
     if not unknown_id:
         result = DBRecordInserts.insert_unknown_permission(permission.name)
-        if result:
-            print("Permission added.")
-        else:
-            print("Failed.")
+        if not result:
+            print("Failed to add permission.")
+
+def add_permission(permission):
+    result = DBRecordInserts.insert_android_permission(permission.name)
+    if not result:
+        print("Failed to add permission.")
 
 def pause_with_progress(wait_time, update_interval=1, display_text="Pausing..."):
     try:
         print(display_text)
         remaining_time = wait_time
-
         while remaining_time > 0:
             minutes, seconds = divmod(remaining_time, 60)
             time_display = f"Time remaining: {minutes:02d} minutes {seconds:02d} seconds"
@@ -117,7 +110,7 @@ def pause_with_progress(wait_time, update_interval=1, display_text="Pausing...")
 
 def alpha():
     try:
-        apk_records = DBFunctions.get_apk_records_sha256(16)
+        apk_records = DBFunctions.get_apk_records_sha256()
         if not apk_records:
             print("No APK samples found in the database.")
             return
@@ -127,19 +120,20 @@ def alpha():
 
 def beta():
     file_path = "output/unknown_permissions_output.txt"
-    results = DBFunctions.check_uknown_permissions_alpha()
-    for perm_id, constant_value in results:
-        print(f"ID: {perm_id} {constant_value}")
+    results = DBFunctions.check_uknown_permissions_alpha()    
+    with open(file_path, 'w') as file:
+        for perm_id, constant_value in results:
+            file.write(f"ID: {perm_id} {constant_value}\n")
+    print(f"Results have been written to {file_path}")
 
-def check_apk_sample_process():
-    record_id = 11
-    sha256 = DBFunctions.get_apk_record_sha256_by_id(12)
+def check_apk_sample_process(record_id):
+    sha256 = DBFunctions.get_apk_record_sha256_by_id(record_id)
     process_apk_sample(sha256)
 
 def run_analysis():
     try:
-        #alpha()
-        beta()
-        #check_apk_sample_process()
+        alpha()
+        #beta()
+        #check_apk_sample_process(12)
     except Exception as e:
         print(f"Error running the analysis: {e}")
