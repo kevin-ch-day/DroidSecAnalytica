@@ -14,9 +14,10 @@ def database_menu():
         print(app_display.format_menu_option(4, "Show Query Statistics"))
         print(app_display.format_menu_option(5, "Display Disk Usage"))
         print(app_display.format_menu_option(6, "Show Thread Information"))
+        print(app_display.format_menu_option(7, "Reorder Unknown Permissions Table"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
 
-        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
+        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '7','0'])
         if menu_choice == '0':
             break
         

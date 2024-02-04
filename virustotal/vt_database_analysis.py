@@ -97,7 +97,7 @@ def add_permission(permission):
 
 def alpha():
     try:
-        apk_records = DBFunctions.get_apk_records_sha256(422)
+        apk_records = DBFunctions.get_apk_records_sha256()
         if not apk_records:
             print("No APK samples found in the database.")
             return
