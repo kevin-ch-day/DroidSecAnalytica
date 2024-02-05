@@ -1,6 +1,6 @@
-# PermissionADT.py
+# AndroPermissionADT.py
 
-class PermissionADT:
+class AndroPermissionADT:
     _instances = {}
 
     def __init__(self, name: str = "", short_desc: str = "", long_desc: str = "", permission_type: str = ""):

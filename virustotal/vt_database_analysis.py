@@ -41,44 +41,6 @@ def process_apk_sample(record):
 def update_vendor_column(engine, label):
     pass
 
-def handle_detected_permissions(permissions):
-    known_permissions = list()
-    unknown_permissions = list()
-    for index in permissions:
-        #print(f"\n{index.name}")
-        #print(f"Type: {index.permission_type}")
-        #print(f"Info: {index.short_desc}")
-        #print(f"Desc: {index.long_desc}")
-
-        # check if standard android permissions
-        perm_id = DBFunct_Perm.get_permission_id_by_name(index.name)
-        if perm_id:
-            known_permissions.append((perm_id, index.name))
-        
-        # permission is non-standard or unknown
-        else:
-            unknown_id = DBFunct_Perm.get_unknown_permission_id(index.name)
-            unknown_permissions.append([unknown_id, index])
-            if not unknown_id:
-                process_unknown_permission(index)
-    
-    # if unknown_permissions:
-    #     print("\nUnknown permissions:")
-    #     for index in unknown_permissions:
-    #         print(index[1].name)
-
-def process_unknown_permission(permission):
-    #print(f"\nUnknown permission: {permission.name}")
-    unknown_id = DBFunct_Perm.get_unknown_permission_id(permission.name)
-    if not unknown_id:
-        result = DBRecordInserts.insert_unknown_permission(permission)
-        if not result:
-            print("Failed to add permission.")
-
-def add_permission(permission):
-    result = DBRecordInserts.insert_android_permission(permission.name)
-    if not result:
-        print("Failed to add permission.")
 
 def run_analysis():
     try:

@@ -1,4 +1,4 @@
-from . import PermissionADT
+from . import AndroPermissionADT
 from . import PermissionManager
 from . import IntentFilterADT
 
@@ -18,8 +18,8 @@ class AndroguardADT:
         self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
 
     def add_permission(self, permission_data):
-        if not isinstance(permission_data, PermissionADT.PermissionADT):
-            raise TypeError("permission_data must be an instance of PermissionADT")
+        if not isinstance(permission_data, AndroPermissionADT.AndroPermissionADT):
+            raise TypeError("permission_data must be an instance of AndroPermissionADT")
         self.permissions_manager.add_permission(permission_data)
 
     def get_permissions(self):
@@ -148,7 +148,7 @@ class AndroguardADT:
 
     def __str__(self) -> str:
         """
-        Provides a detailed string representation of the AndroguardADT object,
+        Provides a detailed string representation of the AndroPermissionADT object,
         summarizing its main attributes and components with more details.
         """
         components_summary = {
