@@ -1,4 +1,4 @@
-import vt_response, vt_androguard
+from . import vt_response, vt_androguard
 
 
 def user_vt_data_processing(response):

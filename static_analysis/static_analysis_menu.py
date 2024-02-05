@@ -1,7 +1,8 @@
 # static_analysis_menu.py
 
 from utils import app_display, user_prompts
-from . import manifest_analysis, permission_analyzer, static_analysis, apk_decompilation
+from . import manifest_analysis, static_analysis, apk_decompilation
+from permission_analysis import permission_analyzer
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():
@@ -44,7 +45,7 @@ def show_menu():
             print("Permission Analysis")
             apk_path = user_prompts.user_enter_apk_path()
             decompiled_apk_dir = static_analysis.apk_static_analysis(apk_path)
-            permission_analyzer.extract_permissions(decompiled_apk_dir)
+            #permission_analyzer.extract_permissions(decompiled_apk_dir)
 
         # Exit
         elif menu_choice == '0':

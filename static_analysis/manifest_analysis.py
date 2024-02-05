@@ -6,7 +6,8 @@ import xml.etree.ElementTree as ET
 from typing import Optional, Dict, List
 
 from utils import load_data
-from . import intent_filters_analysis, permission_analyzer 
+from . import intent_filters_analysis
+from permission_analysis import permission_analyzer
 
 # Constants
 METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
