@@ -13,9 +13,8 @@ def show_menu():
         print(app_display.format_menu_option(4, "Perform Static Analysis"))
         print(app_display.format_menu_option(5, "Perform AndroidManifest.xml Analysis"))
         print(app_display.format_menu_option(6, "Perform Permission Analysis"))
-        print(app_display.format_menu_option(7, "Check if samples has been perivously analyzed"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
-        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])
+        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
     
         # Display APK Files
         if menu_choice == '1':
@@ -46,11 +45,6 @@ def show_menu():
             apk_path = user_prompts.user_enter_apk_path()
             decompiled_apk_dir = static_analysis.apk_static_analysis(apk_path)
             permission_analyzer.extract_permissions(decompiled_apk_dir)
-
-        # Check Previously Analyzed
-        elif menu_choice == '7':
-            print(app_display.format_menu_title("Check If Previously Analyzed"))
-            static_analysis.check_analyzed_by_apk_path()
 
         # Exit
         elif menu_choice == '0':

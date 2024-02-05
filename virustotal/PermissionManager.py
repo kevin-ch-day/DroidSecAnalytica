@@ -1,4 +1,4 @@
-from . import PermissionADT
+from . import AndroPermissionADT
 import bisect
 
 class PermissionManager:
@@ -8,14 +8,14 @@ class PermissionManager:
             for permission in initial_permissions:
                 self.add_permission(permission)
 
-    def add_permission(self, permission: PermissionADT.PermissionADT):
+    def add_permission(self, permission: AndroPermissionADT.AndroPermissionADT):
         self._permissions[permission.name] = permission
     
     def _find_insert_position(self, permission_name: str) -> int:
         return bisect.bisect_left([perm.name for perm in self._permissions], permission_name)
 
 
-    def get_permission(self, name: str) -> PermissionADT.PermissionADT:
+    def get_permission(self, name: str) -> AndroPermissionADT.AndroPermissionADT:
         return self._permissions.get(name)
 
     def remove_permission(self, name: str):

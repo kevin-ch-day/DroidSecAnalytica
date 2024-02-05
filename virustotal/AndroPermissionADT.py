@@ -9,7 +9,7 @@ class AndroPermissionADT:
         self._short_desc = short_desc
         self._long_desc = long_desc
         self._permission_type = permission_type
-        PermissionADT._instances[name] = self
+        AndroPermissionADT._instances[name] = self
 
     @classmethod
     def get_instance(cls, name):

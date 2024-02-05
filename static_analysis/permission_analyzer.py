@@ -47,10 +47,10 @@ def analyze_permissions(permissions):
             if not unknown_id:
                 process_unknown_permission(index)
     
-def process_unknown_permission(permission_nam):
-    unknown_id = DBFunct_Perm.get_unknown_permission_id(permission.name)
+def process_unknown_permission(permission_name):
+    unknown_id = DBFunct_Perm.get_unknown_permission_id(permission_name)
     if not unknown_id:
-        result = DBRecordInserts.insert_unknown_permission(permission)
+        result = DBRecordInserts.insert_unknown_permission(permission_name)
         if not result:
             print("Failed to add permission.")
 

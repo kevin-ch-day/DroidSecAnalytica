@@ -18,7 +18,7 @@ def virustotal_menu():
             1: "Submit a sample",
             2: "Run Database Analysis",
             3: "Check Virustotal API Key",
-            4: "Check Virustotal.com",
+            4: "Check Virustotal.com Connection",
             5: "Check Internet Connection"
         }
         display_menu(menu_title, menu_options)
@@ -72,7 +72,7 @@ def handle_response_data(response):
         menu_title = "Data Results"
         menu_options = {
             1: "Display results",
-            2: "Write results to file",
+            2: "Save results to file",
             3: "Display Androguard data",
             4: "View summary statistics",
             5: "View detection breakdown"

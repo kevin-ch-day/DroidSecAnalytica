@@ -1,5 +1,5 @@
 import re
-from . import AndroguardADT, PermissionADT
+from . import AndroguardADT, AndroPermissionADT
 from utils import logging_utils
 
 def androguard_data(response):
