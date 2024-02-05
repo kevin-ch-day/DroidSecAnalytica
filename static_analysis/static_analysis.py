@@ -43,7 +43,7 @@ def static_menu():
         
         # Display available APK Files
         elif menu_choice == '5':
-            permission_analyzer.handle_permissions_analysis
+            permission_analyzer.handle_permissions_analysis()
         
         # Display APK File Hashes
         elif menu_choice == '6':
