@@ -3,110 +3,17 @@ import subprocess
 import platform
 from typing import Optional
 
-from utils import app_utils, app_display, user_prompts, logging_utils, hash_utils
+from utils import app_utils, user_prompts, logging_utils
 from . import manifest_analysis, permission_analyzer
-from database import DBFunctions, DBTableManagement
 
 # Constants for file paths
 ANALYSIS_OUTPUT_DIR = 'output'
 
-# Display the static analysis menu and handle user interaction.
-def static_menu():
-    while True:
-        print(app_display.format_menu_title("Static Analysis Menu"))
-        print(app_display.format_menu_option(1, "Check if sample has been analyzed"))
-        print(app_display.format_menu_option(2, "Decompile APK File"))
-        print(app_display.format_menu_option(3, "Perform Static Analysis"))
-        print(app_display.format_menu_option(4, "Perform Permission Analysis"))
-        print(app_display.format_menu_option(5, "Display Available APK Files"))
-        print(app_display.format_menu_option(6, "Display APK File Hashes"))
-        print(app_display.format_menu_option(0, "Return to Main Menu"))
-        menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
-        
-        # Check if sample has been previously analyzed
-        if menu_choice == '1':
-            check_sample_menu()
-        
-        # Decompile APK file
-        elif menu_choice == '2':
-            handle_apk_decompilation()
-        
-        # Static analysis
-        elif menu_choice == '3':
-            print("Perform Full Static Analysis")
-            #handle_static_apk_analysis()
-
-        # Permission analysis
-        elif menu_choice == '4':
-            print("Perform Permissin Analysis")
-            #handle_permissions_analysis()
-        
-        # Display available APK Files
-        elif menu_choice == '5':
-            permission_analyzer.handle_permissions_analysis()
-        
-        # Display APK File Hashes
-        elif menu_choice == '6':
-            app_display.display_apk_files()
-        
-        elif menu_choice == '0':
-            break
-        
-        else:
-            print("Invalid option. Please try again.")
-        user_prompts.pause_until_keypress()
-
-def check_sample_menu():
-    print(app_display.format_menu_title("Check Previously Analyzed"))
-    print(app_display.format_menu_option(1, "Check by APK Path"))
-    print(app_display.format_menu_option(2, "Check by Hash IOC"))
-    print(app_display.format_menu_option(3, "Return to Menu"))
-    user_options = ['1', '2', '3']
-    user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
-    if user_choice == '1':
-        check_analyzed_by_apk_path()
-
-    elif user_choice == '2':
-        check_analyzed_by_hash_ioc()
-
-    elif user_choice == '3':
-        return
-
 def check_analyzed_by_apk_path():
     apk_path = user_prompts.user_enter_apk_path()
-    perform_preanalysis(apk_path)
 
 def check_analyzed_by_hash_ioc():
     hash_ioc = user_prompts.user_enter_hash_ioc()
-    # Check if the hash IOC has records
-
-# Run static analysis
-def perform_preanalysis(apk_path: str):
-    apk_hashes = hash_utils.calculate_hashes(apk_path)
-    hash_utils.display_hashes(apk_path, apk_hashes)
-    
-    if not DBFunctions.check_for_hash_record(apk_hashes):
-        # Hash does not have a record in malware_threat_metadata
-        print("IOC hash does not have a record")
-        file_basename = os.path.basename(apk_path)
-        file_size_bytes = os.path.getsize(apk_path)
-        DBTableManagement.create_apk_record(file_basename, file_size_bytes, apk_hashes["MD5"], apk_hashes["SHA1"], apk_hashes["SHA256"])
-        
-        if not DBFunctions.check_if_hash_analyzed(apk_hashes):
-            # Hash has not been analyzed
-            print("IOC hash has not been analyzed")
-            apk_static_analysis(apk_path)
-
-        else:
-            # Hash has been analyzed
-            print("IOC hash has already been analyzed")
-            return
-
-    else:
-        # Hash has a record in malware_threat_metadata
-        print("IOC hash has a record")
-
-    input("Press any button to continue...")
 
 def handle_apk_decompilation():
     apk_path = app_utils.android_apk_selection()

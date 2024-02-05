@@ -1,4 +1,4 @@
-# DBFunctions.py
+# DBFunct_Perm.py
 
 from typing import Optional, Tuple, List, Dict
 from . import DBConnectionManager as dbConnect

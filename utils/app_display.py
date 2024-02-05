@@ -15,7 +15,7 @@ def display_apk_files():
         print(f" [{i}] {file}")
     return apk_files
 
-# DIsplay disk usgae
+# Display disk usgae
 def display_disk_usage(disk_usage):
     if not disk_usage:
         print("No disk usage data available.")

@@ -3,7 +3,7 @@ import sys
 import logging
 
 # Import custom libraries
-from static_analysis import static_analysis
+from static_analysis import static_analysis_menu
 from virustotal import vt_menu
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
@@ -34,7 +34,7 @@ def main():
 
         try:
             if choice == '1':
-                static_analysis.static_menu()
+                static_analysis_menu.show_menu()
             
             elif choice == '2':
                 dynamic_analysis.dynamic_menu()
