@@ -35,7 +35,6 @@ def show_menu():
             apk_path = user_prompts.user_enter_apk_path()
             decompiled_apk_dir = static_analysis.apk_static_analysis(apk_path)
 
-
         # Permission analysis
         elif menu_choice == '5':
             print("Permission Analysis")
