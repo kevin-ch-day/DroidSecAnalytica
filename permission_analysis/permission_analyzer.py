@@ -1,7 +1,10 @@
+# permission_analyzer.py
+
 import os
 import xml.etree.ElementTree as ET
 from static_analysis import apk_decompilation
 from database import DBFunct_Perm, DBRecordInserts
+
 
 def handle_apk_permission_detection(apk_path):
     decompiled_apk_path = apk_decompilation.decompile_apk(apk_path)

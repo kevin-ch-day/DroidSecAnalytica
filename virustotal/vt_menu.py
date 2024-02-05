@@ -3,13 +3,8 @@ from . import vt_utils
 from . import vt_database_analysis
 from . import vt_androguard
 from . import vt_display
+from . import vt_analysis
 from utils import user_prompts, app_display
-
-def display_menu(menu_title, menu_options):
-    print(app_display.format_menu_title(menu_title))
-    for key, option in menu_options.items():
-        print(app_display.format_menu_option(key, option))
-    print(app_display.format_menu_option(0, "Return"))
 
 def virustotal_menu():
     while True:
@@ -21,7 +16,7 @@ def virustotal_menu():
             4: "Check Virustotal.com Connection",
             5: "Check Internet Connection"
         }
-        display_menu(menu_title, menu_options)
+        app_display.display_menu(menu_title, menu_options)
         user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
 
         if user_choice == '0':
@@ -42,12 +37,13 @@ def virustotal_menu():
         user_prompts.pause_until_keypress()
 
 def handle_sample_submission():
-    menu_title = "Sample Submission"
+    menu_title = "VirusTotal.com Sample Submission:"
     menu_options = {
-        1: "Submit APK File",
-        2: "Submit Hash IOC"
+        1: "APK",
+        2: "Hash",
+        0: "Return"
     }
-    display_menu(menu_title, menu_options)
+    app_display.display_menu(menu_title, menu_options)
     choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
 
     if choice == '0':
@@ -55,9 +51,11 @@ def handle_sample_submission():
     
     elif choice == '1':
         response = vt_utils.submit_apk()
+        vt_analysis.user_vt_data_processing(response)
         
     elif choice == '2':
         response = vt_utils.submit_hash()
+        vt_analysis.user_vt_data_processing(response)
     
     else:
         print("Invalid choice. Please try again.")
@@ -77,7 +75,7 @@ def handle_response_data(response):
             4: "View summary statistics",
             5: "View detection breakdown"
         }
-        display_menu(menu_title, menu_options)
+        app_display.display_menu(menu_title, menu_options)
 
         choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
@@ -109,7 +107,7 @@ def display_androguard_data(response):
                 4: "Permissions",
                 5: "Intent Filters"
             }
-            display_menu(menu_title, menu_options)
+            app_display.display_menu(menu_title, menu_options)
 
             choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 

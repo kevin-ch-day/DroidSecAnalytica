@@ -85,7 +85,7 @@ def populate_permissions(androguard_data, data):
             permission_type = permission_type.title()
 
             # Create a PermissionADT object
-            permission_obj = PermissionADT.PermissionADT(permission, short_description, full_description, permission_type)
+            permission_obj = AndroPermissionADT.AndroPermissionADT(permission, short_description, full_description, permission_type)
 
             # Clean short description
             cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))

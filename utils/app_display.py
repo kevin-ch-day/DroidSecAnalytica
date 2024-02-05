@@ -15,6 +15,12 @@ def display_apk_files():
         print(f" [{i}] {file}")
     return apk_files
 
+def display_menu(menu_title, menu_options):
+    print(format_menu_title(menu_title))
+    for key, option in menu_options.items():
+        print(format_menu_option(key, option))
+    print(format_menu_option(0, "Return"))
+
 # Display disk usgae
 def display_disk_usage(disk_usage):
     if not disk_usage:
