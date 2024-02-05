@@ -1,5 +1,8 @@
+# static_analysis_menu.py
+
 from utils import app_display, user_prompts, logging_utils
 from . import manifest_analysis, permission_analyzer, static_analysis
+from virustotal import vt_requests
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():
@@ -28,54 +31,21 @@ def show_menu():
         
         # Static analysis
         elif menu_choice == '4':
-            print(app_display.format_menu_title("Static Analysis"))
-            print(app_display.format_menu_option(1, "Submit APK"))
-            print(app_display.format_menu_option(2, "Submit Hash"))
-            print(app_display.format_menu_option(3, "Return to Menu"))
-            user_options = ['1', '2', '3']
-            user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
-            if user_choice == '1':
-                static_analysis.static_analysis_apk()
+            print("Static Analysis")
+            apk_path = user_prompts.user_enter_apk_path()
+            decompiled_apk_dir = static_analysis.apk_static_analysis(apk_path)
 
-            elif user_choice == '2':
-                static_analysis.static_analysis_hash()
-
-            elif user_choice == '3':
-                return
 
         # Permission analysis
         elif menu_choice == '5':
-            print(app_display.format_menu_title("Permission Analysis"))
-            print(app_display.format_menu_option(1, "Submit APK"))
-            print(app_display.format_menu_option(2, "Submit Hash"))
-            print(app_display.format_menu_option(3, "Return to Menu"))
-            user_options = ['1', '2', '3']
-            user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
-            if user_choice == '1':
-                static_analysis.apk_path_permissions_analysis()
-
-            elif user_choice == '2':
-                static_analysis.hash_permissions_analysis()
-
-            elif user_choice == '3':
-                return
+            print("Permission Analysis")
+            apk_path = user_prompts.user_enter_apk_path()
+            decompiled_apk_dir = static_analysis.apk_static_analysis(apk_path)
 
         # Check Previously Analyzed
         elif menu_choice == '6':
             print(app_display.format_menu_title("Check If Previously Analyzed"))
-            print(app_display.format_menu_option(1, "Check by APK Path"))
-            print(app_display.format_menu_option(2, "Check by Hash IOC"))
-            print(app_display.format_menu_option(3, "Return to Menu"))
-            user_options = ['1', '2', '3']
-            user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", user_options)
-            if user_choice == '1':
-                static_analysis.check_analyzed_by_apk_path()
-
-            elif user_choice == '2':
-                static_analysis.check_analyzed_by_hash_ioc()
-
-            elif user_choice == '3':
-                return
+            static_analysis.check_analyzed_by_apk_path()
 
         # Exit
         elif menu_choice == '0':
@@ -83,4 +53,5 @@ def show_menu():
         
         else:
             print("Invalid option. Please try again.")
+        
         user_prompts.pause_until_keypress()

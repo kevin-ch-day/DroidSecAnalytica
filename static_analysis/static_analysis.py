@@ -17,7 +17,7 @@ def check_analyzed_by_hash_ioc():
 
 def handle_apk_decompilation():
     apk_path = app_utils.android_apk_selection()
-    decompile_apk(apk_path)
+    decompile_apk(apk_path, 'output')
 
 def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
     # Check OS and exit if Windows
