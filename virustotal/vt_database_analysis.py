@@ -25,10 +25,21 @@ def process_apk_sample(record):
     hash_value = record[1]  # SHA256 hash
     response = vt_requests.query_hash(hash_value)
     parsed_data = vt_response.parse_virustotal_response(response)
+    
+    # create vt_scan_analysis record
+
+    for i in parsed_data['Analysis Result']['engine_detection']:
+        engine = i[0]
+        label = i[1]
+    exit()
+
     andro_data = vt_androguard.androguard_data(response)
     if andro_data:
         permissions = andro_data.get_permissions()
         handle_detected_permissions(permissions)
+
+def update_vendor_column(engine, label):
+    pass
 
 def handle_detected_permissions(permissions):
     known_permissions = list()

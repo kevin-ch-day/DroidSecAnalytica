@@ -120,3 +120,102 @@ def check_uknown_permissions_alpha() -> Optional[List[Tuple[int, str]]]:
     except Exception as e:
         logging_utils.log_error("Error retrieving 'android.permission.*' formatted permissions", e)
         return None
+    
+# Executes a SQL query and returns the results.
+def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
+    try:
+        return dbConnect.execute_query(sql, params, fetch=True) or []
+    except Exception as e:
+        logging_utils.log_error(f"Error executing SQL query: {sql}", e)
+        return []
+
+# Retrieves intent filters based on their unusual status.
+def get_intent_filters(is_unusual: bool = True) -> List[Dict]:
+    sql = "SELECT * FROM android_intent_filters WHERE IsUnusual = %s"
+    params = (1 if is_unusual else 0,)
+    return run_query(sql, params)
+
+# Retrieves a specific intent filter record by its name.
+def get_intent_filter_record_by_name(intent_name: str) -> Optional[Dict]:
+    sql = "SELECT * FROM android_intent_filters WHERE IntentName = %s"
+    return next(iter(run_query(sql, (intent_name,))), None)
+
+# Retrieves all permissions from the android_permissions table.
+def get_all_permissions() -> List[Dict]:
+    return run_query("SELECT * FROM android_permissions;")
+
+# Retrieves permissions filtered by a specific category.
+def get_permissions_by_category(category: str) -> List[Dict]:
+    return run_query("SELECT * FROM android_permissions WHERE category = %s", (category,))
+
+# Searches for permissions by name or description.
+def search_permission(search_term: str) -> List[Dict]:
+    query = "SELECT * FROM android_permissions WHERE permission_name LIKE %s OR description LIKE %s"
+    search_query = f"%{search_term}%"
+    return run_query(query, (search_query, search_query))
+
+# Retrieves all services from the android_services table.
+def get_all_services() -> List[Dict]:
+    return run_query("SELECT * FROM android_services;")
+
+# Searches for services by name.
+def search_services_by_name(service_name: str) -> List[Dict]:
+    query = "SELECT * FROM android_services WHERE ServiceName LIKE %s"
+    search_query = f"%{service_name}%"
+    return run_query(query, (search_query,))
+
+# Retrieves services marked as malware-prone.
+def get_malware_prone_services() -> List[Dict]:
+    return run_query("SELECT * FROM android_services WHERE IsMalwareProne = 1")
+
+def create_analysis_record(analysis_name):
+    insert_query = """
+    INSERT INTO analysis_metadata (analysis_name, analysis_status)
+    VALUES (%s, 'InProgress')
+    """
+    try:
+        analysis_id = dbConnect.execute_query(insert_query, (analysis_name,), fetch=True)
+        if analysis_id:
+            analysis_id_value = analysis_id[0][0]  # Assuming the first row and first column is the ID
+            logging_utils.log_info(f"Analysis record created with ID: {analysis_id_value}")
+            return analysis_id_value
+    except Exception as e:
+        logging_utils.log_error("Error creating analysis record", e)
+    return None
+
+def update_analysis_status(analysis_id, status):
+    update_query = """
+    UPDATE analysis_metadata
+    SET analysis_status = %s
+    WHERE analysis_id = %s
+    """
+    try:
+        dbConnect.execute_query(update_query, (status, analysis_id), fetch=False)
+        logging_utils.log_info(f"Analysis status updated to '{status}' for ID: {analysis_id}")
+    except Exception as e:
+        logging_utils.log_error(f"Error updating analysis status to '{status}'", e)
+
+def update_analysis_status_to_completed(analysis_id):
+    update_analysis_status(analysis_id, 'Completed')
+
+def update_analysis_status_to_failed(analysis_id):
+    update_analysis_status(analysis_id, 'Failed')
+
+def reorder_unknown_permissions():
+    with dbConnect.database_connection() as conn:
+        cursor = conn.cursor()
+        # Step 1: Temporarily increase permission_id by an offset to avoid PRIMARY key conflict
+        offset = 90000  # Use an offset larger than the current max permission_id in the table
+        cursor.execute("UPDATE unknown_permissions SET permission_id = permission_id + %s", (offset,))
+
+        # Step 2: Fetch all permissions with the temporary offset, ordered by your criteria (e.g., constant_value)
+        cursor.execute("SELECT permission_id FROM unknown_permissions ORDER BY constant_value ASC")
+        permissions = cursor.fetchall()
+
+        # Step 3: Reset permission_id to sequential order starting from 1
+        new_id = 1
+        for (temp_permission_id,) in permissions:
+            cursor.execute("UPDATE unknown_permissions SET permission_id = %s WHERE permission_id = %s", (new_id, temp_permission_id))
+            new_id += 1
+        conn.commit()
+        print("Unknow Permissions reordered successfully.")

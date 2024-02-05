@@ -4,7 +4,7 @@ import logging
 
 # Import custom libraries
 from static_analysis import static_analysis
-from virustotal import vt_analysis
+from virustotal import vt_menu
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
 from utils import app_display, user_prompts
@@ -40,7 +40,7 @@ def main():
                 dynamic_analysis.dynamic_menu()
             
             elif choice == '3':
-                vt_analysis.virustotal_menu()
+                vt_menu.virustotal_menu()
             
             elif choice == '4':
                 reporting.report_menu()
