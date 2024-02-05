@@ -78,7 +78,7 @@ class AndroPermissionADT:
         return f"PermissionADT(name='{self.name}', short_desc='{self.short_desc}', long_desc='{self.long_desc}', permission_type='{self.permission_type}')"
 
     def __eq__(self, other) -> bool:
-        return isinstance(other, PermissionADT) and self.to_dict() == other.to_dict()
+        return isinstance(other, AndroPermissionADT) and self.to_dict() == other.to_dict()
     
     def __iter__(self):
         for attr_name in ["name", "short_desc", "long_desc", "permission_type"]:

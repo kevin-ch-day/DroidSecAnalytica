@@ -48,9 +48,9 @@ def display_report(report):
 
     # General Information
     print("\nGeneral Information:")
-    print(f"Report URL:".ljust(25), report["Report URL"])
-    print(f"VirusTotal Threat Label:".ljust(25), report["VirusTotal Threat Label"])
-    print(f"File Size:".ljust(25), report["File Size"])
+    print(f"Report URL: {report["Report URL"]}")
+    print(f"VirusTotal Threat Label: {report["VirusTotal Threat Label"]}")
+    print(f"File Size: {report["File Size"]}")
     print(f"MD5:".ljust(25), report["MD5"])
     print(f"SHA1:".ljust(25), report["SHA1"])
     print(f"SHA256:".ljust(25), report["SHA256"])
