@@ -12,13 +12,16 @@ def auto_vt_data_processing(response, analysis_name):
     if andro_data:
         permissions = andro_data.get_permissions()
         for i in permissions:
+            print(i.name)
             permission_record = DBFunct_Perm.get_permission_record_by_name(i.name)
+            print(permission_record)
+
             if permission_record:
                 id = permission_record[0]
                 print(f"Record ID: {id} {i.name}")
                 DBFunct_Perm.check_standard_permission_record(id, i.name, i.short_desc, i.long_desc, i.permission_type)
 
-            if not permission_record:
+            if permission_record is None:
                 unknown_permission_record = DBFunct_Perm.get_unknown_permission_record_by_id(i.name)
                 id = unknown_permission_record[0]
                 print(f"Record ID: {id} {i.name}")
@@ -28,8 +31,9 @@ def auto_vt_data_processing(response, analysis_name):
         print("No Androguard data returned...")
 
 def run_analysis(iterative_mode=False):
+
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256()
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(17)
         if not apk_records:
             print("No APK samples found in the database.")
             return
@@ -55,8 +59,7 @@ def process_apk_sample(record):
     hash_value = record[1]  # SHA256 hash
     response = vt_requests.query_hash(hash_value)
     analysis_name = "Test Run #1 2/7/2024"
-    vt_analysis.auto_vt_data_processing(response, analysis_name)
-
+    auto_vt_data_processing(response, analysis_name)
 
 def user_vt_data_processing(response):
     data = vt_response.parse_virustotal_response(response)
