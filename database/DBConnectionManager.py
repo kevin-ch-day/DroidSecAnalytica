@@ -55,12 +55,15 @@ def execute_delete(table, condition):
         logging_utils.log_error("Error executing delete query", e)
 
 def test_connection():
+    conn = None
     try:
-        with database_connection() as conn:
-            if conn.is_connected():
-                print("Database connection successful.")
+        conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE)
+        print("Database connection successful.")
     except mysql.connector.Error as e:
         print("Database connection failed")
+    finally:
+        if conn and conn.is_connected():
+            conn.close()
 
 def empty_table(table_name):
     try:
