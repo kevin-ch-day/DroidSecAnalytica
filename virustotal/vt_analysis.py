@@ -14,18 +14,17 @@ def auto_vt_data_processing(response, analysis_name):
         for i in permissions:
             print(i.name)
             permission_record = DBFunct_Perm.get_permission_record_by_name(i.name)
-            print(permission_record)
 
             if permission_record:
                 id = permission_record[0]
-                print(f"Record ID: {id} {i.name}")
-                DBFunct_Perm.check_standard_permission_record(id, i.name, i.short_desc, i.long_desc, i.permission_type)
-
+                print(f"Standard Permission ID: {id}")
+               
             if permission_record is None:
                 unknown_permission_record = DBFunct_Perm.get_unknown_permission_record_by_id(i.name)
                 id = unknown_permission_record[0]
-                print(f"Record ID: {id} {i.name}")
-                DBFunct_Perm.check_unknown_permission_record(id, i.name, i.short_desc, i.long_desc, i.permission_type)
+                print(f"Unknown Permission ID: {id}")
+
+            user_prompts.pause_until_keypress()
 
     else:
         print("No Androguard data returned...")

@@ -5,8 +5,9 @@ from utils import logging_utils
 def androguard_data(response):
     try:
         attributes = extract_attributes_from_response(response)
+        
         androguard_data = populate_androguard_data(attributes)
-
+        
         return androguard_data
 
     except Exception as e:
@@ -23,6 +24,7 @@ def populate_androguard_data(attributes):
     json_data = attributes.get('androguard', None)
     if not json_data:
         return None
+
 
     androguard = AndroguardADT.AndroguardADT()
     populate_manifest_data(androguard, json_data)
@@ -134,7 +136,6 @@ def populate_intent_filters(androguard_data, data):
             print(f"Invalid filter type: {filter_type}")
             continue
 
-        print(f"\n{filter_type}")  # Print the filter type heading
         for component, filters in components.items():
             # Extract actions and categories
             action = filters.get('action', []) if isinstance(filters.get('action'), list) else []
