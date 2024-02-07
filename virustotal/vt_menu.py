@@ -40,8 +40,7 @@ def handle_sample_submission():
     menu_title = "VirusTotal.com Sample Submission:"
     menu_options = {
         1: "APK",
-        2: "Hash",
-        0: "Return"
+        2: "Hash"
     }
     app_display.display_menu(menu_title, menu_options)
     choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
@@ -56,9 +55,6 @@ def handle_sample_submission():
     elif choice == '2':
         response = vt_utils.submit_hash()
         vt_analysis.user_vt_data_processing(response)
-    
-    else:
-        print("Invalid choice. Please try again.")
 
     if response:
         handle_response_data(response)

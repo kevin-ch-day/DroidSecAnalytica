@@ -18,7 +18,7 @@ def show_menu():
         menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
     
         # Display APK Files
-        if menu_choice == '1':
+        if menu_choice == "1":
             app_display.display_apk_files()
         
         # Decompile APK file
@@ -50,8 +50,5 @@ def show_menu():
         # Exit
         elif menu_choice == '0':
             break
-        
-        else:
-            print("Invalid option. Please try again.")
         
         user_prompts.pause_until_keypress()
