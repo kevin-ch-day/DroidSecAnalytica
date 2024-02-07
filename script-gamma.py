@@ -3,7 +3,7 @@ import sys
 import logging
 
 # Import custom libraries
-from virustotal import vt_database_analysis
+from virustotal import vt_analysis
 from reporting import *
 from utils import logging_utils
 from database import *
@@ -18,7 +18,7 @@ logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
 def main():
     try:
-        vt_database_analysis.run_analysis()
+        vt_analysis.run_analysis()
     except Exception as e:
         logging_utils.log_critical(f"An error occurred: {e}", exc_info=True)
         print("An error occurred. Please check the logs for more details.")

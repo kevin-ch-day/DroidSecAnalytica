@@ -1,6 +1,5 @@
 from . import vt_response
 from . import vt_utils
-from . import vt_database_analysis
 from . import vt_androguard
 from . import vt_display
 from . import vt_analysis
@@ -24,7 +23,7 @@ def virustotal_menu():
         elif user_choice == '1':
             handle_sample_submission()
         elif user_choice == '2':
-            vt_database_analysis.run_analysis()
+            vt_analysis.run_analysis()
         elif user_choice == '3':
             print("Check Virustotal API Key")
         elif user_choice == '4':

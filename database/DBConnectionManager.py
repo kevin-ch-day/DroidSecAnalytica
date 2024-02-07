@@ -1,9 +1,6 @@
-# DBConnectionManager.py
-
 import mysql.connector
 from contextlib import contextmanager
 from utils import logging_utils
-
 from database.DBConfig import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 @contextmanager
@@ -18,6 +15,14 @@ def database_connection():
     finally:
         if conn and conn.is_connected():
             conn.close()
+
+def get_database_connection():
+    conn = None
+    try:
+        conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE)
+    except mysql.connector.Error as e:
+        logging_utils.log_error("Database connection failed", e)
+    return conn
 
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     with database_connection() as conn:
