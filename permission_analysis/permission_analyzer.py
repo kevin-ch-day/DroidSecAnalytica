@@ -3,13 +3,13 @@
 import os
 import xml.etree.ElementTree as ET
 from static_analysis import apk_decompilation
-from database import DBFunct_Perm, DBRecordInserts
-
+from database import DBFunct_Perm
+from utils import user_prompts
 
 def handle_apk_permission_detection(apk_path):
     decompiled_apk_path = apk_decompilation.decompile_apk(apk_path)
     permissions = extract_apk_permissions(decompiled_apk_path)
-    return analyze_permissions(permissions)
+    return process_permission(permissions)
 
 def extract_apk_permissions(decompiled_apk_path):
     # Path to the AndroidManifest.xml file within the decompiled APK directory
@@ -58,6 +58,8 @@ def process_unknown_permission(permission):
             print("Long Desc:\t", permission.long_desc)
             print("Type:\t\t", permission.permission_type)
             DBFunct_Perm.insert_unknown_permission_record(permission.name, permission.short_desc, permission.long_desc, permission.permission_type)
+            
             user_prompts.pause_until_keypress()
+
     except Exception as e:
         print(f"An error occurred while processing unknown permission: {e}")

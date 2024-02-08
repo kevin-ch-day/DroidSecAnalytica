@@ -2,6 +2,7 @@ from . import vt_response, vt_androguard
 from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords, DBFunct_Perm
 from virustotal import vt_requests
 from utils import user_prompts, app_utils
+from permission_analysis import permission_analyzer
 
 def process_vt_response(response, analysis_name):
     try:
@@ -29,7 +30,7 @@ def process_androguard_data(andro_data):
 
     print(f"\nPermissions")
     for permission in andro_data.get_permissions():
-        process_permission(permission)
+        permission_analyzer.process_permission(permission)
 
     print("\nActivities")
     for activity in andro_data.get_activities():
