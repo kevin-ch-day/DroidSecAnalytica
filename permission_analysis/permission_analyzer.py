@@ -29,35 +29,35 @@ def extract_apk_permissions(decompiled_apk_path):
     
     return permissions
 
-def analyze_permissions(permissions):
-    permission_count = len(permissions)
-    print(f"The APK has {permission_count} permissions: {permissions}")
-
-    known_permissions = list()
-    unknown_permissions = list()
-    for index in permissions:
-
-        # Check permissions
-        perm_id = DBFunct_Perm.get_permission_id_by_name(index.name)
-        if perm_id:
-            # Detected permission is known
-            known_permissions.append((perm_id, index.name))
-        
+def process_permission(permission):
+    try:
+        print(permission.name)
+        permission_record = DBFunct_Perm.get_permission_record_by_name(permission.name)
+        if permission_record:
+            process_standard_permission(permission_record, permission)
         else:
-            # Detected permission is unknown
-            unknown_id = DBFunct_Perm.get_unknown_permission_id(index.name)
-            unknown_permissions.append([unknown_id, index])
-            if not unknown_id:
-                process_unknown_permission(index)
-    
-def process_unknown_permission(permission_name):
-    unknown_id = DBFunct_Perm.get_unknown_permission_id(permission_name)
-    if not unknown_id:
-        result = DBRecordInserts.insert_unknown_permission(permission_name)
-        if not result:
-            print("Failed to add permission.")
+            process_unknown_permission(permission)
+    except Exception as e:
+        print(f"Error processing permission {permission.name}: {e}")
 
-def add_permission(permission):
-    result = DBRecordInserts.insert_android_permission(permission.name)
-    if not result:
-        print("Failed to add permission.")
+def process_standard_permission(permission_record, permission):
+    id = permission_record[0]
+    DBFunct_Perm.check_standard_permission_record(id, permission.short_desc, permission.long_desc, permission.permission_type)
+
+def process_unknown_permission(permission):
+    try:
+        unknown_permission_record = DBFunct_Perm.get_unknown_permission_record_by_name(permission.name)
+        if unknown_permission_record:
+            id = unknown_permission_record[0]
+            print(f"Unknown Permission ID: {id}")
+            DBFunct_Perm.check_unknown_permission_record(id, permission.short_desc, permission.long_desc, permission.permission_type)
+        else:
+            print("\n[**] Permission not found in database.")
+            print("Name:\t\t", permission.name)
+            print("Short Desc:\t", permission.short_desc)
+            print("Long Desc:\t", permission.long_desc)
+            print("Type:\t\t", permission.permission_type)
+            DBFunct_Perm.insert_unknown_permission_record(permission.name, permission.short_desc, permission.long_desc, permission.permission_type)
+            user_prompts.pause_until_keypress()
+    except Exception as e:
+        print(f"An error occurred while processing unknown permission: {e}")

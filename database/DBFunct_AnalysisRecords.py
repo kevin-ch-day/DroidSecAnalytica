@@ -14,7 +14,7 @@ def run_query(sql: str, params: Optional[tuple] = None, query_type: str = "selec
             dbConnect.execute_query(sql, params, fetch=False)
             return [{"status": "success"}]
     except Exception as e:
-        logging_utils.log_error("Failed to execute query: {} with params: {}".format(sql, params), e)
+        logging_utils.log_error(f"Failed to execute query: {sql} with params: {params}", e)
         return []
 
 # Creates a new analysis record
@@ -37,9 +37,9 @@ def update_analysis_status(analysis_id: int, status: str):
     run_query(query, (status, analysis_id), query_type="update")
 
 # Set analysis record status to Completed
-def update_analysis_status_to_completed(analysis_id: int):
+def update_status_to_completed(analysis_id: int):
     update_analysis_status(analysis_id, 'Completed')
 
 # Set analysis record status to Failed
-def update_analysis_status_to_failed(analysis_id: int):
+def update_status_to_failed(analysis_id: int):
     update_analysis_status(analysis_id, 'Failed')
