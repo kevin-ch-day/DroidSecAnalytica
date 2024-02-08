@@ -2,7 +2,7 @@
 
 import requests
 
-API_KEY = '30c267c3babffbd22f7ffe6aa97b15d1f0a4f958c3db83431bc909a104b7f14f'
+API_KEY = '848c2f7d2499138423f7416f61b8a3e42d8dd9a429ca9bc6f4f478c590c8eec7'
 
 def set_headers():
     return {"x-apikey": API_KEY}

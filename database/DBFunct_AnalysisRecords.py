@@ -29,7 +29,6 @@ def create_analysis_record(analysis_name: str):
     query = "INSERT INTO analysis_metadata (analysis_id, analysis_name, analysis_status) VALUES (%s, %s, %s)"
     params = (next_id, analysis_name, 'InProgress')
     run_query(query, params, query_type="insert")
-    print(f"Analysis ID: {next_id}")
     return next_id
 
 # Update the status of an analysis record
