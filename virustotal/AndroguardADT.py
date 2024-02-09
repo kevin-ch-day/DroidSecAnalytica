@@ -5,6 +5,9 @@ from . import IntentFilterADT
 class AndroguardADT:
 
     def __init__(self, main_activity=None, package=None, target_sdk_version=None):
+        self.md5 = None # MD5 Hash value
+        self.sha1 = None # Hash value
+        self.sha256 = None # Hash value
         self.main_activity = main_activity
         self.package = package
         self.target_sdk_version = target_sdk_version
@@ -17,13 +20,31 @@ class AndroguardADT:
         self.intent_filters = IntentFilterADT.IntentFilterADT() 
         self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
 
+    def get_md5(self):
+        return self.md5
+
+    def set_md5(self, md5):
+        self.md5 = md5
+
+    def get_sha1(self):
+        return self.sha1
+
+    def set_sha1(self, sha1):
+        self.sha1 = sha1
+
+    def get_sha256(self):
+        return self.sha256
+
+    def set_sha256(self, sha256):
+        self.sha256 = sha256
+
     def add_permission(self, permission_data):
         if not isinstance(permission_data, AndroPermissionADT.AndroPermissionADT):
             raise TypeError("permission_data must be an instance of AndroPermissionADT")
         self.permissions_manager.add_permission(permission_data)
 
     def get_permissions(self):
-        return self.permissions_manager.list_permissions()
+        return self.permissions_manager.get_permissions()
 
     def get_permission(self, name):
         return self.permissions_manager.get_permission(name)

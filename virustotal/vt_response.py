@@ -1,14 +1,34 @@
 # vt_response.py
 
+import os
+import json
 from utils import logging_utils
 from . import vt_utils
+
+def save_report_to_file(report):
+    file_path = "output\\json_data.txt"
+    try:
+        with open(file_path, 'w') as file:
+            json.dump(report, file, indent=4)
+            for key, value in report.items():
+                if key == 'Analysis Result':
+                    file.write(f"{key}:\n")
+                    for sub_key, sub_value in value.items():
+                        file.write(f"  {sub_key}: {sub_value}\n")
+                else:
+                    file.write(f"{key}: {value}\n")
+        
+        print(f"Report saved to: {file_path}")
+    except Exception as e:
+        print(f"Error saving report to file: {e}")
 
 def parse_virustotal_response(response):
     try:
         data = response.get('data', {})
         if not data:
             raise ValueError("No 'data' key in response.")
-
+        # save_report_to_file(data)
+        
         attributes = data.get('attributes', {})
         if not attributes:
             raise ValueError("No valid attributes found in the data.")

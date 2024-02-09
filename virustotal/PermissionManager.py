@@ -14,7 +14,6 @@ class PermissionManager:
     def _find_insert_position(self, permission_name: str) -> int:
         return bisect.bisect_left([perm.name for perm in self._permissions], permission_name)
 
-
     def get_permission(self, name: str) -> AndroPermissionADT.AndroPermissionADT:
         return self._permissions.get(name)
 
@@ -25,5 +24,5 @@ class PermissionManager:
     def permission_exists(self, name: str) -> bool:
         return name in self._permissions
 
-    def list_permissions(self) -> list:
-        return list(self._permissions.values())
+    def get_permissions(self) -> AndroPermissionADT.AndroPermissionADT:
+        return self._permissions

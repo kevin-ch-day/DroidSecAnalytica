@@ -1,8 +1,8 @@
-from . import vt_response, vt_androguard
-from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords, DBFunct_Perm
-from virustotal import vt_requests
+from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords
 from utils import user_prompts, app_utils
 from permission_analysis import permission_analyzer
+
+from . import vt_response, vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
     try:
@@ -10,10 +10,9 @@ def process_vt_response(response, analysis_name):
         print(f"Analysis ID: {analysis_id}")
 
         vt_data = vt_response.parse_virustotal_response(response)
-        
         andro_data = vt_androguard.androguard_data(response)
         if andro_data:
-            process_androguard_data(andro_data)
+            process_androguard_data(analysis_id, andro_data)
         else:
             print("No Androguard data returned...")
 
@@ -22,40 +21,43 @@ def process_vt_response(response, analysis_name):
     except Exception as e:
         print(f"Error processing APK samples: {e}")
 
-def process_androguard_data(andro_data):
+def process_androguard_data(analysis_id, andro_data):
+    print("\nAndroid APK Analysis Report\n" + "=" * 50)
 
-    print(f"Package Name: {andro_data.get_package()}")
-    print(f"Main Activity: {andro_data.get_main_activity()}")
+    # Detailed Summary Section
+    print(f"MD5:                {andro_data.get_md5()}")
+    print(f"SHA1:               {andro_data.get_sha1()}")
+    print(f"SHA256:             {andro_data.get_sha256()}")
+    print(f"Package Name:       {andro_data.get_package()}")
+    print(f"Main Activity:      {andro_data.get_main_activity()}")
     print(f"Target SDK Version: {andro_data.get_target_sdk_version()}")
+    print("-" * 50)
 
-    print(f"\nPermissions")
-    for permission in andro_data.get_permissions():
-        permission_analyzer.process_permission(permission)
+    # Data Sections
+    data_sections = {
+        "Permissions": andro_data.get_permissions(),
+        "Activities": andro_data.get_activities(),
+        "Services": andro_data.get_services(),
+        "Receivers": andro_data.get_receivers(),
+        "Libraries": andro_data.get_libraries()
+    }
 
-    print("\nActivities")
-    for activity in andro_data.get_activities():
-        print(activity)
+    for i in andro_data.get_permissions():
+        pass
 
-    print("\nServices")
-    for service in andro_data.get_services():
-        print(service)
+    for section_name, items in data_sections.items():
+        if section_name == "Permissions":
+            continue
+        elif items:
+            print(f"\n{section_name} ({len(items)}):")
+            for item in items:
+                print(f"- {item}")
+        else:
+            print(f"\nNo {section_name} data found.")
 
-    print("\nReceivers")
-    for receiver in andro_data.get_receivers():
-        print(receiver)
+    print("=" * 50)
 
-    print("\nLibraries")
-    for library in andro_data.get_libraries():
-        print(library)
 
-    print("\nIntent Filters By Action")
-    # for intent_filter in andro_data.get_intent_filters_by_action():
-    #     print(intent_filter)
-
-    print("\nIntent Filters By Category")
-    # for intent_filter in andro_data.get_intent_filters_by_category():
-    #     print(intent_filter)
-    
 def process_apk_sample(record):
     print(f"Processing APK Sample - ID: {record[0]}, SHA-256: {record[1]}")
     hash_value = record[1]  # SHA256 hash

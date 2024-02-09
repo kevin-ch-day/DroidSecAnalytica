@@ -5,9 +5,7 @@ from utils import logging_utils
 def androguard_data(response):
     try:
         attributes = extract_attributes_from_response(response)
-        
         androguard_data = populate_androguard_data(attributes)
-        
         return androguard_data
 
     except Exception as e:
@@ -24,9 +22,14 @@ def populate_androguard_data(attributes):
     json_data = attributes.get('androguard', None)
     if not json_data:
         return None
-
-
+    
     androguard = AndroguardADT.AndroguardADT()
+
+    # Hash data
+    androguard_data.set_md5(attributes.get('md5', 'N/A'))
+    androguard_data.set_sha1(attributes.get('sha1', 'N/A'))
+    androguard_data.set_sha256(attributes.get('sha256', 'N/A'))
+
     populate_manifest_data(androguard, json_data)
     populate_permissions(androguard, json_data)
     populate_certificate_data(androguard, json_data)
@@ -72,28 +75,23 @@ def populate_permissions(androguard_data, data):
         permission_details = data['permission_details']
 
         for permission, details in permission_details.items():
-            # Extract permission details
             short_description = details.get('short_description', 'N/A')
-            
             full_description = details.get('full_description', 'N/A')
             full_description = full_description.strip()
             full_description = " ".join(full_description.split())
             full_description = full_description.replace("\n", " ").replace("\r", " ")
-            
             permission_type = details.get('permission_type', 'N/A')
 
             # Capitalize and title-casing
             short_description = short_description.capitalize()
             permission_type = permission_type.title()
 
-            # Create a PermissionADT object
             permission_obj = AndroPermissionADT.AndroPermissionADT(permission, short_description, full_description, permission_type)
 
             # Clean short description
             cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))
             permission_obj.short_desc = cleaned_short_desc.strip()
 
-            # Add permission object to androguard_data
             androguard_data.add_permission(permission_obj)
 
 def populate_certificate_data(androguard_data, data):
