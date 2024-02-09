@@ -26,9 +26,9 @@ def populate_androguard_data(attributes):
     androguard = AndroguardADT.AndroguardADT()
 
     # Hash data
-    androguard_data.set_md5(attributes.get('md5', 'N/A'))
-    androguard_data.set_sha1(attributes.get('sha1', 'N/A'))
-    androguard_data.set_sha256(attributes.get('sha256', 'N/A'))
+    androguard.set_md5(attributes.get('md5', 'N/A'))
+    androguard.set_sha1(attributes.get('sha1', 'N/A'))
+    androguard.set_sha256(attributes.get('sha256', 'N/A'))
 
     populate_manifest_data(androguard, json_data)
     populate_permissions(androguard, json_data)
