@@ -39,16 +39,17 @@ def process_summary_data(analysis_id, andro_data):
         andro_data.get_target_sdk_version()
     )
 
-def process_activities(analysis_id, activities):
+def process_activities(analysis_id, apk_id, activities):
     activities_cnt = len(activities)
     print(f"\nActivities ({activities_cnt}):")
     if activities:
         for activity in activities:
             print(f"- {activity}")
+            DBRecordInserts.insert_vt_activities(analysis_id, activity, apk_id)
     else:
         print("No data.")
 
-def process_permissions(analysis_id, permissions):
+def process_permissions(analysis_id, apk_id, permissions):
     permissions_cnt = len(permissions)
     print(f"\nPermissions ({permissions_cnt}):")
     if permissions:
@@ -57,43 +58,49 @@ def process_permissions(analysis_id, permissions):
     else:
         print("No data.")
 
-def process_services(analysis_id, services):
+def process_services(analysis_id, apk_id, services):
     services_cnt = len(services)
     print(f"\nServices ({services_cnt}):")
     if services:
         for service in services:
             print(f"- {service}")
+            DBRecordInserts.insert_vt_services(analysis_id, service, apk_id)
     else:
         print("No data.")
 
-def process_receivers(analysis_id, receivers):
+def process_receivers(analysis_id, apk_id, receivers):
     receivers_cnt = len(receivers)
     print(f"\nReceivers ({receivers_cnt}):")
     if receivers:
         for receiver in receivers:
             print(f"- {receiver}")
+            DBRecordInserts.insert_vt_receivers(analysis_id, receiver, apk_id)
     else:
         print("No data.")
 
-def process_libraries(analysis_id, libraries):
+def process_libraries(analysis_id, apk_id, libraries):
     libraries_cnt = len(libraries)
     print(f"\nLibraries ({libraries_cnt}):")
     if libraries:
         for library in libraries:
             print(f"- {library}")
+            DBRecordInserts.insert_vt_libraries(analysis_id, library, apk_id)
     else:
         print("No data.")
 
 def process_androguard_data(analysis_id, andro_data):
+    apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+    #print(f"APK ID: {apk_id}") # Debugging
+
     # Step 1: Process Summary Data
     process_summary_data(analysis_id, andro_data)
     
     # Step 2: Process Each Data Section Individually
-    process_activities(analysis_id, andro_data.get_activities())
-    process_permissions(analysis_id, andro_data.get_permissions())
-    process_services(analysis_id, andro_data.get_services())
-    process_receivers(analysis_id, andro_data.get_receivers())
-    process_libraries(analysis_id, andro_data.get_libraries())
+    process_activities(analysis_id, apk_id, andro_data.get_activities())
+    process_permissions(analysis_id, apk_id, andro_data.get_permissions())
+    process_services(analysis_id, apk_id, andro_data.get_services())
+    process_receivers(analysis_id, apk_id, andro_data.get_receivers())
+    process_libraries(analysis_id, apk_id, andro_data.get_libraries())
 
     print("=" * 50)
 

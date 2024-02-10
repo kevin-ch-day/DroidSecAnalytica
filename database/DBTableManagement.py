@@ -28,26 +28,6 @@ def list_tables() -> list:
         table_info.append((table_name, num_columns, num_rows))
     return table_info
 
-# Creates a table for storing Android malware hashes
-def create_android_malware_hash_table() -> bool:
-    sql_create_table = """
-        CREATE TABLE IF NOT EXISTS android_malware_threat_metadata (
-            id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            malware_name_1 VARCHAR(255) DEFAULT NULL,
-            malware_name_2 VARCHAR(250) DEFAULT NULL,
-            md5 VARCHAR(250) DEFAULT NULL,
-            sha1 VARCHAR(250) DEFAULT NULL,
-            sha256 VARCHAR(250) DEFAULT NULL,
-            location VARCHAR(100) DEFAULT NULL,
-            month VARCHAR(100) DEFAULT NULL,
-            year VARCHAR(10) DEFAULT NULL
-        );
-    """
-    success = execute_sql(sql_create_table, should_fetch=False)
-    if success:
-        print("Table 'android_malware_threat_metadata' created successfully.")
-    return success
-
 # Updates a record in android_malware_threat_metadata to indicate no VirusTotal match
 def no_virustotal_record_match(record_id):
     if execute_sql("UPDATE android_malware_threat_metadata SET no_virustotal_match = 1 WHERE id = %s", (record_id,)):
@@ -58,3 +38,29 @@ def create_apk_record(filename: str, filesize: int, md5: str, sha1: str, sha256:
     sql = "INSERT INTO apk_samples (filename, filesize, md5, sha1, sha256) VALUES (%s, %s, %s, %s, %s)"
     if execute_sql(sql, (filename, filesize, md5, sha1, sha256)):
         logging_utils.log_info("APK record created successfully.")
+
+def truncate_analysis_data_tables() -> bool:
+    table_names = [
+        "analysis_metadata",
+        "vt_activities",
+        "vt_certificates",
+        "vt_libraries",
+        "vt_permissions",
+        "vt_receivers",
+        "vt_scan_analysis",
+        "vt_services"
+    ]
+    
+    try:
+        for table_name in table_names:
+            execute_sql(f"TRUNCATE TABLE {table_name}")
+            print(f"Successfully truncated table: {table_name}")
+
+        dbConnect.commit()
+        print("All specified tables were successfully truncated.")
+        return True
+    except Exception as e:
+        # Roll back the transaction if an error occurred
+        dbConnect.rollback()
+        logging_utils.log_error("An error occurred while truncating tables. Transaction has been rolled back.", e)
+        return False

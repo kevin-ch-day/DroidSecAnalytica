@@ -11,6 +11,15 @@ def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
         logging_utils.log_error(f"Error executing SQL query: {sql}", e)
         return []
 
+def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
+    sql = "SELECT apk_id FROM apk_samples WHERE sha256 = %s"
+    params = (sha256_hash,)
+    result = run_query(sql, params)
+    if result:
+        return result[0][0]
+    else:
+        return None
+
 def get_apk_samples() -> List[Dict]:
     return run_query("SELECT * FROM apk_samples ORDER BY apk_id")
 
