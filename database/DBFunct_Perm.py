@@ -163,6 +163,8 @@ def insert_unknown_permission_record(constant_value: str, short_desc: str, long_
         run_query(query, (next_id, constant_value, short_desc, long_desc, permission_type), False)
         print(f"{constant_value} inserted successfully.")
 
+        return get_unknown_permission_record_by_name(constant_value)
+
     except Exception as e:
         print(f"Error inserting new record: {e}")
 
