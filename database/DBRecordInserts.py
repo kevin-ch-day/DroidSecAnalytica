@@ -14,7 +14,7 @@ def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool =
         return None
 
 # Function to insert data into vt_permissions table
-def insert_vt_permissions(analysis_id: int, apk_id: int, known_permission_id: Optional[int], unknown_permission_id: Optional[int]) -> Optional[bool]:
+def insert_vt_permission(analysis_id: int, apk_id: int, known_permission_id: Optional[int], unknown_permission_id: Optional[int]) -> Optional[bool]:
     query = "INSERT INTO vt_permissions (analysis_id, apk_id, known_permission_id, unknown_permission_id)"
     query += " VALUES (%s, %s, %s, %s)"
     params = (analysis_id, apk_id, known_permission_id, unknown_permission_id)

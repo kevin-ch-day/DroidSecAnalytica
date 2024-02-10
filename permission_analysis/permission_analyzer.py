@@ -26,29 +26,23 @@ def extract_apk_permissions(decompiled_apk_path):
     # Define namespace for Android attributes
     ns = {'android': 'http://schemas.android.com/apk/res/android'}
     # Extract permissions using the Android namespace
-    permissions = [perm.attrib[f'{{{ns["android"]}}}name'] for perm in root.findall(".//uses-permission", ns)]
-    
-    return permissions
+    return [perm.attrib[f'{{{ns["android"]}}}name'] for perm in root.findall(".//uses-permission", ns)]
 
 # Process permissions extracted from the APK
-def process_permissions(analysis_id, permissions):
+def process_permissions(analysis_id, apk_id, permissions):
     for permission in permissions:
         try:
             # Find the permission record in the database
-            record = DBFunct_Perm.get_permission_record_by_name(permission)
-            if record:
-                process_standard_permission(analysis_id, record, permission)
+            perm_id = DBFunct_Perm.get_permission_id_by_name(permission)
+            if perm_id:
+                # Process a known standard permission
+                DBFunct_Perm.check_standard_permission_record(id, permission)
+                DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
             else:
-                process_unknown_permission(analysis_id, permission)
+                process_unknown_permission(analysis_id, apk_id, permission)
 
         except Exception as e:
             print(f"Error processing permission {permission}: {e}")
-
-# Process a known standard permission
-def process_standard_permission(analysis_id, permission_record, permission):
-    id = permission_record[0]
-    DBFunct_Perm.check_standard_permission_record(id, permission)
-    DBRecordInserts.
 
 # Process an unknown permission
 def process_unknown_permission(analysis_id, permission):
