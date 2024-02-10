@@ -53,6 +53,7 @@ def process_permissions(analysis_id, apk_id, permissions):
     permissions_cnt = len(permissions)
     print(f"\nPermissions ({permissions_cnt}):")
     if permissions:
+        permission_analyzer.process_permissions(permissions)
         for permission in permissions:
             print(f"- {permission}")
     else:

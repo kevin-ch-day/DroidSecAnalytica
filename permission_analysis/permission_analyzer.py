@@ -3,14 +3,14 @@
 import os
 import xml.etree.ElementTree as ET
 from static_analysis import apk_decompilation
-from database import DBFunct_Perm
+from database import DBFunct_Perm, DBRecordInserts
 from utils import user_prompts
 
 # Handle APK permission detection process
 def handle_apk_permission_detection(analysis_id, apk_path):
     decompiled_apk_path = apk_decompilation.decompile_apk(apk_path)
     permissions = extract_apk_permissions(decompiled_apk_path)
-    return process_permission(analysis_id, permissions)
+    return process_permissions(analysis_id, permissions)
 
 # Extract permissions from the decompiled APK's manifest
 def extract_apk_permissions(decompiled_apk_path):
@@ -31,17 +31,16 @@ def extract_apk_permissions(decompiled_apk_path):
     return permissions
 
 # Process permissions extracted from the APK
-def process_permission(analysis_id, permissions):
+def process_permissions(analysis_id, permissions):
     for permission in permissions:
         try:
             # Find the permission record in the database
             record = DBFunct_Perm.get_permission_record_by_name(permission)
             if record:
-                # Process known permission
                 process_standard_permission(analysis_id, record, permission)
             else:
-                # Process unknown permission
                 process_unknown_permission(analysis_id, permission)
+
         except Exception as e:
             print(f"Error processing permission {permission}: {e}")
 
@@ -49,6 +48,7 @@ def process_permission(analysis_id, permissions):
 def process_standard_permission(analysis_id, permission_record, permission):
     id = permission_record[0]
     DBFunct_Perm.check_standard_permission_record(id, permission)
+    DBRecordInserts.
 
 # Process an unknown permission
 def process_unknown_permission(analysis_id, permission):
