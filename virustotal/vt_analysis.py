@@ -53,7 +53,7 @@ def process_permissions(analysis_id, apk_id, permissions):
     permissions_cnt = len(permissions)
     print(f"\nPermissions ({permissions_cnt}):")
     if permissions:
-        permission_analyzer.process_permissions(analysis_id, apk_id, permissions)
+        permission_analyzer.save_detected_permission(analysis_id, apk_id, permissions)
         for permission in permissions:
             print(f"- {permission}")
     else:
@@ -112,7 +112,7 @@ def process_apk_sample(record):
     analysis_name = "Test Run #1 2/7/2024"
     process_vt_response(response, analysis_name)
 
-def run_analysis(iterative_mode=False):
+def run_analysis(iterative_mode=True):
     try:
         apk_records = DBFunct_ApkRecords.get_apk_records_sha256(92)
         if not apk_records:

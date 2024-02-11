@@ -56,11 +56,9 @@ def truncate_analysis_data_tables() -> bool:
             execute_sql(f"TRUNCATE TABLE {table_name}")
             print(f"Successfully truncated table: {table_name}")
 
-        dbConnect.commit()
         print("All specified tables were successfully truncated.")
         return True
+    
     except Exception as e:
-        # Roll back the transaction if an error occurred
-        dbConnect.rollback()
         logging_utils.log_error("An error occurred while truncating tables. Transaction has been rolled back.", e)
         return False

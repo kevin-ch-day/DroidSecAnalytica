@@ -18,8 +18,8 @@ logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
 def main():
     try:
-        #vt_analysis.run_analysis()
-        vt_analysis.run_hash_ioc()
+        vt_analysis.run_analysis()
+        #vt_analysis.run_hash_ioc()
     except Exception as e:
         logging_utils.log_critical(f"An error occurred: {e}", exc_info=True)
         print("An error occurred. Please check the logs for more details.")

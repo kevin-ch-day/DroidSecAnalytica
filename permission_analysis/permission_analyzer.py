@@ -29,14 +29,13 @@ def extract_apk_permissions(decompiled_apk_path):
     return [perm.attrib[f'{{{ns["android"]}}}name'] for perm in root.findall(".//uses-permission", ns)]
 
 # Process permissions extracted from the APK
-def process_permissions(analysis_id, apk_id, permissions):
+def save_detected_permission(analysis_id, apk_id, permissions):
     for permission in permissions:
         try:
             # Find the permission record in the database
             perm_id = DBFunct_Perm.get_permission_id_by_name(permission)
             if perm_id:
-                # Process a known standard permission
-                DBFunct_Perm.check_standard_permission_record(id, permission)
+                #DBFunct_Perm.check_standard_permission_record(id, permission)
                 DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
             else:
                 process_unknown_permission(analysis_id, apk_id, permission)
@@ -46,8 +45,9 @@ def process_permissions(analysis_id, apk_id, permissions):
 
 def process_unknown_permission(analysis_id, apk_id, permission_name):
     try:
-        # Attempt to retrieve the record for the unknown permission by its name
+        # Retrieve the record for the unknown permission by its name
         unknown_permission_record = DBFunct_Perm.get_unknown_permission_record_by_name(permission_name)
+        print(unknown_permission_record)
 
         if unknown_permission_record:
             # If the unknown permission has been previously detected
@@ -66,6 +66,7 @@ def process_unknown_permission(analysis_id, apk_id, permission_name):
                 print(f"New Unknown Permission ID: {permission_id}")
                 print(f"Permission '{permission_name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
             else:
+                user_prompts.pause_until_keypress()
                 return
 
         # Link the permission with the analysis and APK if permission_id is defined
@@ -79,6 +80,3 @@ def process_unknown_permission(analysis_id, apk_id, permission_name):
 
     except Exception as e:
         logging_utils.log_error(f"An error occurred while processing unknown permission '{permission_name}': {e}")
-
-
-
