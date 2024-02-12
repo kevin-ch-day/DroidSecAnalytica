@@ -10,7 +10,7 @@ from utils import user_prompts, logging_utils
 def handle_apk_permission_detection(analysis_id, apk_path):
     decompiled_apk_path = apk_decompilation.decompile_apk(apk_path)
     permissions = extract_apk_permissions(decompiled_apk_path)
-    return process_permissions(analysis_id, permissions)
+    #return process_permissions(analysis_id, permissions)
 
 # Extract permissions from the decompiled APK's manifest
 def extract_apk_permissions(decompiled_apk_path):
@@ -54,6 +54,7 @@ def process_unknown_permission(analysis_id, apk_id, permission_name):
             permission_id = unknown_permission_record[0]
             print(f"Unknown Permission ID: {permission_id}")
             DBFunct_Perm.check_unknown_permission_record(permission_id, permission_name)
+        
         else:
             # Prompt for user decision on new unknown permission
             print("\n[**] New unknown permission detected:")

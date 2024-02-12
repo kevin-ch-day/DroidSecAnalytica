@@ -1,8 +1,8 @@
 # device_manager.py
 
 import subprocess
-from utils import logging_utils
 import tempfile
+from utils import logging_utils
 
 def check_devices():
     try:

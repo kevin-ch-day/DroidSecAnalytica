@@ -1,8 +1,6 @@
-from . import vt_response
-from . import vt_utils
-from . import vt_androguard
-from . import vt_display
-from . import vt_analysis
+# vt_menu.py
+
+from . import vt_utils, vt_androguard, vt_analysis
 from utils import user_prompts, app_display
 
 def virustotal_menu():
@@ -59,7 +57,7 @@ def handle_sample_submission():
         handle_response_data(response)
 
 def handle_response_data(response):
-    report_data = vt_response.parse_virustotal_response(response)
+    report_data = vt_analysis.parse_virustotal_response(response)
 
     while True:
         menu_title = "Data Results"
@@ -77,16 +75,16 @@ def handle_response_data(response):
         if choice == "0":
             return
         elif choice == "1":
-            vt_response.display_report(report_data)
+            vt_analysis.display_report(report_data)
         elif choice == "2":
-            vt_response.write_report_to_file(report_data)
+            vt_analysis.write_report_to_file(report_data)
             print("Report saved to file.")
         elif choice == "3":
             display_androguard_data(response)
         elif choice == "4":
-            vt_display.view_summary_statistics(report_data)
+            vt_utils.view_summary_statistics(report_data)
         elif choice == "5":
-            vt_display.view_detection_breakdown(report_data)
+            vt_utils.view_detection_breakdown(report_data)
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")
 
@@ -102,21 +100,21 @@ def display_androguard_data(response):
                 4: "Permissions",
                 5: "Intent Filters"
             }
+            
             app_display.display_menu(menu_title, menu_options)
-
             choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
             if choice == "0":
                 break
             elif choice == "1":
-                vt_display.display_main_activity(androguard)
+                vt_utils.display_main_activity(androguard)
             elif choice == "2":
-                vt_display.display_manifest_components(androguard)
+                vt_utils.display_manifest_components(androguard)
             elif choice == "3":
-                vt_display.display_certificate_details(androguard)
+                vt_utils.display_certificate_details(androguard)
             elif choice == "4":
-                vt_display.display_permissions(androguard)
+                vt_utils.display_permissions(androguard)
             elif choice == "5":
-                vt_display.display_intent_filters(androguard)
+                vt_utils.display_intent_filters(androguard)
             else:
                 print("Invalid choice.")
