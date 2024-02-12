@@ -106,8 +106,8 @@ def process_androguard_data(analysis_id, andro_data):
     print("=" * 50)
 
 def process_apk_sample(record):
-    print(f"Processing APK Sample - ID: {record[0]}, SHA-256: {record[1]}")
-    hash_value = record[1]  # SHA256 hash
+    print(f"Android APK ID: {record[0]} SHA-256: {record[1]}")
+    hash_value = record[1]  # SHA256 hash value
     response = vt_requests.query_hash(hash_value)
     analysis_name = "Test Run #1 2/7/2024"
     process_vt_response(response, analysis_name)
@@ -130,7 +130,7 @@ def run_analysis(iterative_mode=True):
             else:
                 iteration += 1
 
-            user_prompts.pause_until_keypress()
+            #user_prompts.pause_until_keypress()
 
     except Exception as e:
         print(f"Error running the analysis: {e}")
