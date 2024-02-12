@@ -4,7 +4,6 @@ class AndroPermissionADT:
     _instances = {}
 
     def __init__(self, name: str = "", short_desc: str = "", long_desc: str = "", permission_type: str = ""):
-        # Initialize a new PermissionADT instance
         self._name = name
         self._short_desc = short_desc
         self._long_desc = long_desc
@@ -85,9 +84,7 @@ class AndroPermissionADT:
             yield getattr(self, attr_name)
 
     def __repr__(self):
-        # Official string representation of the PermissionADT object
         return f"PermissionADT(name='{self._name}', short_desc='{self._short_desc}', long_desc='{self._long_desc}', permission_type='{self._permission_type}')"
 
     def display_summary(self):
-        # Display a summary of the permission
         return f"Name: {self._name} Description: {self._short_desc} Type: {self._permission_type}"

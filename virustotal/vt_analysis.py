@@ -2,14 +2,14 @@ from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords, DBRecordInsert
 from utils import user_prompts, app_utils
 from permission_analysis import permission_analyzer
 
-from . import vt_response, vt_androguard, vt_requests
+from . import vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
     try:
         analysis_id = DBFunct_AnalysisRecords.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
 
-        vt_data = vt_response.parse_virustotal_response(response)
+        vt_data = vt_requests.parse_virustotal_response(response)
         andro_data = vt_androguard.androguard_data(response)
         if andro_data:
             process_androguard_data(analysis_id, andro_data)
@@ -20,6 +20,15 @@ def process_vt_response(response, analysis_name):
 
     except Exception as e:
         print(f"Error processing APK samples: {e}")
+
+def process_permissions(analysis_id, apk_id, permissions):
+    permissions_cnt = len(permissions)
+    print(f"\nTotal Permissions: {permissions_cnt}")
+    if permissions:
+        for index in permissions:
+            permission_analyzer.save_detected_permission(analysis_id, apk_id, permissions[index])
+    else:
+        print("No data.")
 
 def process_summary_data(analysis_id, andro_data):
     print("\nAndroid APK Analysis Report\n" + "=" * 50)
@@ -46,16 +55,6 @@ def process_activities(analysis_id, apk_id, activities):
         for activity in activities:
             print(f"- {activity}")
             DBRecordInserts.insert_vt_activities(analysis_id, activity, apk_id)
-    else:
-        print("No data.")
-
-def process_permissions(analysis_id, apk_id, permissions):
-    permissions_cnt = len(permissions)
-    print(f"\nPermissions ({permissions_cnt}):")
-    if permissions:
-        permission_analyzer.save_detected_permission(analysis_id, apk_id, permissions)
-        for permission in permissions:
-            print(f"- {permission}")
     else:
         print("No data.")
 
@@ -93,37 +92,35 @@ def process_androguard_data(analysis_id, andro_data):
     apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
     #print(f"APK ID: {apk_id}") # Debugging
 
-    # Step 1: Process Summary Data
     process_summary_data(analysis_id, andro_data)
-    
-    # Step 2: Process Each Data Section Individually
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-    process_libraries(analysis_id, apk_id, andro_data.get_libraries())
+    #process_libraries(analysis_id, apk_id, andro_data.get_libraries())
 
-    print("=" * 50)
+    footer = "=" * 50
+    print(f"\n{footer}\n")
 
 def process_apk_sample(record):
     print(f"Android APK ID: {record[0]} SHA-256: {record[1]}")
     hash_value = record[1]  # SHA256 hash value
     response = vt_requests.query_hash(hash_value)
-    analysis_name = "Test Run #1 2/7/2024"
+    analysis_name = "Test Run 2/12/2024"
     process_vt_response(response, analysis_name)
 
 def run_analysis(iterative_mode=True):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(92)
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256()
         if not apk_records:
             print("No APK samples found in the database.")
             return
+        
         print("\nProcessing APK Samples")
         wait_time = 4 * 60 if iterative_mode else 0
         iteration = 0
         for record in apk_records:
             process_apk_sample(record)
-            
             if iterative_mode and iteration == 4:
                 iteration = 0
                 app_utils.pause_with_updates(wait_time)

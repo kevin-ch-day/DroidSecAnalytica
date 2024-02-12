@@ -70,7 +70,7 @@ def populate_manifest_data(androguard_data, data):
     except Exception as e:
         print(f"Error parsing Androguard data: {str(e)}")
 
-def populate_permissions(androguard_data, data):
+def populate_permissions(andr_obj, data):
     if 'permission_details' in data:
         permission_details = data['permission_details']
 
@@ -86,13 +86,12 @@ def populate_permissions(androguard_data, data):
             short_description = short_description.capitalize()
             permission_type = permission_type.title()
 
-            permission_obj = AndroPermissionADT.AndroPermissionADT(permission, short_description, full_description, permission_type)
+            perm_obj = AndroPermissionADT.AndroPermissionADT(permission, short_description, full_description, permission_type)
 
             # Clean short description
-            cleaned_short_desc = re.sub(' +', ' ', ' '.join(permission_obj.short_desc.splitlines()))
-            permission_obj.short_desc = cleaned_short_desc.strip()
-
-            androguard_data.add_permission(permission_obj)
+            cleaned_short_desc = re.sub(' +', ' ', ' '.join(perm_obj.short_desc.splitlines()))
+            perm_obj.short_desc = cleaned_short_desc.strip()
+            andr_obj.add_permission(perm_obj)
 
 def populate_certificate_data(androguard_data, data):
     if 'certificate' in data:

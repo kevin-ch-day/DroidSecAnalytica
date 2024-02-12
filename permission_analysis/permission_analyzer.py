@@ -29,55 +29,67 @@ def extract_apk_permissions(decompiled_apk_path):
     return [perm.attrib[f'{{{ns["android"]}}}name'] for perm in root.findall(".//uses-permission", ns)]
 
 # Process permissions extracted from the APK
-def save_detected_permission(analysis_id, apk_id, permissions):
-    for permission in permissions:
-        try:
-            # Find the permission record in the database
-            perm_id = DBFunct_Perm.get_permission_id_by_name(permission)
-            if perm_id:
-                #DBFunct_Perm.check_standard_permission_record(id, permission)
-                DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
-            else:
-                process_unknown_permission(analysis_id, apk_id, permission)
-
-        except Exception as e:
-            print(f"Error processing permission {permission}: {e}")
-
-def process_unknown_permission(analysis_id, apk_id, permission_name):
+def save_detected_permission(analysis_id, apk_id, perm):
     try:
-        # Retrieve the record for the unknown permission by its name
-        unknown_permission_record = DBFunct_Perm.get_unknown_permission_record_by_name(permission_name)
-        print(unknown_permission_record)
-
-        if unknown_permission_record:
-            # If the unknown permission has been previously detected
-            permission_id = unknown_permission_record[0]
-            print(f"Unknown Permission ID: {permission_id}")
-            DBFunct_Perm.check_unknown_permission_record(permission_id, permission_name)
-        
+        # Find the permission record in the database
+        perm_id = DBFunct_Perm.get_permission_id_by_name(perm.name)
+        if perm_id:
+            print(f"Permission ID: [{perm_id}] {perm.name}")
+            #DBFunct_Perm.check_standard_permission_record(id, permission)
+            DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
-            # Prompt for user decision on new unknown permission
-            print("\n[**] New unknown permission detected:")
-            print(f"Name:\t\t{permission_name}")
-            user_decision = input("Save this unknown permission? (y/n): ").strip().lower()
-
-            if user_decision == 'y':
-                # User chose to save the permission
-                permission_id = DBFunct_Perm.insert_unknown_permission_record(permission_name)
-                print(f"New Unknown Permission ID: {permission_id}")
-                print(f"Permission '{permission_name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
-            else:
-                user_prompts.pause_until_keypress()
-                return
-
-        # Link the permission with the analysis and APK if permission_id is defined
-        if permission_id:
-            if DBRecordInserts.insert_vt_permission(analysis_id, apk_id, None, permission_id):
-                print(f"Permission '{permission_name}' linked with analysis ID {analysis_id} and APK ID {apk_id}.")
-            else:
-                print("Failed to link permission with analysis and APK.")
-
-        user_prompts.pause_until_keypress()
+            process_unknown_permission(analysis_id, apk_id, perm)
 
     except Exception as e:
-        logging_utils.log_error(f"An error occurred while processing unknown permission '{permission_name}': {e}")
+        print(f"Error processing permission {perm}: {e}")
+
+def fetch_unknown_permission_record(permission_name):
+    return DBFunct_Perm.get_unknown_permission_record_by_name(permission_name)
+
+def check_permission_record(record, permission):
+    print("\nVirusTotal Data:")
+    print(f"Name: {permission.name}")
+    print(f"Short desc: {permission.short_desc}")
+    print(f"Long desc: {permission.long_desc}")
+    print(f"Type: {permission.permission_type}")
+    
+    print("\nDatabase Record:")
+    print(f"Permission ID: [{record[0]}] {permission.name}")
+    print(f"Name: {record[1]}")
+    print(f"Short desc: {record[6]}")
+    print(f"Long desc: {record[7]}")
+    print(f"Type: {record[8]}")
+    user_prompts.pause_until_keypress()
+
+def prompt_and_insert_new_permission(permission, analysis_id, apk_id):
+    print("\n[**] New unknown permission detected:")
+    print(f"Name:\t\t{permission.name}")
+    user_decision = input("Save this unknown permission? (y/n): ").strip().lower()
+    if user_decision == 'y':
+        permission_id = DBFunct_Perm.insert_unknown_permission_record(permission.name)
+        print(f"New Unknown Permission ID: {permission_id}")
+        print(f"Permission '{permission.name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
+        return permission_id
+    else:
+        user_prompts.pause_until_keypress()
+        return None
+
+def save_unknown_permission(analysis_id, apk_id, permission_id, permission_name):
+    if not DBRecordInserts.insert_vt_permission(analysis_id, apk_id, None, permission_id):
+        print(f"[!!] Failed to insert Analysis ID: {analysis_id} APK ID: {apk_id} Permission: {permission_name}")
+        user_prompts.pause_until_keypress()
+
+def process_unknown_permission(analysis_id, apk_id, perm):
+    try:
+        record = DBFunct_Perm.get_unknown_permission_record_by_name(perm.name)
+        if record:
+            #check_permission_record(record, perm)
+            permission_id = record[0]
+        else:
+            permission_id = prompt_and_insert_new_permission(perm, analysis_id, apk_id)
+
+        if permission_id:
+            save_unknown_permission(analysis_id, apk_id, permission_id, perm.name)
+
+    except Exception as e:
+        logging_utils.log_error(f"An error occurred while processing unknown permission '{perm.name}': {e}")
