@@ -13,6 +13,61 @@ def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool =
         logging_utils.log_error(f"Error executing query: {query}", e)
         return None
 
+# Function to create vt_scan_analysis record
+def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:
+    query = "INSERT INTO vt_scan_analysis (analysis_id, apk_id)"
+    query += " VALUES (%s, %s)"
+    params = (analysis_id, apk_id)
+    return execute_sql(query, params)
+
+def update_vt_engine_detection(analysis_id: int, summary_stat: dict):
+    with dbConnect.database_connection() as conn:
+        cursor = conn.cursor()
+        for key, value in summary_stat.items():
+            # Replace hyphens in key names with underscores to match column names
+            column_name = key.replace('-', '_')
+            # Construct the SQL UPDATE statement for each modified key-value pair
+            sql = f"UPDATE vt_scan_analysis SET `{column_name}` = %s WHERE analysis_id = %s"
+            params = (value, analysis_id)
+            try:
+                cursor.execute(sql, params)
+                conn.commit()
+            except Exception as e:
+                logging_utils.log_error(f"Error updating {column_name} for analysis_id {analysis_id}", e)
+
+def fetch_vt_scan_analysis_column_names():
+    query = "SHOW COLUMNS FROM vt_scan_analysis"
+    column_names = []
+    with dbConnect.database_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        column_names = [column[0] for column in cursor.fetchall()]
+    return column_names
+
+# Function to create vt_scan_analysis record
+def update_vt_engine_records(analysis_id: int, detections: list):
+    # Fetch and prepare the column names.
+    column_names = fetch_vt_scan_analysis_column_names()
+    valid_columns = {col.replace('_', '-'): col for col in column_names}  # Reverse mapping for normalization.
+
+    for detection in detections:
+        av_vendor, result = detection
+        # Normalize AV vendor names to match column names, considering the reverse mapping.
+        column_name = valid_columns.get(av_vendor)
+
+        if column_name:
+            sql = f"UPDATE vt_scan_analysis SET `{column_name}` = %s WHERE analysis_id = %s"
+            params = (result, analysis_id)
+            try:
+                with dbConnect.database_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(sql, params)
+                    conn.commit()
+            except Exception as e:
+                logging_utils.log_error(f"Error updating record for {av_vendor} in analysis {analysis_id}", e)
+        else:
+            logging_utils.log_error(f"Invalid AV vendor name: {av_vendor}")
+
 # Function to insert data into vt_permissions table
 def insert_vt_permission(analysis_id: int, apk_id: int, known_permission_id: Optional[int], unknown_permission_id: Optional[int]) -> Optional[bool]:
     query = "INSERT INTO vt_permissions (analysis_id, apk_id, known_permission_id, unknown_permission_id)"

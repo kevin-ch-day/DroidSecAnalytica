@@ -45,7 +45,7 @@ def get_apk_records_sha256(apk_id: Optional[int] = None) -> Optional[List[Tuple[
     if apk_id:
         query += " AND a.apk_id >= %s"
         params = (apk_id,)
-    query += " ORDER BY a.apk_id ASC"
+    query += " ORDER BY a.apk_id asc"
     return run_query(query, params)
 
 def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:

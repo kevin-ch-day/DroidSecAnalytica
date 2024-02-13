@@ -81,6 +81,10 @@ def save_unknown_permission(analysis_id, apk_id, permission_id, permission_name)
 
 def process_unknown_permission(analysis_id, apk_id, perm):
     try:
+        # skip
+        if "android.intent.action." in perm.name:
+            return
+        
         record = DBFunct_Perm.get_unknown_permission_record_by_name(perm.name)
         if record:
             #check_permission_record(record, perm)

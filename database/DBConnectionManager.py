@@ -34,6 +34,7 @@ def execute_query(query: str, params: tuple = None, fetch: bool = False):
         cursor.execute(query, params or ())
         if fetch:
             return cursor.fetchall()
+        
         conn.commit()
 
 def execute_insert(table, data):

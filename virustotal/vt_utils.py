@@ -64,6 +64,7 @@ def add_items_to_list_if_key_exists(key, add_function, data):
             add_function(item)
 
 def save_json_response(response, filename, overwrite=True):
+    print(filename)
     if not isinstance(response, dict):
         print("Error: Response must be a dictionary.")
         return

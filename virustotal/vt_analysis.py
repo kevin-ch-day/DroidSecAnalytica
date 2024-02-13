@@ -1,20 +1,31 @@
 from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords, DBRecordInserts
-from utils import user_prompts, app_utils
+from utils import app_utils
 from permission_analysis import permission_analyzer
-
 from . import vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
     try:
         analysis_id = DBFunct_AnalysisRecords.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
-
-        vt_data = vt_requests.parse_virustotal_response(response)
         andro_data = vt_androguard.androguard_data(response)
         if andro_data:
             process_androguard_data(analysis_id, andro_data)
         else:
             print("No Androguard data returned...")
+
+        vt_data = vt_requests.parse_virustotal_response(response)
+        if vt_data:
+            apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+            DBRecordInserts.create_vt_engine_record(analysis_id, apk_id) 
+
+            summary_stat = vt_data["Analysis Result"]["summary_statistics"]
+            DBRecordInserts.update_vt_engine_detection(analysis_id, summary_stat)
+   
+            vendor_data = vt_data["Analysis Result"]["engine_detection"]
+            DBRecordInserts.update_vt_engine_records(analysis_id, vendor_data)
+
+            json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
+            #vt_utils.save_json_response(vt_data, json_filename)
 
         DBFunct_AnalysisRecords.update_status_to_completed(analysis_id)
 
@@ -97,7 +108,7 @@ def process_androguard_data(analysis_id, andro_data):
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-    #process_libraries(analysis_id, apk_id, andro_data.get_libraries())
+    process_libraries(analysis_id, apk_id, andro_data.get_libraries())
 
     footer = "=" * 50
     print(f"\n{footer}\n")
@@ -111,7 +122,7 @@ def process_apk_sample(record):
 
 def run_analysis(iterative_mode=True):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256()
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(37)
         if not apk_records:
             print("No APK samples found in the database.")
             return
