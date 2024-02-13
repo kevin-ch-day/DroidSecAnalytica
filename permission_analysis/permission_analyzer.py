@@ -34,7 +34,7 @@ def save_detected_permission(analysis_id, apk_id, perm):
         # Find the permission record in the database
         perm_id = DBFunct_Perm.get_permission_id_by_name(perm.name)
         if perm_id:
-            print(f"Permission ID: [{perm_id}] {perm.name}")
+            print(f"{perm.name}")
             #DBFunct_Perm.check_standard_permission_record(id, permission)
             DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
