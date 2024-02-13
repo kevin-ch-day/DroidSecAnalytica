@@ -122,7 +122,7 @@ def process_apk_sample(record):
 
 def run_analysis(iterative_mode=False):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(72)
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(237)
         if not apk_records:
             print("No APK samples found in the database.")
             return
