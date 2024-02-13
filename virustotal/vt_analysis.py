@@ -120,9 +120,9 @@ def process_apk_sample(record):
     analysis_name = "Test Run 2/12/2024"
     process_vt_response(response, analysis_name)
 
-def run_analysis(iterative_mode=True):
+def run_analysis(iterative_mode=False):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256()
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(72)
         if not apk_records:
             print("No APK samples found in the database.")
             return
