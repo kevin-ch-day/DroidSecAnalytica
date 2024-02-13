@@ -15,7 +15,6 @@ class AndroguardADT:
         self.activities = []
         self.providers = []
         self.services = []
-        self.libraries = []
         self.certificate = {}
         self.intent_filters = IntentFilterADT.IntentFilterADT() 
         self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
@@ -111,14 +110,6 @@ class AndroguardADT:
     def get_services(self):
         return self.services
 
-    # Add a library
-    def add_library(self, library):
-        self.libraries.append(library)
-
-    # Get all libraries
-    def get_libraries(self):
-        return self.libraries
-
     # Set the certificate data
     def set_certificate_data(self, certificate_data):
         self.certificate = certificate_data
@@ -159,14 +150,6 @@ class AndroguardADT:
             self.services.remove(service)
         except ValueError:
             pass  # Optionally handle the error or log it
-
-    def remove_library(self, library):
-        """Remove a library if it exists."""
-        try:
-            self.libraries.remove(library)
-        except ValueError:
-            pass  # Optionally handle the error or log it
-
     def __str__(self) -> str:
         """
         Provides a detailed string representation of the AndroPermissionADT object,
@@ -180,7 +163,6 @@ class AndroguardADT:
             "Activities": f"{len(self.activities)}",
             "Providers": f"{len(self.providers)}",
             "Services": f"{len(self.services)}",
-            "Libraries": f"{len(self.libraries)}",
             "Permissions": f"{len(self.permissions_manager.list_permissions())}"
         }
 
@@ -218,23 +200,7 @@ class AndroguardADT:
             f"Number of Activities: {len(self.activities)}",
             f"Number of Providers: {len(self.providers)}",
             f"Number of Services: {len(self.services)}",
-            f"Number of Libraries: {len(self.libraries)}",
             f"Number of Permissions: {len(self.permissions)}",
         ]
-
-        # Optionally, add more detailed information for each component
-        if self.receivers:
-            summary_info.append("Receivers: " + ", ".join(self.receivers))
-        if self.activities:
-            summary_info.append("Activities: " + ", ".join(self.activities))
-        # Similar for providers, services, libraries, and permissions
-
-        # Adding certificate summary if present
-        if self.certificate:
-            summary_info.append(f"Certificate: Available")
         
-        # Adding intent filters summary if present
-        if self.intent_filters:
-            summary_info.append(f"Intent Filters: Available")
-
         return "\n".join(summary_info)

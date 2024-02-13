@@ -42,7 +42,7 @@ def process_permissions(analysis_id, apk_id, permissions):
         print("No data.")
 
 def process_summary_data(analysis_id, andro_data):
-    print("\nAndroid APK Analysis Report\n" + "=" * 50)
+    print("\APK Analysis Report\n" + "=" * 50)
     print(f"MD5:                {andro_data.get_md5()}")
     print(f"SHA1:               {andro_data.get_sha1()}")
     print(f"SHA256:             {andro_data.get_sha256()}")
@@ -89,26 +89,14 @@ def process_receivers(analysis_id, apk_id, receivers):
     else:
         print("No data.")
 
-def process_libraries(analysis_id, apk_id, libraries):
-    libraries_cnt = len(libraries)
-    print(f"\nLibraries ({libraries_cnt}):")
-    if libraries:
-        for library in libraries:
-            #print(f"- {library}") # Debugging
-            DBRecordInserts.insert_vt_libraries(analysis_id, library, apk_id)
-    else:
-        print("No data.")
-
 def process_androguard_data(analysis_id, andro_data):
     apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
-    #print(f"APK ID: {apk_id}") # Debugging
 
     process_summary_data(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-    #process_libraries(analysis_id, apk_id, andro_data.get_libraries())
 
     footer = "=" * 50
     print(f"\n{footer}\n")
@@ -143,8 +131,8 @@ def run_analysis(iterative_mode=False):
     except Exception as e:
         print(f"Error running the analysis: {e}")
 
-def run_hash_ioc():
+def test_hash_analysis():
     hash_value = '57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f'
     response = vt_requests.query_hash(hash_value)
-    analysis_name = "Test Run #1 2/7/2024"
+    analysis_name = "Test Hash Analysis 2/13/2024"
     process_vt_response(response, analysis_name)

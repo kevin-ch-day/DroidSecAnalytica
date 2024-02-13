@@ -15,7 +15,6 @@ if not os.path.exists('logs'):
 # Configure Logging using logging_utils
 logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
-
 def main():
     try:
         vt_analysis.run_analysis()
