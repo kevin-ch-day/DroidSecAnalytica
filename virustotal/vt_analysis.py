@@ -64,7 +64,7 @@ def process_activities(analysis_id, apk_id, activities):
     print(f"\nActivities ({activities_cnt}):")
     if activities:
         for activity in activities:
-            print(f"- {activity}")
+            #print(f"- {activity}") # Debugging
             DBRecordInserts.insert_vt_activities(analysis_id, activity, apk_id)
     else:
         print("No data.")
@@ -74,7 +74,7 @@ def process_services(analysis_id, apk_id, services):
     print(f"\nServices ({services_cnt}):")
     if services:
         for service in services:
-            print(f"- {service}")
+            #print(f"- {service}") # Debugging
             DBRecordInserts.insert_vt_services(analysis_id, service, apk_id)
     else:
         print("No data.")
@@ -84,7 +84,7 @@ def process_receivers(analysis_id, apk_id, receivers):
     print(f"\nReceivers ({receivers_cnt}):")
     if receivers:
         for receiver in receivers:
-            print(f"- {receiver}")
+            #print(f"- {receiver}") # Debugging
             DBRecordInserts.insert_vt_receivers(analysis_id, receiver, apk_id)
     else:
         print("No data.")
@@ -94,7 +94,7 @@ def process_libraries(analysis_id, apk_id, libraries):
     print(f"\nLibraries ({libraries_cnt}):")
     if libraries:
         for library in libraries:
-            print(f"- {library}")
+            #print(f"- {library}") # Debugging
             DBRecordInserts.insert_vt_libraries(analysis_id, library, apk_id)
     else:
         print("No data.")
@@ -104,11 +104,11 @@ def process_androguard_data(analysis_id, andro_data):
     #print(f"APK ID: {apk_id}") # Debugging
 
     process_summary_data(analysis_id, andro_data)
-    process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
+    process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-    process_libraries(analysis_id, apk_id, andro_data.get_libraries())
+    #process_libraries(analysis_id, apk_id, andro_data.get_libraries())
 
     footer = "=" * 50
     print(f"\n{footer}\n")
@@ -122,7 +122,7 @@ def process_apk_sample(record):
 
 def run_analysis(iterative_mode=True):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(37)
+        apk_records = DBFunct_ApkRecords.get_apk_records_sha256()
         if not apk_records:
             print("No APK samples found in the database.")
             return
