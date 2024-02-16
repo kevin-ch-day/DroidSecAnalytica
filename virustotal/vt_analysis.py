@@ -134,11 +134,23 @@ def run_analysis(iterative_mode=False):
         print(f"Error running the analysis: {e}")
 
 def analysis_process_alpha():
-    
+    hash_file_path = "input\\SHA256-Hashes.txt"
+    hashes = []
+
+    with open(hash_file_path, 'r') as file:
+        for line in file:
+            hash_value = line.strip()
+            if hash_value:
+                hashes.append(hash_value)
+
+    records = DB_ApkRecords.get_apk_samples_by_sha256_list(hashes)
+
     if not records:
         print("No records giving.")
         return
     
     print("\nProcessing APK Samples")
     for index in records:
-        process_apk_sample(records)
+        response = vt_requests.query_hash(index[1])
+        analysis_name = "Test Run 2/15/2024"
+        process_vt_response(response, analysis_name)

@@ -84,3 +84,12 @@ def hash_query_alpha(hashes):
                 matching_records.extend(results)
                 non_matching_hashes.remove(hash_str)
     return matching_records, non_matching_hashes
+
+def get_apk_samples_by_sha256_list(sha256_list: List[str]) -> List[Dict]:
+    # Queries the apk_samples table for records matching a list of SHA256 hashes.
+    matching_records = []
+    for sha256 in sha256_list:
+        records = run_query("SELECT * FROM apk_samples WHERE sha256 = %s", (sha256,))
+        if records:
+            matching_records.extend(records)
+    return matching_records
