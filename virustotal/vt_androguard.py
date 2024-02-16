@@ -32,7 +32,7 @@ def populate_androguard_data(attributes):
 
     populate_manifest_metadata(androguard, json_data)
     populate_manifest_components(androguard, json_data)
-    #populate_permissions(androguard, json_data)
+    populate_permissions(androguard, json_data)
     #populate_certificate_data(androguard, json_data)
     #populate_intent_filters(androguard, json_data)
     return androguard
@@ -61,30 +61,35 @@ def populate_manifest_components(androguard_data, data):
         print("Error: androguard_data is None or invalid.")
         return
     
-    display_dict_data(data)
-    print()
-
-    component_types = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
-
-    for component_type in component_types:
-        # Safely get the component data, defaulting to None if not found
-        component_data = data.get(component_type)
-
-        # Only proceed if component_data is not None and not empty
-        if component_data:
-            
-            # Construct the method name based on the component_type
-            method_name = f'set_{component_type.lower()}'
-            
-            # Check if the androguard_data object has the method
-            if hasattr(androguard_data, method_name):
-                getattr(androguard_data, method_name)(component_data)
-                print(f"{component_type} {type(component_data)} -> {component_data}\n")
-            else:
-                print(f"Warning: androguard_data does not have a method to handle {component_type}")
-        else:
-            print(f"{component_type} is empty or not present.")
-
+    if 'Activities' in data and data['Activities']:
+        activities = data['Activities']
+        #print(f"Activities {type(activities)} -> {activities}\n") # DEBUGGING
+        for a in activities:
+            androguard_data.add_activity(a)
+    
+    if 'Receivers' in data and data['Receivers']:
+        receivers = data['Receivers']
+        #print(f"Receivers {type(receivers)} -> {receivers}\n") # DEBUGGING
+        for r in receivers:
+            androguard_data.add_receiver(r)
+    
+    if 'Providers' in data and data['Providers']:
+        providers = data['Providers']
+        #print(f"Providers {type(providers)} -> {providers}\n") # DEBUGGING
+        for p in providers:
+            androguard_data.add_provider(p)
+    
+    if 'Services' in data and data['Services']:
+        services = data['Services']
+        #print(f"Services {type(services)} -> {services}\n") # DEBUGGING
+        for s in services:
+            androguard_data.add_service(s)
+    
+    if 'Libraries' in data and data['Libraries']:
+        libraries = data['Libraries']
+        #print(f"Libraries {type(libraries)} -> {libraries}\n") # DEBUGGING
+        for l in libraries:
+            androguard_data.add_library(l)
 
 def populate_permissions(andr_obj, data):
     if 'permission_details' in data:

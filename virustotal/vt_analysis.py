@@ -46,22 +46,21 @@ def process_vt_response(response, analysis_name):
 
 def process_permissions(analysis_id, apk_id, permissions):
     permissions_cnt = len(permissions)
-    print(f"\nTotal Permissions: {permissions_cnt}")
+    print(f"\nPermissions ({permissions_cnt})")
     if permissions:
         for index in permissions:
             permission_analyzer.save_detected_permission(analysis_id, apk_id, permissions[index])
     else:
         print("No data.")
 
-def process_summary_data(analysis_id, andro_data):
+def process_metadata(analysis_id, andro_data):
     print("\nAPK Analysis Report\n" + "=" * 50)
     print(f"MD5:                {andro_data.get_md5()}")
     print(f"SHA1:               {andro_data.get_sha1()}")
     print(f"SHA256:             {andro_data.get_sha256()}")
-    print(f"Package Name:       {andro_data.get_package()}")
+    print(f"\nPackage Name:       {andro_data.get_package()}")
     print(f"Main Activity:      {andro_data.get_main_activity()}")
     print(f"Target SDK Version: {andro_data.get_target_sdk_version()}")
-    print("-" * 50)
 
     DBRecordInserts.create_apk_analysis_records(
         analysis_id,
@@ -73,7 +72,7 @@ def process_summary_data(analysis_id, andro_data):
 
 def process_activities(analysis_id, apk_id, activities):
     activities_cnt = len(activities)
-    print(f"\nActivities ({activities_cnt}):")
+    print(f"\nActivities ({activities_cnt})")
     if activities:
         for activity in activities:
             #print(f"- {activity}") # Debugging
@@ -83,7 +82,7 @@ def process_activities(analysis_id, apk_id, activities):
 
 def process_services(analysis_id, apk_id, services):
     services_cnt = len(services)
-    print(f"\nServices ({services_cnt}):")
+    print(f"\nServices ({services_cnt})")
     if services:
         for service in services:
             #print(f"- {service}") # Debugging
@@ -93,7 +92,7 @@ def process_services(analysis_id, apk_id, services):
 
 def process_receivers(analysis_id, apk_id, receivers):
     receivers_cnt = len(receivers)
-    print(f"\nReceivers ({receivers_cnt}):")
+    print(f"\nReceivers ({receivers_cnt})")
     if receivers:
         for receiver in receivers:
             #print(f"- {receiver}") # Debugging
@@ -104,7 +103,7 @@ def process_receivers(analysis_id, apk_id, receivers):
 def process_androguard_data(analysis_id, andro_data):
     apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
 
-    process_summary_data(analysis_id, andro_data)
+    process_metadata(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())

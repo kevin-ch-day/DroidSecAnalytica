@@ -16,6 +16,7 @@ class AndroguardADT:
         self.activities = []
         self.providers = []
         self.services = []
+        self.libraries = []
         self.certificate = {}
         self.intent_filters = IntentFilterADT.IntentFilterADT() 
         self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
@@ -92,6 +93,14 @@ class AndroguardADT:
     # Get all receivers
     def get_receivers(self):
         return self.receivers
+    
+    # Add a library
+    def add_library(self, library):
+        self.libraries.append(library)
+
+    # Get all libraries
+    def add_libraries(self):
+        return self.libraries
 
     # Add an activity
     def add_activity(self, activity):
@@ -157,8 +166,9 @@ class AndroguardADT:
             self.services.remove(service)
         except ValueError:
             pass  # Optionally handle the error or log it
+    
     def __str__(self) -> str:
-        # Provides a detailed string representation of the AndroPermissionADT object,
+        """Provides a string representation of the AndroPermissionADT object """
         components_summary = {
             "Main Activity": self.main_activity or "N/A",
             "Package": self.package or "N/A",
