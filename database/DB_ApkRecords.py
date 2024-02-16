@@ -2,7 +2,7 @@
 
 from typing import Optional, Tuple, List, Dict
 from . import DBConnectionManager as dbConnect
-from utils import logging_utils
+from utils import logging_utils, hash_utils
 
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
     try:
@@ -65,3 +65,22 @@ def get_unanalyzed_malware_ioc_threats():
 def update_malware_ioc_vt_url(id, url):
     query = "UPDATE malware_ioc_threats SET virustotal_url = %s WHERE id = %s"
     return run_query(query, (url, id))
+
+def hash_query_alpha(hashes):
+    """Query for each hash and collect matching and non-matching hashes."""
+    matching_records = []
+    non_matching_hashes = set(hashes)
+    for hash_str in hashes:
+        hash_type = hash_utils.determine_hash_type(hash_str)
+        if hash_type:
+            query = f"""
+                SELECT a.apk_id, a.{hash_type}, a.sha256, a.source, b.name_1, b.name_2, b.virustotal_label, b.month, b.year
+                FROM apk_samples a
+                JOIN malware_ioc_threats b ON a.sha256 = b.sha256
+                WHERE a.{hash_type} = %s
+            """
+            results = run_query(query, (hash_str,))
+            if results:
+                matching_records.extend(results)
+                non_matching_hashes.remove(hash_str)
+    return matching_records, non_matching_hashes

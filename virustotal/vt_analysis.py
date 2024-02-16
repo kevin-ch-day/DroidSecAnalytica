@@ -131,36 +131,3 @@ def run_analysis(iterative_mode=False):
 
     except Exception as e:
         print(f"Error running the analysis: {e}")
-
-def check_unanalyzed_malware_ioc():
-    # Part 1: Check for Missing VirusTotal Report URLs
-    results = DB_ApkRecords.get_unanalyzed_malware_ioc_threats()
-    if results:
-        print(f"Unanalyzed threats: {len(results)}\n")
-        for i in results:
-            print(f"Threat ID: {i[0]} SHA-256: {i[6]}")
-            response = vt_requests.query_hash(i[6])
-            vt_data = vt_requests.parse_virustotal_response(response)
-            if vt_data:
-                if vt_data['Report URL']:
-                    print(f"\n{vt_data['Report URL']}")
-                    DB_ApkRecords.update_malware_ioc_vt_url(i[0], vt_data['Report URL'])
-                    user_prompts.pause_until_keypress()
-
-    # Part 2: check if apk_samples are missing records
-    malware_iocs = DB_ApkRecords.get_malware_hash_samples()
-    if malware_iocs:
-        for i in malware_iocs:
-            results = DB_ApkRecords.get_apk_sample_record_by_sha256(i[6])
-            if not results:
-                print(f"Missing Record for {i[0]} SHA-256: {i[6]}")
-                response = vt_requests.query_hash(i[6])
-                vt_data = vt_requests.parse_virustotal_response(response)
-                if vt_data:
-                    if not DBRecordInserts.create_apk_sample_record(i[6], vt_data['Size'], vt_data['MD5'], vt_data['SHA1'], vt_data['SHA256']):
-                        print("Error: creating apk sample record")
-                    else:
-                        print("New record created.")
-                    user_prompts.pause_until_keypress()
-    
-    

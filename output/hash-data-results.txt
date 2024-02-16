@@ -1,0 +1,487 @@
+Matching Records:
+ID: 581
+Hash data: 218c6e2327c8342192dc58c6e793fc3d5cba7f15e4b2f188c98cd4ba48bf244a
+SHA-256: 218c6e2327c8342192dc58c6e793fc3d5cba7f15e4b2f188c98cd4ba48bf244a
+Source: None
+Name 1: SharkBot
+Name 2: SharkBot
+VirusTotal: None
+Date: September 2022
+
+ID: 325
+Hash data: 2ce8a6a361ca57009cef9640c02dc44a3a084371c1f7a9d2ddc5b4d0394fd90a
+SHA-256: 2ce8a6a361ca57009cef9640c02dc44a3a084371c1f7a9d2ddc5b4d0394fd90a
+Source: 2020-README.txt
+Name 1: Malvertising
+Name 2: Malvertising
+VirusTotal: trojan.bankbot/hqwar
+Date: June 2020
+
+ID: 212
+Hash data: fcc8e879421efa4a87c18771ad6a5e20960dbdf80222f34024d110922a9ae63a
+SHA-256: fcc8e879421efa4a87c18771ad6a5e20960dbdf80222f34024d110922a9ae63a
+Source: 2020-README.txt
+Name 1: Banker
+Name 2: Banker
+VirusTotal: trojan.bankbot/cerberus
+Date: March 2020
+
+ID: 336
+Hash data: d89e08db5af347be72f1307186638aaa062a8de45a808f57dce85bc83c94059e
+SHA-256: d89e08db5af347be72f1307186638aaa062a8de45a808f57dce85bc83c94059e
+Source: 2020-README.txt
+Name 1: Cerberus
+Name 2: Cerberus
+VirusTotal: trojan.hqwar/cerberus
+Date: July 2020
+
+ID: 481
+Hash data: 65619e3afe53268f5cbe5eae6a429f23e712c4412eda8c70dcfd3ebb25382894
+SHA-256: 65619e3afe53268f5cbe5eae6a429f23e712c4412eda8c70dcfd3ebb25382894
+Source: 2021-README.txt
+Name 1: Ermac
+Name 2: Ermac
+VirusTotal: trojan.hqwar/bankbot
+Date: September 2021
+
+ID: 184
+Hash data: 0d10d8d3d25e60fb99f17501a23d6a2dcbb2df1281b79a90e4656225e41747bd
+SHA-256: 0d10d8d3d25e60fb99f17501a23d6a2dcbb2df1281b79a90e4656225e41747bd
+Source: 2020-README.txt
+Name 1: New Anubis samples
+Name 2: Anubis
+VirusTotal: trojan.hqwar/cerberus
+Date: January 2020
+
+ID: 411
+Hash data: 80260cc2e49e1014d64f871f5cc89754ecd0124337e3ce0a2ec9c2ec7f65c726
+SHA-256: 80260cc2e49e1014d64f871f5cc89754ecd0124337e3ce0a2ec9c2ec7f65c726
+Source: 2021-README.txt
+Name 1: cabassous/Flubot
+Name 2: cabassous/Flubot
+VirusTotal: trojan.polph/polphc
+Date: March 2021
+
+ID: 446
+Hash data: 4067054f202cc8e87557915783d4468b54985c5cc7b0b57df98ffbb106475196
+SHA-256: 4067054f202cc8e87557915783d4468b54985c5cc7b0b57df98ffbb106475196
+Source: 2021-README.txt
+Name 1: teabot
+Name 2: teabot
+VirusTotal: trojan.hqwar/bankbot
+Date: June 2021
+
+ID: 423
+Hash data: 4cdbd105ab8117620731630f8f89eb2e6110dbf6341df43712a0ec9837c5a9be
+SHA-256: 4cdbd105ab8117620731630f8f89eb2e6110dbf6341df43712a0ec9837c5a9be
+Source: 2021-README.txt
+Name 1: brata
+Name 2: brata
+VirusTotal: trojan.bankbot/brata
+Date: April 2021
+
+ID: 232
+Hash data: f57a44bec2f7af2da443f068edb0a743f9625ac3a9d686393bacb8e72274b5de
+SHA-256: f57a44bec2f7af2da443f068edb0a743f9625ac3a9d686393bacb8e72274b5de
+Source: 2020-README.txt
+Name 1: Covid_Cerebrus
+Name 2: Cerebrus
+VirusTotal: trojan.hqwar/bankbot
+Date: March 2020
+
+ID: 421
+Hash data: 2846c9dda06a052049d89b1586cff21f44d1d28f153a2ff4726051ac27ca3ba7
+SHA-256: 2846c9dda06a052049d89b1586cff21f44d1d28f153a2ff4726051ac27ca3ba7
+Source: 2021-README.txt
+Name 1: brata
+Name 2: brata
+VirusTotal: trojan.brata
+Date: April 2021
+
+ID: 447
+Hash data: 6cc2421b86392072fece2d63e9731eb902001f2d812e56d26553e8ad0dac4b8e
+SHA-256: 6cc2421b86392072fece2d63e9731eb902001f2d812e56d26553e8ad0dac4b8e
+Source: 2021-README.txt
+Name 1: teabot
+Name 2: teabot
+VirusTotal: banker.cerberus/bank
+Date: June 2021
+
+ID: 22
+Hash data: 48618153df1b2b5be3f83e6e1fa6aa5f517b173b10f3f6e925d1598a22b459e1
+SHA-256: 48618153df1b2b5be3f83e6e1fa6aa5f517b173b10f3f6e925d1598a22b459e1
+Source: 2019-README.txt
+Name 1: Brazilian Android RAT
+Name 2: Brazilian Android RAT
+VirusTotal: trojan.brata/banbra
+Date: March 2019
+
+ID: 428
+Hash data: 74183f6454d2aaa44fcb363eb71beb33f04845c7fe4b402d06a87bab7b99e235
+SHA-256: 74183f6454d2aaa44fcb363eb71beb33f04845c7fe4b402d06a87bab7b99e235
+Source: 2021-README.txt
+Name 1: flubot
+Name 2: flubot
+VirusTotal: trojan.polph/flubot
+Date: May 2021
+
+ID: 331
+Hash data: 51f9c37c3eec0b6f8325aa1c8fe64a0615ab920584042df557426473b1270b40
+SHA-256: 51f9c37c3eec0b6f8325aa1c8fe64a0615ab920584042df557426473b1270b40
+Source: 2020-README.txt
+Name 1: BlackRock
+Name 2: BlackRock
+VirusTotal: trojan.bankbot/hqwar
+Date: July 2020
+
+ID: 224
+Hash data: 1a8c17ad1a790554278b055bdb946d4597ba9af6be3611ee6311b90c7f7848c5
+SHA-256: 1a8c17ad1a790554278b055bdb946d4597ba9af6be3611ee6311b90c7f7848c5
+Source: 2020-README.txt
+Name 1: EventBot
+Name 2: EventBot
+VirusTotal: trojan.knobot/eventbot
+Date: March 2020
+
+ID: 229
+Hash data: ad07d44d348185db08710d8cdef6b4cff3f52e5c8ce0646654cef441dea1e869
+SHA-256: ad07d44d348185db08710d8cdef6b4cff3f52e5c8ce0646654cef441dea1e869
+Source: 2020-README.txt
+Name 1: Xerxes
+Name 2: Xerxes
+VirusTotal: trojan.cerberus/bank
+Date: March 2020
+
+ID: 222
+Hash data: 7b1ac3a8caa556c9208d4db62395cca2f8a53420e5d51a1537bc45622e41b63f
+SHA-256: 7b1ac3a8caa556c9208d4db62395cca2f8a53420e5d51a1537bc45622e41b63f
+Source: 2020-README.txt
+Name 1: EventBot
+Name 2: EventBot
+VirusTotal: trojan.knobot/eventbot
+Date: March 2020
+
+ID: 185
+Hash data: f49d7e115bfcdfe2fe1439b2d4fd149a2b15fb9d03986274d59b9249c1bd6678
+SHA-256: f49d7e115bfcdfe2fe1439b2d4fd149a2b15fb9d03986274d59b9249c1bd6678
+Source: 2020-README.txt
+Name 1: New Anubis samples
+Name 2: Anubis
+VirusTotal: trojan.hqwar/cerberus
+Date: January 2020
+
+ID: 480
+Hash data: 495a0621b2afc6adefbf17dc6c3cf5e92ba8227ac6939a20439b1b9dde878617
+SHA-256: 495a0621b2afc6adefbf17dc6c3cf5e92ba8227ac6939a20439b1b9dde878617
+Source: 2021-README.txt
+Name 1: Ermac
+Name 2: Ermac
+VirusTotal: trojan.hqwar/bankbot
+Date: September 2021
+
+ID: 310
+Hash data: b8d245b62fdb7370aaef0133b62c25c3eb60d2d0f15d8170b2255c26d489a589
+SHA-256: b8d245b62fdb7370aaef0133b62c25c3eb60d2d0f15d8170b2255c26d489a589
+Source: 2020-README.txt
+Name 1: Covid_FakeCoronaTest
+Name 2: Covid_FakeCoronaTest
+VirusTotal: trojan.anubis/andr
+Date: May 2020
+
+ID: 575
+Hash data: b01b74aaf249d0740f541c081c0c0de4bf455b4b68f2634fab6cf8aafcd95d52
+SHA-256: b01b74aaf249d0740f541c081c0c0de4bf455b4b68f2634fab6cf8aafcd95d52
+Source: None
+Name 1: SOVA v4
+Name 2: SOVA
+VirusTotal: None
+Date: August 2022
+
+ID: 357
+Hash data: 446d44b2e2bdd063aed7c142da54d0bf1e1f145ddc5cb4f64b1de8dbb9b5a117
+SHA-256: 446d44b2e2bdd063aed7c142da54d0bf1e1f145ddc5cb4f64b1de8dbb9b5a117
+Source: 2020-README.txt
+Name 1: Cerberus
+Name 2: Cerberus
+VirusTotal: downloader.dldragent/figt
+Date: September 2020
+
+ID: 213
+Hash data: 9687682ceb5bcb544331eabd61ec3b65accbc691609691f826518d40d2d5304b
+SHA-256: 9687682ceb5bcb544331eabd61ec3b65accbc691609691f826518d40d2d5304b
+Source: 2020-README.txt
+Name 1: Banker
+Name 2: Banker
+VirusTotal: trojan.anubis/andr
+Date: March 2020
+
+ID: 557
+Hash data: 26d2555a2c73fd7f49ae1d5d335f4cc983e3fab3f564989dfc3262ee2355a2b9
+SHA-256: 26d2555a2c73fd7f49ae1d5d335f4cc983e3fab3f564989dfc3262ee2355a2b9
+Source: 2022-README.txt
+Name 1: SharkBot 
+Name 2: SharkBot 
+VirusTotal: trojan.sharkbot/flrj
+Date: September 2022
+
+ID: 356
+Hash data: 6243ed1d4f2712be2e02edfb6411e8dc86ebe2c683e9f64462f7d23354a0e1ba
+SHA-256: 6243ed1d4f2712be2e02edfb6411e8dc86ebe2c683e9f64462f7d23354a0e1ba
+Source: 2020-README.txt
+Name 1: Cerberus
+Name 2: Cerberus
+VirusTotal: downloader.dldragent/figt
+Date: September 2020
+
+ID: 225
+Hash data: 6c0c788eddaf228df9c7f95ced4ea95dcb384b8dabcdd579dedba56915107779
+SHA-256: 6c0c788eddaf228df9c7f95ced4ea95dcb384b8dabcdd579dedba56915107779
+Source: 2020-README.txt
+Name 1: EventBot
+Name 2: EventBot
+VirusTotal: trojan.knobot/eventbot
+Date: March 2020
+
+ID: 558
+Hash data: 7f2248f5de8a74b3d1c48be0db574b1c6558d6edae347592b29dc5234337a5ff
+SHA-256: 7f2248f5de8a74b3d1c48be0db574b1c6558d6edae347592b29dc5234337a5ff
+Source: 2022-README.txt
+Name 1: SharkBot 
+Name 2: SharkBot 
+VirusTotal: trojan.sharkbot/bankbot
+Date: September 2022
+
+ID: 576
+Hash data: 25e2a148a586acc6b741a64f42c618796a08ec9745eb3d1170acabf9e732a366
+SHA-256: 25e2a148a586acc6b741a64f42c618796a08ec9745eb3d1170acabf9e732a366
+Source: None
+Name 1: SharkBot 
+Name 2: SharkBot 
+VirusTotal: None
+Date: November 2022
+
+ID: 574
+Hash data: b77adec6e50e884b03750944f41d539213d7cc1e9cadd86e76fa0cacf83ad9ed
+SHA-256: b77adec6e50e884b03750944f41d539213d7cc1e9cadd86e76fa0cacf83ad9ed
+Source: None
+Name 1: Anubis
+Name 2: Anubis
+VirusTotal: None
+Date: December 2020
+
+ID: 422
+Hash data: d9bc87ab45b0c786aa09f964a8101f6df7ea76895e2e8438c13935a356d9116b
+SHA-256: d9bc87ab45b0c786aa09f964a8101f6df7ea76895e2e8438c13935a356d9116b
+Source: 2021-README.txt
+Name 1: brata
+Name 2: brata
+VirusTotal: trojan.piom/brata
+Date: April 2021
+
+ID: 405
+Hash data: 30937927e8891f8c0fd2c7b6be5fbc5a05011c34a7375e91aad384b82b9e6a67
+SHA-256: 30937927e8891f8c0fd2c7b6be5fbc5a05011c34a7375e91aad384b82b9e6a67
+Source: 2021-README.txt
+Name 1: flubot
+Name 2: flubot
+VirusTotal: trojan.polph/fimy
+Date: March 2021
+
+ID: 273
+Hash data: 2b43af46398ece7b9e1e41bb7c2e2ff3ec227edb38283bea7622115bb76a7823
+SHA-256: 2b43af46398ece7b9e1e41bb7c2e2ff3ec227edb38283bea7622115bb76a7823
+Source: 2020-README.txt
+Name 1: Covid_CovidMap
+Name 2: Covid_CovidMap
+VirusTotal: trojan.cerberus/cebruser
+Date: April 2020
+
+ID: 515
+Hash data: 57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f
+SHA-256: 57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f
+Source: 2021-README.txt
+Name 1: phoneSpy
+Name 2: phoneSpy
+VirusTotal: trojan.sharkbot/bankbot
+Date: November 2021
+
+ID: 515
+Hash data: 57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f
+SHA-256: 57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f
+Source: 2021-README.txt
+Name 1: SharkBot 
+Name 2: SharkBot 
+VirusTotal: trojan.sharkbot/bankbot
+Date: November 2021
+
+ID: 223
+Hash data: 3b61e0bf8eef614c6a6b8d9bf09b78e4c3db5bfabcdd8888d1042b5fd28959fe
+SHA-256: 3b61e0bf8eef614c6a6b8d9bf09b78e4c3db5bfabcdd8888d1042b5fd28959fe
+Source: 2020-README.txt
+Name 1: EventBot
+Name 2: EventBot
+VirusTotal: trojan.knobot/eventbot
+Date: March 2020
+
+ID: 238
+Hash data: dfb54d6c468271c73865d45e54b9dd942a18e716d608cf9233f1122cf79bab8c
+SHA-256: dfb54d6c468271c73865d45e54b9dd942a18e716d608cf9233f1122cf79bab8c
+Source: 2020-README.txt
+Name 1: Covid_FakeCoronatracker
+Name 2: Covid_FakeCoronatracker
+VirusTotal: trojan.anubis/andr
+Date: March 2020
+
+ID: 410
+Hash data: d22c5db75f6260823e83057721a2d3e90a9821bdbc81ec52683e8cce49d9a49d
+SHA-256: d22c5db75f6260823e83057721a2d3e90a9821bdbc81ec52683e8cce49d9a49d
+Source: 2021-README.txt
+Name 1: cabassous/Flubot
+Name 2: cabassous/Flubot
+VirusTotal: trojan.polph/fith
+Date: March 2021
+
+ID: 332
+Hash data: 6fa4baef8a811f429cee4b383d7a4776b7b363b62551c8d8e0f93bad33adefbd
+SHA-256: 6fa4baef8a811f429cee4b383d7a4776b7b363b62551c8d8e0f93bad33adefbd
+Source: 2020-README.txt
+Name 1: BlackRock
+Name 2: BlackRock
+VirusTotal: trojan.hqwar/bankbot
+Date: July 2020
+
+ID: 258
+Hash data: 7711f2515fa68fcb75459a90b9d0102569435cdfbaacb35b23828ab17d6a0987
+SHA-256: 7711f2515fa68fcb75459a90b9d0102569435cdfbaacb35b23828ab17d6a0987
+Source: 2020-README.txt
+Name 1: BankerTrojan
+Name 2: BankerTrojan
+VirusTotal: trojan.anubis/bankbot
+Date: April 2020
+
+ID: 231
+Hash data: 9832b1ade1907849fd7091e85f2c24bd8a4488ecd96f0638fc979d8858b25196
+SHA-256: 9832b1ade1907849fd7091e85f2c24bd8a4488ecd96f0638fc979d8858b25196
+Source: 2020-README.txt
+Name 1: Covid_Cerebrus
+Name 2: Cerebrus
+VirusTotal: trojan.bankbot/hqwar
+Date: March 2020
+
+ID: 335
+Hash data: c30ebf9fc47e6e12f4467e32bf1b3c055f99659c8c0395df4b3e7107591eb5fa
+SHA-256: c30ebf9fc47e6e12f4467e32bf1b3c055f99659c8c0395df4b3e7107591eb5fa
+Source: 2020-README.txt
+Name 1: Cerberus
+Name 2: Cerberus
+VirusTotal: trojan.kabun/piom
+Date: July 2020
+
+ID: 449
+Hash data: 1d8ffa729c0decd436624669e8ff65076ab567cd2b5b52f703b7d5528db8c67e
+SHA-256: 1d8ffa729c0decd436624669e8ff65076ab567cd2b5b52f703b7d5528db8c67e
+Source: 2021-README.txt
+Name 1: teabot
+Name 2: teabot
+VirusTotal: trojan.bankbot
+Date: June 2021
+
+ID: 489
+Hash data: 8a6889610a18296e812fabd0a4ceb8b75caadc5cec1b39e8173c3e0093fd3a57
+SHA-256: 8a6889610a18296e812fabd0a4ceb8b75caadc5cec1b39e8173c3e0093fd3a57
+Source: 2021-README.txt
+Name 1: SOVA
+Name 2: SOVA
+VirusTotal: trojan.sova/bankbot
+Date: September 2021
+
+ID: 526
+Hash data: f690e30b6ee25c153effc5620fd7ec61481a449a127b54a67c7afc4c13d7917f
+SHA-256: f690e30b6ee25c153effc5620fd7ec61481a449a127b54a67c7afc4c13d7917f
+Source: 2022-README.txt
+Name 1: brata
+Name 2: brata
+VirusTotal: trojan.
+Date: January 2022
+
+ID: 448
+Hash data: 02e30e57604445d22a6ba0e9386335c6d37a936164a319d993649521cf223c24
+SHA-256: 02e30e57604445d22a6ba0e9386335c6d37a936164a319d993649521cf223c24
+Source: 2021-README.txt
+Name 1: teabot
+Name 2: teabot
+VirusTotal: trojan.fjmm
+Date: June 2021
+
+ID: 488
+Hash data: efb92fb17348eb10ba3a93ab004422c30bcf8ae72f302872e9ef3263c47133a7
+SHA-256: efb92fb17348eb10ba3a93ab004422c30bcf8ae72f302872e9ef3263c47133a7
+Source: 2021-README.txt
+Name 1: SOVA
+Name 2: SOVA
+VirusTotal: trojan.bankbot/hqwar
+Date: September 2021
+
+ID: 333
+Hash data: 7d34aaf84754fb247507681bcd821f9533f24c6d78aa6779a11f4d789d4822ee
+SHA-256: 7d34aaf84754fb247507681bcd821f9533f24c6d78aa6779a11f4d789d4822ee
+Source: 2020-README.txt
+Name 1: BlackRock
+Name 2: BlackRock
+VirusTotal: trojan.hqwar/bankbot
+Date: July 2020
+
+ID: 527
+Hash data: e769ef0d011cbf3322c9e85d4cdf70af413f021d033aed884c1431f2b7861d0d
+SHA-256: e769ef0d011cbf3322c9e85d4cdf70af413f021d033aed884c1431f2b7861d0d
+Source: 2022-README.txt
+Name 1: brata
+Name 2: brata
+VirusTotal: trojan.basbanke/bankbot
+Date: January 2022
+
+ID: 430
+Hash data: 5c9057d6d19f82fbba255d58e9b0da7102fed08ee25e548e08f0a5b22efc42a2
+SHA-256: 5c9057d6d19f82fbba255d58e9b0da7102fed08ee25e548e08f0a5b22efc42a2
+Source: 2021-README.txt
+Name 1: flubot
+Name 2: flubot
+VirusTotal: trojan.polph
+Date: May 2021
+
+ID: 537
+Hash data: b884757d8431f36a65eebe318fb7df25a4a15ee5e1efc39a45274c18e7c7bd4c
+SHA-256: b884757d8431f36a65eebe318fb7df25a4a15ee5e1efc39a45274c18e7c7bd4c
+Source: 2022-README.txt
+Name 1: fluBotTeaBot
+Name 2: fluBotTeaBot
+VirusTotal: trojan.flubot
+Date: January 2022
+
+ID: 406
+Hash data: 1eb54ee1328ad5563e0e85a8ecff13cd2e642f5c6fc42e0e1038aeac0ee8cf2f
+SHA-256: 1eb54ee1328ad5563e0e85a8ecff13cd2e642f5c6fc42e0e1038aeac0ee8cf2f
+Source: 2021-README.txt
+Name 1: flubot
+Name 2: flubot
+VirusTotal: trojan.polph
+Date: March 2021
+
+ID: 570
+Hash data: 7c805f51ee3b2994e742d73954e51d7c2c24c76455b0b9a1b44d61cb4e280502
+SHA-256: 7c805f51ee3b2994e742d73954e51d7c2c24c76455b0b9a1b44d61cb4e280502
+Source: None
+Name 1: SOVA v5
+Name 2: SOVA
+VirusTotal: None
+Date: August 2022
+
+ID: 571
+Hash data: df298b0aba5aad2886ae720577557b3e48fba905055dcee0fd74336660bfd0a2
+SHA-256: df298b0aba5aad2886ae720577557b3e48fba905055dcee0fd74336660bfd0a2
+Source: None
+Name 1: ERMAC 2.0
+Name 2: ERMAC
+VirusTotal: None
+Date: May 2022
+

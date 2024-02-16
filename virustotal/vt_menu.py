@@ -1,6 +1,6 @@
 # vt_menu.py
 
-from . import vt_utils, vt_androguard, vt_analysis
+from . import vt_utils, vt_androguard, vt_analysis, vt_check_hashes
 from utils import user_prompts, app_display
 
 def virustotal_menu():
@@ -9,12 +9,13 @@ def virustotal_menu():
         menu_options = {
             1: "Submit a sample",
             2: "Run Database Analysis",
-            3: "Check Malware IOC Threatts",
-            4: "Check Virustotal.com Connection",
-            5: "Check Internet Connection"
+            3: "Check Malware IOC Threats",
+            4: "Read Malware IOC Text Data",
+            5: "Check Virustotal.com Connection",
+            6: "Check Internet Connection"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])
 
         if user_choice == '0':
             break
@@ -23,10 +24,12 @@ def virustotal_menu():
         elif user_choice == '2':
             vt_analysis.run_analysis()
         elif user_choice == '3':
-            vt_analysis.check_unanalyzed_malware_ioc()
+            vt_check_hashes.check_unanalyzed_malware_ioc()
         elif user_choice == '4':
-            vt_utils.check_virustotal_access()
+            vt_check_hashes.read_hash_data_input()
         elif user_choice == '5':
+            vt_utils.check_virustotal_access()
+        elif user_choice == '6':
             vt_utils.check_ping()
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")

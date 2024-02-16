@@ -40,6 +40,11 @@ def extract_hashes(response_data):
         "SHA256": sha256
     }
 
+def determine_hash_type(hash_str):
+    """Determine the hash type based on its length."""
+    hash_lengths = {32: 'md5', 40: 'sha1', 64: 'sha256'}
+    return hash_lengths.get(len(hash_str), None)
+
 def determine_hash_fields(hash_str):
     if not hash_str:
         print('Error: No hash string provided. The input is empty or None.')
