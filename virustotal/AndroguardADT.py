@@ -72,7 +72,9 @@ class AndroguardADT:
 
     # Set the target SDK version
     def set_target_sdk_version(self, target_sdk_version):
-        self.target_sdk_version = target_sdk_version
+        self.target_sdk_ver
+        
+        sion = target_sdk_version
 
     # Get the target SDK version
     def get_target_sdk_version(self):
@@ -202,5 +204,5 @@ class AndroguardADT:
             f"Number of Services: {len(self.services)}",
             f"Number of Permissions: {len(self.permissions)}",
         ]
-        
+
         return "\n".join(summary_info)

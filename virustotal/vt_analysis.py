@@ -1,11 +1,11 @@
-from database import DBFunct_ApkRecords, DBFunct_AnalysisRecords, DBRecordInserts
+from database import DB_AnalysisRecords, DB_ApkRecords, DBRecordInserts
 from utils import app_utils
 from permission_analysis import permission_analyzer
 from . import vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
     try:
-        analysis_id = DBFunct_AnalysisRecords.create_analysis_record(analysis_name)
+        analysis_id = DB_AnalysisRecords.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
         andro_data = vt_androguard.androguard_data(response)
         if andro_data:
@@ -15,7 +15,7 @@ def process_vt_response(response, analysis_name):
 
         vt_data = vt_requests.parse_virustotal_response(response)
         if vt_data:
-            apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+            apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
             DBRecordInserts.create_vt_engine_record(analysis_id, apk_id) 
 
             summary_stat = vt_data["Analysis Result"]["summary_statistics"]
@@ -27,7 +27,7 @@ def process_vt_response(response, analysis_name):
             json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
             #vt_utils.save_json_response(vt_data, json_filename)
 
-        DBFunct_AnalysisRecords.update_status_to_completed(analysis_id)
+        DB_AnalysisRecords.update_status_to_completed(analysis_id)
 
     except Exception as e:
         print(f"Error processing APK samples: {e}")
@@ -90,7 +90,7 @@ def process_receivers(analysis_id, apk_id, receivers):
         print("No data.")
 
 def process_androguard_data(analysis_id, andro_data):
-    apk_id = DBFunct_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+    apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
 
     process_summary_data(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
@@ -110,7 +110,7 @@ def process_apk_sample(record):
 
 def run_analysis(iterative_mode=False):
     try:
-        apk_records = DBFunct_ApkRecords.get_apk_records_sha256(237)
+        apk_records = DB_ApkRecords.get_apk_records_sha256(237)
         if not apk_records:
             print("No APK samples found in the database.")
             return
@@ -130,9 +130,3 @@ def run_analysis(iterative_mode=False):
 
     except Exception as e:
         print(f"Error running the analysis: {e}")
-
-def test_hash_analysis():
-    hash_value = '57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f'
-    response = vt_requests.query_hash(hash_value)
-    analysis_name = "Test Hash Analysis 2/13/2024"
-    process_vt_response(response, analysis_name)

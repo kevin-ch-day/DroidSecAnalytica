@@ -53,3 +53,12 @@ def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
     SELECT apk_id, sha256 FROM apk_samples
     WHERE apk_id = %s
     """, (apk_id,))), None)
+
+def get_unanalyzed_malware_ioc_threats():
+    query = """
+    SELECT * FROM malware_ioc_threats x
+    WHERE x.virustotal_url IS NULL
+    AND x.no_virustotal_data IS NULL
+    ORDER BY x.no_virustotal_data ASC
+    """
+    return run_query(query)

@@ -9,7 +9,7 @@ def virustotal_menu():
         menu_options = {
             1: "Submit a sample",
             2: "Run Database Analysis",
-            3: "Check Virustotal API Key",
+            3: "Check Malware IOC Threatts",
             4: "Check Virustotal.com Connection",
             5: "Check Internet Connection"
         }

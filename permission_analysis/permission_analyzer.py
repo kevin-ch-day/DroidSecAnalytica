@@ -3,7 +3,7 @@
 import os
 import xml.etree.ElementTree as ET
 from static_analysis import apk_decompilation
-from database import DBFunct_Perm, DBRecordInserts
+from database import DB_Perm, DBRecordInserts
 from utils import user_prompts, logging_utils
 
 # Handle APK permission detection process
@@ -32,7 +32,7 @@ def extract_apk_permissions(decompiled_apk_path):
 def save_detected_permission(analysis_id, apk_id, perm):
     try:
         # Find the permission record in the database
-        perm_id = DBFunct_Perm.get_permission_id_by_name(perm.name)
+        perm_id = DB_Perm.get_permission_id_by_name(perm.name)
         if perm_id:
             print(f"- {perm.name}")
             #DBFunct_Perm.check_standard_permission_record(id, permission)
@@ -44,7 +44,7 @@ def save_detected_permission(analysis_id, apk_id, perm):
         print(f"Error processing permission {perm}: {e}")
 
 def fetch_unknown_permission_record(permission_name):
-    return DBFunct_Perm.get_unknown_permission_record_by_name(permission_name)
+    return DB_Perm.get_unknown_permission_record_by_name(permission_name)
 
 def check_permission_record(record, permission):
     print("\nVirusTotal Data:")
@@ -66,7 +66,7 @@ def prompt_and_insert_new_permission(permission, analysis_id, apk_id):
     print(f"Name:\t\t{permission.name}")
     user_decision = input("Save this unknown permission? (y/n): ").strip().lower()
     if user_decision == 'y':
-        permission_id = DBFunct_Perm.insert_unknown_permission_record(permission.name)
+        permission_id = DB_Perm.insert_unknown_permission_record(permission.name)
         print(f"New Unknown Permission ID: {permission_id}")
         print(f"Permission '{permission.name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
         return permission_id
@@ -85,7 +85,7 @@ def process_unknown_permission(analysis_id, apk_id, perm):
         if "android.intent.action." in perm.name:
             return
         
-        record = DBFunct_Perm.get_unknown_permission_record_by_name(perm.name)
+        record = DB_Perm.get_unknown_permission_record_by_name(perm.name)
         if record:
             #check_permission_record(record, perm)
             permission_id = record[0]
