@@ -7,7 +7,7 @@ from typing import Optional, Dict, List
 
 from utils import load_data
 from . import intent_filters_analysis
-from permission_analysis import permission_analyzer
+from permission_analysis import save_permissions
 
 # Constants
 METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
@@ -51,11 +51,11 @@ def heuristic_analysis(manifest_data: Dict) -> Dict:
     }
 
     # Heuristic 1: Identify Overprivileged Apps
-    overprivileged_results = permission_analyzer.identify_overprivileged_apps(manifest_data)
+    overprivileged_results = save_permissions.identify_overprivileged_apps(manifest_data)
     analysis_results.update(overprivileged_results)
 
     # Heuristic 2: Check for Uncommon or Sensitive Permissions
-    analysis_results['sensitive_permissions'] = permission_analyzer.check_sensitive_permissions(manifest_data)
+    analysis_results['sensitive_permissions'] = save_permissions.check_sensitive_permissions(manifest_data)
 
     # Heuristic 3: Analyze Component Exposure
     exposed_components = []
@@ -73,7 +73,7 @@ def heuristic_analysis(manifest_data: Dict) -> Dict:
     analysis_results['custom_intent_filter_analysis_result'] = intent_filters_analysis.custom_intent_filter_analysis(manifest_data)
 
     # Heuristic 6: Network-related Permissions
-    analysis_results['network_related_permissions'] = permission_analyzer.check_network_permissions(manifest_data)
+    analysis_results['network_related_permissions'] = save_permissions.check_network_permissions(manifest_data)
     return analysis_results
 
 def check_unusual_activities_services(manifest_data: Dict) -> List[str]:

@@ -5,7 +5,7 @@ from typing import Optional
 
 from utils import app_utils, user_prompts, logging_utils, app_display
 from . import manifest_analysis, apk_decompilation
-from permission_analysis import permission_analyzer
+from permission_analysis import save_permissions
 from virustotal import vt_analysis, vt_requests
 
 # Constants for file paths
