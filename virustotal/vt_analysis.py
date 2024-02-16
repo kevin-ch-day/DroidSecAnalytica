@@ -9,12 +9,21 @@ def process_vt_response(response, analysis_name):
     try:
         analysis_id = DB_AnalysisRecords.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
-        andro_data = vt_androguard.androguard_data(response)
+        
+        print("\n****** PART I. ******\n")
+        andro_data = vt_androguard.handle_androguard_response(response)
+
+        print("POST -> vt_androguard.androguard_data()\n")
+
         if andro_data:
             process_androguard_data(analysis_id, andro_data)
         else:
             print("No Androguard data returned...")
 
+        #user_prompts.pause_until_keypress()
+        return
+
+        print("\n****** PART II. ******\n")
         vt_data = vt_requests.parse_virustotal_response(response)
         if vt_data:
             apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
@@ -154,3 +163,11 @@ def analysis_process_alpha():
         response = vt_requests.query_hash(index[1])
         analysis_name = "Test Run 2/15/2024"
         process_vt_response(response, analysis_name)
+        exit()
+
+def analysis_process_beta():
+    hash_value = '7d34aaf84754fb247507681bcd821f9533f24c6d78aa6779a11f4d789d4822ee'
+    response = vt_requests.query_hash(hash_value)
+    analysis_name = "analysis_process_beta()"
+    process_vt_response(response, analysis_name)
+    exit()

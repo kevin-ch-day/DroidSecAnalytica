@@ -1,45 +1,49 @@
+# vt_androguard.py
+
 import re
 from . import AndroguardADT, AndroPermissionADT
 from utils import logging_utils
 
-def androguard_data(response):
+def handle_androguard_response(api_response):
     try:
-        attributes = extract_attributes_from_response(response)
-        androguard_data = populate_androguard_data(attributes)
-        return androguard_data
-
+        data = api_response.get('data', {})
+        if not data:
+            raise ValueError("No 'data' key in api response.")
+        
+        attributes = data.get('attributes', {})
+        return populate_androguard_data(attributes)
+    
     except Exception as e:
-        logging_utils.log_error(f"Error in generate_androguard_data: {e}")
+        logging_utils.log_error(f"Error in handle_androguard_response(): {e}")
         return None
 
-def extract_attributes_from_response(response):
-    data = response.get('data', {})
-    if not data:
-        raise ValueError("No 'data' key in response.")
-    return data.get('attributes', {})
-
 def populate_androguard_data(attributes):
+    print("\npopulate_androguard_data()")
     json_data = attributes.get('androguard', None)
     if not json_data:
         return None
     
+    #print(json_data) # DEBUGGING
     androguard = AndroguardADT.AndroguardADT()
 
-    # Hash data
+    # Populate Hash data
     androguard.set_md5(attributes.get('md5', 'N/A'))
     androguard.set_sha1(attributes.get('sha1', 'N/A'))
     androguard.set_sha256(attributes.get('sha256', 'N/A'))
 
-    populate_manifest_data(androguard, json_data)
-    populate_permissions(androguard, json_data)
-    populate_certificate_data(androguard, json_data)
-    populate_intent_filters(androguard, json_data)
+    populate_manifest_metadata(androguard, json_data)
+    #populate_manifest_components(androguard, json_data)
+    #populate_permissions(androguard, json_data)
+    #populate_certificate_data(androguard, json_data)
+    #populate_intent_filters(androguard, json_data)
     return androguard
 
-def populate_manifest_data(androguard_data, data):
+def display_dict_data(data):
     for key in data:
         print(f"{key} -> {data[key]}\n")
 
+def populate_manifest_metadata(androguard_data, data):
+    
     if not androguard_data:
         print("Error: androguard_data is None or invalid.")
         return
@@ -56,6 +60,17 @@ def populate_manifest_data(androguard_data, data):
         for key, setter_function in basic_data_settings:
             if key in data and data[key] is not None:
                 setter_function(data[key])
+
+    except Exception as e:
+        print(f"Error populate_manifest_metadata(): {str(e)}")
+
+def populate_manifest_components(androguard_data, data):
+
+    if not androguard_data:
+        print("Error: androguard_data is None or invalid.")
+        return
+
+    try:
 
         # Adding manifest components like Activities, Receivers, etc.
         add_functions = [
