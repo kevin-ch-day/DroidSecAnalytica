@@ -37,6 +37,9 @@ def populate_androguard_data(attributes):
     return androguard
 
 def populate_manifest_data(androguard_data, data):
+    for key in data:
+        print(f"{key} -> {data[key]}\n")
+
     if not androguard_data:
         print("Error: androguard_data is None or invalid.")
         return
@@ -47,6 +50,7 @@ def populate_manifest_data(androguard_data, data):
             ('main_activity', androguard_data.set_main_activity),
             ('Package', androguard_data.set_package),
             ('TargetSdkVersion', androguard_data.set_target_sdk_version)
+            ('MinSdkVersion', androguard_data.set_min_sdk_version)
         ]
 
         for key, setter_function in basic_data_settings:

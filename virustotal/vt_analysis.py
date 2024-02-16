@@ -28,6 +28,7 @@ def process_vt_response(response, analysis_name):
             #vt_utils.save_json_response(vt_data, json_filename)
 
         DB_AnalysisRecords.update_status_to_completed(analysis_id)
+        user_prompts.pause_until_keypress()
 
     except Exception as e:
         print(f"Error processing APK samples: {e}")
@@ -42,7 +43,7 @@ def process_permissions(analysis_id, apk_id, permissions):
         print("No data.")
 
 def process_summary_data(analysis_id, andro_data):
-    print("\APK Analysis Report\n" + "=" * 50)
+    print("\nAPK Analysis Report\n" + "=" * 50)
     print(f"MD5:                {andro_data.get_md5()}")
     print(f"SHA1:               {andro_data.get_sha1()}")
     print(f"SHA256:             {andro_data.get_sha256()}")
@@ -105,12 +106,12 @@ def process_apk_sample(record):
     print(f"Android APK ID: {record[0]} SHA-256: {record[1]}")
     hash_value = record[1]  # SHA256 hash value
     response = vt_requests.query_hash(hash_value)
-    analysis_name = "Test Run 2/12/2024"
+    analysis_name = "Test Run 2/15/2024"
     process_vt_response(response, analysis_name)
 
 def run_analysis(iterative_mode=False):
     try:
-        apk_records = DB_ApkRecords.get_apk_records_sha256(237)
+        apk_records = DB_ApkRecords.get_apk_records_sha256()
         if not apk_records:
             print("No APK samples found in the database.")
             return

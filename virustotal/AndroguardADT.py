@@ -11,6 +11,7 @@ class AndroguardADT:
         self.main_activity = main_activity
         self.package = package
         self.target_sdk_version = target_sdk_version
+        self.min_sdk_version  = None
         self.receivers = []
         self.activities = []
         self.providers = []
@@ -73,12 +74,16 @@ class AndroguardADT:
     # Set the target SDK version
     def set_target_sdk_version(self, target_sdk_version):
         self.target_sdk_ver
-        
-        sion = target_sdk_version
 
     # Get the target SDK version
     def get_target_sdk_version(self):
         return self.target_sdk_version
+
+    def set_min_sdk_version(self, set_min_sdk_version):
+        self.min_sdk_version = set_min_sdk_version
+
+    def set_min_sdk_version(self):
+        return self.min_sdk_version
 
     # Add a receiver
     def add_receiver(self, receiver):

@@ -44,7 +44,6 @@ def truncate_analysis_data_tables() -> bool:
         "analysis_metadata",
         "vt_activities",
         "vt_certificates",
-        "vt_libraries",
         "vt_permissions",
         "vt_receivers",
         "vt_scan_analysis",
