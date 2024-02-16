@@ -138,3 +138,10 @@ def update_apk_analysis_counts(analysis_id: int, receivers: int, activities: int
     """
     params = (receivers, activities, services, libraries, analysis_id)
     return execute_sql(query, params)
+
+def create_apk_sample_record(file_name, file_size, md5, sha1, sha256):
+    query = """
+    INSERT INTO apk_samples (file_name, file_size, md5, sha1, sha256)
+    VALUES (%s, %s, %s, %s, %s)
+    """
+    return execute_sql(query, (file_name, file_size, md5, sha1, sha256))

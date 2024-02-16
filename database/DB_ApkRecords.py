@@ -23,6 +23,9 @@ def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
 def get_apk_samples() -> List[Dict]:
     return run_query("SELECT * FROM apk_samples ORDER BY apk_id")
 
+def get_apk_sample_record_by_sha256(sha256) -> List[Dict]:
+    return run_query(f"SELECT * FROM apk_samples where sha256 = '{sha256}' ORDER BY apk_id")
+
 def get_apk_samples_sha256() -> List[Dict]:
     return run_query("SELECT apk_id, sha256 FROM apk_samples ORDER BY apk_id")
 
@@ -49,16 +52,16 @@ def get_apk_records_sha256(apk_id: Optional[int] = None) -> Optional[List[Tuple[
     return run_query(query, params)
 
 def get_apk_record_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
-    return next(iter(run_query("""
-    SELECT apk_id, sha256 FROM apk_samples
-    WHERE apk_id = %s
-    """, (apk_id,))), None)
+    return next(iter(run_query("SELECT apk_id, sha256 FROM apk_samples WHERE apk_id = %s", (apk_id,))), None)
 
 def get_unanalyzed_malware_ioc_threats():
     query = """
     SELECT * FROM malware_ioc_threats x
-    WHERE x.virustotal_url IS NULL
-    AND x.no_virustotal_data IS NULL
+    WHERE x.virustotal_url IS NULL AND x.no_virustotal_data IS NULL
     ORDER BY x.no_virustotal_data ASC
     """
     return run_query(query)
+
+def update_malware_ioc_vt_url(id, url):
+    query = "UPDATE malware_ioc_threats SET virustotal_url = %s WHERE id = %s"
+    return run_query(query, (url, id))

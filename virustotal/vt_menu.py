@@ -23,7 +23,7 @@ def virustotal_menu():
         elif user_choice == '2':
             vt_analysis.run_analysis()
         elif user_choice == '3':
-            print("Check Virustotal API Key")
+            vt_analysis.check_unanalyzed_malware_ioc()
         elif user_choice == '4':
             vt_utils.check_virustotal_access()
         elif user_choice == '5':
