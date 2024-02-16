@@ -74,7 +74,7 @@ def hash_query_alpha(hashes):
         hash_type = hash_utils.determine_hash_type(hash_str)
         if hash_type:
             query = f"""
-                SELECT a.apk_id, a.{hash_type}, a.sha256, a.source, b.name_1, b.name_2, b.virustotal_label, b.month, b.year
+                SELECT a.apk_id, a.md5, a.sha256, a.source, b.name_1, b.name_2, b.virustotal_label, b.month, b.year
                 FROM apk_samples a
                 JOIN malware_ioc_threats b ON a.sha256 = b.sha256
                 WHERE a.{hash_type} = %s

@@ -34,7 +34,7 @@ def check_unanalyzed_malware_ioc():
                         print("New record created.")
                     user_prompts.pause_until_keypress()
 
-def read_hash_data_input():
+def read_hash_data_alpha():
     hash_file_path = "input\\SHA256-Hashes.txt"
     result_file_path = "output\\hash-data-results.txt"
     hashes = read_and_deduplicate_hashes(hash_file_path)
@@ -60,7 +60,7 @@ def read_and_deduplicate_hashes(file_path):
     return unique_hashes
 
 def format_matching_record(record):
-    labels = ["ID", "Hash data", "SHA-256", "Source", "Name 1", "Name 2", "VirusTotal", "Date"]
+    labels = ["ID", "MD5", "SHA-256", "Source", "Name 1", "Name 2", "VirusTotal", "Date"]
     if len(record) > 7:
         record = record[:7] + (f"{record[7]} {record[8]}",)
     formatted_output = "\n".join(f"{label}: {value}" for label, value in zip(labels, record))

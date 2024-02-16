@@ -1,3 +1,5 @@
+# vt_analysis.py
+
 from database import DB_AnalysisRecords, DB_ApkRecords, DBRecordInserts
 from utils import app_utils, user_prompts
 from permission_analysis import permission_analyzer
@@ -128,6 +130,15 @@ def run_analysis(iterative_mode=False):
                 iteration += 1
 
             #user_prompts.pause_until_keypress()
-
     except Exception as e:
         print(f"Error running the analysis: {e}")
+
+def analysis_process_alpha():
+    
+    if not records:
+        print("No records giving.")
+        return
+    
+    print("\nProcessing APK Samples")
+    for index in records:
+        process_apk_sample(records)

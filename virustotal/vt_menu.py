@@ -11,26 +11,45 @@ def virustotal_menu():
             2: "Run Database Analysis",
             3: "Check Malware IOC Threats",
             4: "Read Malware IOC Text Data",
-            5: "Check Virustotal.com Connection",
-            6: "Check Internet Connection"
+            5: "Alpha Analysis",
+            6: "Check Virustotal.com Connection",
+            7: "Check Internet Connection"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(8)])
 
+        # exit
         if user_choice == '0':
             break
+        
+        # submit a sample to virustotal.com
         elif user_choice == '1':
             handle_sample_submission()
+        
+        # run analysis on all database samples
         elif user_choice == '2':
             vt_analysis.run_analysis()
+        
+        # check malware hash tables
         elif user_choice == '3':
             vt_check_hashes.check_unanalyzed_malware_ioc()
+        
+        # read hash file input data
         elif user_choice == '4':
-            vt_check_hashes.read_hash_data_input()
+            vt_check_hashes.read_hash_data_alpha()
+        
+        # analysis process alpha
         elif user_choice == '5':
-            vt_utils.check_virustotal_access()
+            vt_analysis.analysis_process_alpha()
+        
+        # check connection to virustotal.com
         elif user_choice == '6':
+            vt_utils.check_virustotal_access()
+        
+        # check 8.8.8.8
+        elif user_choice == '7':
             vt_utils.check_ping()
+        
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")
 
