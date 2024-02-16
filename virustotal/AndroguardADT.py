@@ -73,7 +73,7 @@ class AndroguardADT:
 
     # Set the target SDK version
     def set_target_sdk_version(self, target_sdk_version):
-        self.target_sdk_ver
+        self.target_sdk_version = target_sdk_version
 
     # Get the target SDK version
     def get_target_sdk_version(self):
@@ -82,7 +82,7 @@ class AndroguardADT:
     def set_min_sdk_version(self, set_min_sdk_version):
         self.min_sdk_version = set_min_sdk_version
 
-    def set_min_sdk_version(self):
+    def get_min_sdk_version(self):
         return self.min_sdk_version
 
     # Add a receiver
@@ -158,10 +158,7 @@ class AndroguardADT:
         except ValueError:
             pass  # Optionally handle the error or log it
     def __str__(self) -> str:
-        """
-        Provides a detailed string representation of the AndroPermissionADT object,
-        summarizing its main attributes and components with more details.
-        """
+        # Provides a detailed string representation of the AndroPermissionADT object,
         components_summary = {
             "Main Activity": self.main_activity or "N/A",
             "Package": self.package or "N/A",
@@ -170,12 +167,11 @@ class AndroguardADT:
             "Activities": f"{len(self.activities)}",
             "Providers": f"{len(self.providers)}",
             "Services": f"{len(self.services)}",
-            "Permissions": f"{len(self.permissions_manager.list_permissions())}"
+            "Permissions": f"{len(self.permissions_manager.get_permissions())}"
         }
 
         summary_parts = [f"{key}: {value}" for key, value in components_summary.items()]
         return "\n".join(summary_parts)
-
 
     def remove_activity(self, activity):
         """ Remove an activity if it exists """

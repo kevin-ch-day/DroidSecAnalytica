@@ -18,7 +18,6 @@ def handle_androguard_response(api_response):
         return None
 
 def populate_androguard_data(attributes):
-    print("\npopulate_androguard_data()")
     json_data = attributes.get('androguard', None)
     if not json_data:
         return None
@@ -32,7 +31,7 @@ def populate_androguard_data(attributes):
     androguard.set_sha256(attributes.get('sha256', 'N/A'))
 
     populate_manifest_metadata(androguard, json_data)
-    #populate_manifest_components(androguard, json_data)
+    populate_manifest_components(androguard, json_data)
     #populate_permissions(androguard, json_data)
     #populate_certificate_data(androguard, json_data)
     #populate_intent_filters(androguard, json_data)
@@ -43,51 +42,49 @@ def display_dict_data(data):
         print(f"{key} -> {data[key]}\n")
 
 def populate_manifest_metadata(androguard_data, data):
-    
     if not androguard_data:
         print("Error: androguard_data is None or invalid.")
         return
+    
+    main_activity = data['main_activity']
+    package = data['Package']
+    targetSdkVersion= data['TargetSdkVersion']
+    minSdkVersion = data['MinSdkVersion']
 
-    try:
-        # Setting basic manifest data
-        basic_data_settings = [
-            ('main_activity', androguard_data.set_main_activity),
-            ('Package', androguard_data.set_package),
-            ('TargetSdkVersion', androguard_data.set_target_sdk_version)
-            ('MinSdkVersion', androguard_data.set_min_sdk_version)
-        ]
-
-        for key, setter_function in basic_data_settings:
-            if key in data and data[key] is not None:
-                setter_function(data[key])
-
-    except Exception as e:
-        print(f"Error populate_manifest_metadata(): {str(e)}")
+    androguard_data.set_main_activity(main_activity)
+    androguard_data.set_package(package)
+    androguard_data.set_target_sdk_version(targetSdkVersion)
+    androguard_data.set_min_sdk_version(minSdkVersion)
 
 def populate_manifest_components(androguard_data, data):
-
     if not androguard_data:
         print("Error: androguard_data is None or invalid.")
         return
+    
+    display_dict_data(data)
+    print()
 
-    try:
+    component_types = ['Activities', 'Receivers', 'Providers', 'Services', 'Libraries']
 
-        # Adding manifest components like Activities, Receivers, etc.
-        add_functions = [
-            ('Activities', androguard_data.add_activity),
-            ('Receivers', androguard_data.add_receiver),
-            ('Providers', androguard_data.add_provider),
-            ('Services', androguard_data.add_service),
-            ('Libraries', androguard_data.add_library)
-        ]
+    for component_type in component_types:
+        # Safely get the component data, defaulting to None if not found
+        component_data = data.get(component_type)
 
-        for key, add_function in add_functions:
-            for item in data.get(key, []):
-                if item:
-                    add_function(item)
+        # Only proceed if component_data is not None and not empty
+        if component_data:
+            
+            # Construct the method name based on the component_type
+            method_name = f'set_{component_type.lower()}'
+            
+            # Check if the androguard_data object has the method
+            if hasattr(androguard_data, method_name):
+                getattr(androguard_data, method_name)(component_data)
+                print(f"{component_type} {type(component_data)} -> {component_data}\n")
+            else:
+                print(f"Warning: androguard_data does not have a method to handle {component_type}")
+        else:
+            print(f"{component_type} is empty or not present.")
 
-    except Exception as e:
-        print(f"Error parsing Androguard data: {str(e)}")
 
 def populate_permissions(andr_obj, data):
     if 'permission_details' in data:

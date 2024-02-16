@@ -11,7 +11,7 @@ class PermissionManager:
     def add_permission(self, permission: AndroPermissionADT.AndroPermissionADT):
         self._permissions[permission.name] = permission
     
-    def _find_insert_position(self, permission_name: str) -> int:
+    def find_insert_position(self, permission_name: str) -> int:
         return bisect.bisect_left([perm.name for perm in self._permissions], permission_name)
 
     def get_permission(self, name: str) -> AndroPermissionADT.AndroPermissionADT:
@@ -23,6 +23,10 @@ class PermissionManager:
 
     def permission_exists(self, name: str) -> bool:
         return name in self._permissions
+    
+    def list_permissions(self):
+        for i in self._permissions:
+            print(i)
 
     def get_permissions(self) -> AndroPermissionADT.AndroPermissionADT:
         return self._permissions
