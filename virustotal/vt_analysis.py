@@ -2,7 +2,7 @@
 
 from database import DB_AnalysisRecords, DB_ApkRecords, DBRecordInserts
 from utils import app_utils, user_prompts
-from permission_analysis import save_permissions
+from permission_analysis import save_detected_permissions
 from . import vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
@@ -49,7 +49,7 @@ def process_permissions(analysis_id, apk_id, permissions):
     print(f"\nPermissions ({permissions_cnt})")
     if permissions:
         for index in permissions:
-            save_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])
+            save_detected_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])
     else:
         print("No data.")
 
