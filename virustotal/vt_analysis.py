@@ -2,7 +2,7 @@
 
 from database import DB_AnalysisRecords, DB_ApkRecords, DBRecordInserts
 from utils import app_utils, user_prompts
-from permission_analysis import save_detected_permissions
+from permission_audit import save_detected_permissions
 from . import vt_androguard, vt_requests
 
 def process_vt_response(response, analysis_name):
