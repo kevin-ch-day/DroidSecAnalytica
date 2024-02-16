@@ -10,36 +10,36 @@ def process_vt_response(response, analysis_name):
         analysis_id = DB_AnalysisRecords.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
         
-        print("\n****** PART I. ******\n")
         andro_data = vt_androguard.handle_androguard_response(response)
-
-        print("POST -> vt_androguard.androguard_data()\n")
-
         if andro_data:
             process_androguard_data(analysis_id, andro_data)
         else:
             print("No Androguard data returned...")
 
-        #user_prompts.pause_until_keypress()
-        return
-
-        print("\n****** PART II. ******\n")
         vt_data = vt_requests.parse_virustotal_response(response)
         if vt_data:
             apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+
+            print(f"\nCreating Virustotal engine record..")
             DBRecordInserts.create_vt_engine_record(analysis_id, apk_id) 
 
             summary_stat = vt_data["Analysis Result"]["summary_statistics"]
+            #print(f"{summary_stat}\n") # DEBUGGING
+            print(f"Adding summary stats.")
             DBRecordInserts.update_vt_engine_detection(analysis_id, summary_stat)
    
             vendor_data = vt_data["Analysis Result"]["engine_detection"]
+            #print(f"{vendor_data}") # DEBUGGING
+            print(f"Adding engine results.")
             DBRecordInserts.update_vt_engine_records(analysis_id, vendor_data)
 
-            json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
+            # Saving json response
+            #json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
             #vt_utils.save_json_response(vt_data, json_filename)
 
         DB_AnalysisRecords.update_status_to_completed(analysis_id)
-        user_prompts.pause_until_keypress()
+        #user_prompts.pause_until_keypress()
+        print()
 
     except Exception as e:
         print(f"Error processing APK samples: {e}")
@@ -53,22 +53,35 @@ def process_permissions(analysis_id, apk_id, permissions):
     else:
         print("No data.")
 
-def process_metadata(analysis_id, andro_data):
-    print("\nAPK Analysis Report\n" + "=" * 50)
-    print(f"MD5:                {andro_data.get_md5()}")
-    print(f"SHA1:               {andro_data.get_sha1()}")
-    print(f"SHA256:             {andro_data.get_sha256()}")
-    print(f"\nPackage Name:       {andro_data.get_package()}")
-    print(f"Main Activity:      {andro_data.get_main_activity()}")
-    print(f"Target SDK Version: {andro_data.get_target_sdk_version()}")
-
-    DBRecordInserts.create_apk_analysis_records(
-        analysis_id,
-        andro_data.get_sha256(),
-        andro_data.get_package(),
-        andro_data.get_main_activity(),
-        andro_data.get_target_sdk_version()
-    )
+def process_metadata(analysis_id, andro_data):    
+    # Retrieve data with checks for None values or defaulting to 'Not Available'
+    md5 = andro_data.get_md5() or 'Not Available'
+    sha1 = andro_data.get_sha1() or 'Not Available'
+    sha256 = andro_data.get_sha256() or 'Not Available'
+    package_name = andro_data.get_package() or 'Not Available'
+    main_activity = andro_data.get_main_activity() or 'Not Available'
+    target_sdk_version = andro_data.get_target_sdk_version() or 'Not Available'
+    
+    # Display the retrieved information
+    print(f"MD5:                {md5}")
+    print(f"SHA1:               {sha1}")
+    print(f"SHA256:             {sha256}")
+    print(f"Package Name:       {package_name}")
+    print(f"Main Activity:      {main_activity}")
+    print(f"Target SDK Version: {target_sdk_version}")
+    
+    # Attempt to insert the record into the database with error handling
+    try:
+        DBRecordInserts.create_apk_analysis_records(
+            analysis_id,
+            sha256,
+            package_name,
+            main_activity,
+            target_sdk_version
+        )
+    
+    except Exception as e:
+        print(f"\nFailed to insert record into the database. Error: {e}")
 
 def process_activities(analysis_id, apk_id, activities):
     activities_cnt = len(activities)
@@ -108,9 +121,6 @@ def process_androguard_data(analysis_id, andro_data):
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-
-    footer = "=" * 50
-    print(f"\n{footer}\n")
 
 def process_apk_sample(record):
     print(f"Android APK ID: {record[0]} SHA-256: {record[1]}")
@@ -152,7 +162,6 @@ def analysis_process_alpha():
                 hashes.append(hash_value)
 
     records = DB_ApkRecords.get_apk_samples_by_sha256_list(hashes)
-
     if not records:
         print("No records giving.")
         return
@@ -162,10 +171,9 @@ def analysis_process_alpha():
         response = vt_requests.query_hash(index[1])
         analysis_name = "Test Run 2/15/2024"
         process_vt_response(response, analysis_name)
-        exit()
 
 def analysis_process_beta():
-    hash_value = '7d34aaf84754fb247507681bcd821f9533f24c6d78aa6779a11f4d789d4822ee'
+    hash_value = '218c6e2327c8342192dc58c6e793fc3d5cba7f15e4b2f188c98cd4ba48bf244a'
     response = vt_requests.query_hash(hash_value)
     analysis_name = "analysis_process_beta()"
     process_vt_response(response, analysis_name)

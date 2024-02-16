@@ -61,15 +61,22 @@ def check_permission_record(record, permission):
     print(f"Type: {record[8]}")
     user_prompts.pause_until_keypress()
 
-def prompt_and_insert_new_permission(permission, analysis_id, apk_id):
+def prompt_and_insert_new_permission(permission, analysis_id, apk_id):   
     print("\n[**] New unknown permission detected:")
     print(f"Name:\t\t{permission.name}")
     user_decision = input("Save this unknown permission? (y/n): ").strip().lower()
     if user_decision == 'y':
-        permission_id = DB_Perm.insert_unknown_permission_record(permission.name)
-        print(f"New Unknown Permission ID: {permission_id}")
+        record = DB_Perm.insert_unknown_permission_record(
+            permission.name,
+            permission.short_desc,
+            permission.long_desc,
+            permission.permission_type
+            )
+        
+        print(f"New Unknown Permission ID: {record[0]}")
         print(f"Permission '{permission.name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
-        return permission_id
+        return record[0]
+    
     else:
         user_prompts.pause_until_keypress()
         return None

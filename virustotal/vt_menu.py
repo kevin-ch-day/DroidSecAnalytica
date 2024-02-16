@@ -12,11 +12,12 @@ def virustotal_menu():
             3: "Check Malware IOC Threats",
             4: "Read Malware IOC Text Data",
             5: "Alpha Analysis",
-            6: "Check Virustotal.com Connection",
-            7: "Check Internet Connection"
+            6: "Test Hash Analysis",
+            7: "Check Virustotal.com Connection",
+            8: "Check Internet Connection"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(8)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(9)])
 
         # exit
         if user_choice == '0':
@@ -41,13 +42,17 @@ def virustotal_menu():
         # analysis process alpha
         elif user_choice == '5':
             vt_analysis.analysis_process_alpha()
+
+        # analysis process beta
+        elif user_choice == '6':
+            vt_analysis.analysis_process_beta()
         
         # check connection to virustotal.com
-        elif user_choice == '6':
+        elif user_choice == '7':
             vt_utils.check_virustotal_access()
         
         # check 8.8.8.8
-        elif user_choice == '7':
+        elif user_choice == '8':
             vt_utils.check_ping()
         
         else:
