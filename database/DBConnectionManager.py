@@ -1,3 +1,5 @@
+# DBConnectionManager.py
+
 import mysql.connector
 from contextlib import contextmanager
 from utils import logging_utils
