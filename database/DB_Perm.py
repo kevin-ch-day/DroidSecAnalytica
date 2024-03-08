@@ -20,8 +20,8 @@ def run_query(sql: str, params: Optional[tuple] = None, is_select: bool = True) 
             cursor.close()
         return []
 
-def get_permission_id_by_name(perm_name: str) -> Optional[int]:
-    result = run_query("SELECT permission_id FROM android_permissions WHERE constant_value = %s", (perm_name,))
+def get_permission_id_by_name(permission_adt: str) -> Optional[int]:
+    result = run_query("SELECT permission_id FROM android_permissions WHERE constant_value = %s", (permission_adt.name,))
     return result[0][0] if result else None
 
 def get_permission_record_by_name(perm_name: str) -> Optional[Dict]:

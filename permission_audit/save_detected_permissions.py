@@ -2,20 +2,20 @@ from database import DB_Perm, DBRecordInserts
 from utils import logging_utils, user_prompts
 
 # Setup logging
-logging_utils.setup_logging()
+logging_utils.setup_logger()
 
 # Process permissions extracted from the APK
-def save_detected_permission(analysis_id, apk_id, perm):
+def save_detected_permission(analysis_id, apk_id, permission_data):
     try:
-        perm_id = DB_Perm.get_permission_id_by_name(perm)
+        perm_id = DB_Perm.get_permission_id_by_name(permission_data)
         if perm_id:
-            logging_utils.log_info(f"- {perm}")
+            print(f"Permisison ID: {perm_id} Name: {permission_data.name} Type: {permission_data.permission_type}")
             DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
-            process_unknown_permission(analysis_id, apk_id, perm)
+            process_unknown_permission(analysis_id, apk_id, permission_data)
 
     except Exception as e:
-        logging_utils.log_error(f"Error processing permission {perm}: {e}")
+        logging_utils.log_error(f"Error processing permission {permission_data}: {e}")
 
 def process_unknown_permission(analysis_id, apk_id, perm_name):
     try:

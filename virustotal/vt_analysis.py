@@ -46,7 +46,7 @@ def process_vt_response(response, analysis_name):
 
 def process_permissions(analysis_id, apk_id, permissions):
     permissions_cnt = len(permissions)
-    print(f"\nPermissions ({permissions_cnt})")
+    print(f"\nPermissions: {permissions_cnt}")
     if permissions:
         for index in permissions:
             save_detected_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])

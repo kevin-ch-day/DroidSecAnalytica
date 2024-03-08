@@ -1,7 +1,12 @@
 from virustotal import vt_analysis, vt_requests
 
-def test_hash_analysis():
-    hash_value = '57f8a57320eeed2f5b5a316d67319191ce717cc51384318966b61f95722e275f'
+def main():
+    hash_value = '889392ed44a613bb3618f6b9a05a663f801c9cd7086ff8d3d7531c3bc57d97be'
+    print(f"Hash: {hash_value}")
     response = vt_requests.query_hash(hash_value)
-    analysis_name = "Test Hash Analysis 2/13/2024"
+    analysis_name = "Hash Analysis 3/8/2024"
     vt_analysis.process_vt_response(response, analysis_name)
+
+# Run the function
+if __name__ == "__main__":
+    main()
