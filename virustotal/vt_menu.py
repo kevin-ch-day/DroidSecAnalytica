@@ -1,6 +1,6 @@
 # vt_menu.py
 
-from . import vt_utils, vt_androguard, vt_analysis, vt_check_hashes
+from . import vt_utils, vt_androguard, vt_analysis
 from utils import user_prompts, app_display
 
 def virustotal_menu():
@@ -9,15 +9,12 @@ def virustotal_menu():
         menu_options = {
             1: "Submit a sample",
             2: "Run Database Analysis",
-            3: "Check Malware IOC Threats",
-            4: "Read Malware IOC Text Data",
-            5: "Alpha Analysis",
-            6: "Test Hash Analysis",
-            7: "Check Virustotal.com Connection",
-            8: "Check Internet Connection"
+            3: "Check Malware IOC Hash Data",
+            4: "Check connection to Virustotal.com",
+            5: "Check Internet connection"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(9)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(5)])
 
         # exit
         if user_choice == '0':
@@ -31,28 +28,16 @@ def virustotal_menu():
         elif user_choice == '2':
             vt_analysis.run_analysis()
         
-        # check malware hash tables
-        elif user_choice == '3':
-            vt_check_hashes.check_unanalyzed_malware_ioc()
-        
-        # read hash file input data
-        elif user_choice == '4':
-            vt_check_hashes.read_hash_data_alpha()
-        
         # analysis process alpha
-        elif user_choice == '5':
-            vt_analysis.analysis_process_alpha()
-
-        # analysis process beta
-        elif user_choice == '6':
-            vt_analysis.analysis_process_beta()
+        elif user_choice == '3':
+            vt_analysis.read_hash_data()
         
         # check connection to virustotal.com
-        elif user_choice == '7':
+        elif user_choice == '4':
             vt_utils.check_virustotal_access()
         
         # check 8.8.8.8
-        elif user_choice == '8':
+        elif user_choice == '5':
             vt_utils.check_ping()
         
         else:
@@ -84,7 +69,7 @@ def handle_sample_submission():
         handle_response_data(response)
 
 def handle_response_data(response):
-    report_data = vt_analysis.parse_virustotal_response(response)
+    report_data = vt_analysis.process_vt_response(response)
 
     while True:
         menu_title = "Data Results"
@@ -101,17 +86,23 @@ def handle_response_data(response):
 
         if choice == "0":
             return
+        
         elif choice == "1":
             vt_analysis.display_report(report_data)
+        
         elif choice == "2":
             vt_analysis.write_report_to_file(report_data)
             print("Report saved to file.")
+        
         elif choice == "3":
             display_androguard_data(response)
+        
         elif choice == "4":
             vt_utils.view_summary_statistics(report_data)
+        
         elif choice == "5":
             vt_utils.view_detection_breakdown(report_data)
+        
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")
 

@@ -152,7 +152,7 @@ def run_analysis(iterative_mode=False):
         print(f"Error running the analysis: {e}")
 
 def analysis_process_alpha():
-    hash_file_path = "input\\SHA256-Hashes.txt"
+    hash_file_path = "input\\Hash-Data.txt"
     hashes = []
 
     with open(hash_file_path, 'r') as file:
@@ -171,10 +171,3 @@ def analysis_process_alpha():
         response = vt_requests.query_hash(index[1])
         analysis_name = "Test Run 2/15/2024"
         process_vt_response(response, analysis_name)
-
-def analysis_process_beta():
-    hash_value = '218c6e2327c8342192dc58c6e793fc3d5cba7f15e4b2f188c98cd4ba48bf244a'
-    response = vt_requests.query_hash(hash_value)
-    analysis_name = "analysis_process_beta()"
-    process_vt_response(response, analysis_name)
-    exit()
