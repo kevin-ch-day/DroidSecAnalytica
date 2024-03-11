@@ -2,7 +2,7 @@
 
 from utils import app_display, user_prompts
 from . import manifest_analysis, static_analysis, apk_decompilation
-from permission_audit import save_detected_permissions
+from permission_audit import save_permissions
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():

@@ -9,7 +9,7 @@ def save_detected_permission(analysis_id, apk_id, permission_data):
     try:
         perm_id = DB_Perm.get_permission_id_by_name(permission_data)
         if perm_id:
-            print(f"Permisison ID: {perm_id} Name: {permission_data.name} Type: {permission_data.permission_type}")
+            print(f"{permission_data.name} [{permission_data.permission_type}]")
             DBRecordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
             process_unknown_permission(analysis_id, apk_id, permission_data)

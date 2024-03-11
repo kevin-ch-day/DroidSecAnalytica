@@ -8,10 +8,10 @@ def virustotal_menu():
         menu_title = "VirusTotal Analysis Menu"
         menu_options = {
             1: "Submit a sample",
-            2: "Run Database Analysis",
-            3: "Check Malware IOC Hash Data",
-            4: "Check connection to Virustotal.com",
-            5: "Check Internet connection"
+            2: "Analyze Malware IOC Hash Data",
+            3: "Run Database Malware IOC Analysis",
+            4: "Test Virustotal.com Connection",
+            5: "Ping 8.8.8.8"
         }
         app_display.display_menu(menu_title, menu_options)
         user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(5)])
@@ -22,15 +22,32 @@ def virustotal_menu():
         
         # submit a sample to virustotal.com
         elif user_choice == '1':
-            handle_sample_submission()
-        
-        # run analysis on all database samples
-        elif user_choice == '2':
-            vt_analysis.run_analysis()
-        
+            menu_title = "VirusTotal Submission:"
+            menu_options = {1: "APK", 2: "Hash"}
+            app_display.display_menu(menu_title, menu_options)
+            choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
+
+            # Return to menu
+            if choice == '0':
+                return
+            
+            elif choice == '1': # Submit APK
+                response = vt_utils.submit_apk()
+                if response:
+                    handle_response_data(response)
+            
+            elif choice == '2': # Submit Hash
+                response = vt_utils.submit_hash()
+                if response:
+                    handle_response_data(response)
+
         # analysis process alpha
-        elif user_choice == '3':
+        elif user_choice == '2':
             vt_analysis.read_hash_data()
+        
+        # check connection to virustotal.com
+        elif user_choice == '3':
+            vt_analysis.run_analysis()
         
         # check connection to virustotal.com
         elif user_choice == '4':
@@ -45,29 +62,6 @@ def virustotal_menu():
 
         user_prompts.pause_until_keypress()
 
-def handle_sample_submission():
-    menu_title = "VirusTotal.com Sample Submission:"
-    menu_options = {
-        1: "APK",
-        2: "Hash"
-    }
-    app_display.display_menu(menu_title, menu_options)
-    choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
-
-    if choice == '0':
-        return
-    
-    elif choice == '1':
-        response = vt_utils.submit_apk()
-        vt_analysis.user_vt_data_processing(response)
-        
-    elif choice == '2':
-        response = vt_utils.submit_hash()
-        vt_analysis.user_vt_data_processing(response)
-
-    if response:
-        handle_response_data(response)
-
 def handle_response_data(response):
     report_data = vt_analysis.process_vt_response(response)
 
@@ -81,7 +75,6 @@ def handle_response_data(response):
             5: "View detection breakdown"
         }
         app_display.display_menu(menu_title, menu_options)
-
         choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
         if choice == "0":
@@ -124,15 +117,21 @@ def display_androguard_data(response):
 
             if choice == "0":
                 break
+            
             elif choice == "1":
                 vt_utils.display_main_activity(androguard)
+            
             elif choice == "2":
                 vt_utils.display_manifest_components(androguard)
+            
             elif choice == "3":
                 vt_utils.display_certificate_details(androguard)
+            
             elif choice == "4":
                 vt_utils.display_permissions(androguard)
+            
             elif choice == "5":
                 vt_utils.display_intent_filters(androguard)
+            
             else:
                 print("Invalid choice.")
