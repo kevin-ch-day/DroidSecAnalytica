@@ -129,7 +129,7 @@ def read_hash_data():
             if hash_value:
                 hashes.append(hash_value)
 
-    records = DB_ApkRecords.get_apk_samples_by_sha256_list(hashes)
+    records = DB_ApkRecords.get_apk_samples_by_md5_list(hashes)
     if not records:
         print("Error: no records returned from the database .")
         return
@@ -141,8 +141,8 @@ def read_hash_data():
         process_vt_response(response, analysis_name)
 
 def process_apk_sample(record):
-    print(f"Android APK ID: {record[0]} SHA-256: {record[1]}")
-    hash_value = record[1]  # SHA256 hash value
+    print(f"Android APK ID: {record[0]} Hash: {record[1]}")
+    hash_value = record[1]  # hash value
     response = vt_requests.query_hash(hash_value)
     analysis_name = "Processing APK Sample"
     process_vt_response(response, analysis_name)

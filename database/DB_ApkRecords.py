@@ -93,3 +93,12 @@ def get_apk_samples_by_sha256_list(sha256_list: List[str]) -> List[Dict]:
         if records:
             matching_records.extend(records)
     return matching_records
+
+def get_apk_samples_by_md5_list(md5_list: List[str]) -> List[Dict]:
+    # Queries the apk_samples table for records matching a list of MD5 hashes.
+    matching_records = []
+    for index in md5_list:
+        records = run_query("SELECT * FROM apk_samples WHERE md5 = %s", (index,))
+        if records:
+            matching_records.extend(records)
+    return matching_records

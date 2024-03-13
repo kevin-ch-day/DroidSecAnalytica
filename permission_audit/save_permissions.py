@@ -22,11 +22,12 @@ def process_unknown_permission(analysis_id, apk_id, perm_name):
         if "android.intent.action." in perm_name:
             return
         
-        record = DB_Perm.get_unknown_permission_record_by_name(perm_name)
+        record = DB_Perm.get_unknown_permission_record_by_name(perm_name.name)
         if record:
             permission_id = record[0]
         else:
-            if user_prompts.user_for_confirmation(f"New unknown permission detected: {perm_name}. Save this permission?"):
+            print(f"New unknown permission detected: {perm_name.name}")
+            if user_prompts.user_for_confirmation("Save this permission?"):
                 permission_id = prompt_and_insert_new_permission(perm_name, analysis_id, apk_id)
             else:
                 user_prompts.pause_until_keypress()
