@@ -44,14 +44,14 @@ def process_vt_response(response, analysis_name):
     except Exception as e:
         print(f"Error processing APK samples: {e}")
 
-def process_permissions(analysis_id, apk_id, permissions):
-    permissions_cnt = len(permissions)
-    print(f"\nPermissions: {permissions_cnt}")
-    if permissions:
-        for index in permissions:
-            save_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])
-    else:
-        print("No data.")
+def process_androguard_data(analysis_id, andro_data):
+    apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
+
+    process_metadata(analysis_id, andro_data)
+    process_permissions(analysis_id, apk_id, andro_data.get_permissions())
+    process_activities(analysis_id, apk_id, andro_data.get_activities())
+    process_services(analysis_id, apk_id, andro_data.get_services())
+    process_receivers(analysis_id, apk_id, andro_data.get_receivers())
 
 def process_metadata(analysis_id, andro_data):    
     # Retrieve data with checks for None values or defaulting to 'Not Available'
@@ -61,6 +61,7 @@ def process_metadata(analysis_id, andro_data):
     package_name = andro_data.get_package() or 'Not Available'
     main_activity = andro_data.get_main_activity() or 'Not Available'
     target_sdk_version = andro_data.get_target_sdk_version() or 'Not Available'
+    min_sdk_version = andro_data.get_min_sdk_version() or 'Not Available'
     
     # Display the retrieved information
     print(f"MD5:                {md5}")
@@ -68,16 +69,31 @@ def process_metadata(analysis_id, andro_data):
     print(f"SHA256:             {sha256}")
     print(f"Package Name:       {package_name}")
     print(f"Main Activity:      {main_activity}")
+    print(f"Minimum SDK Version: {min_sdk_version}")
     print(f"Target SDK Version: {target_sdk_version}")
+    
     
     # Attempt to insert the record into the database with error handling
     try:
         DBRecordInserts.create_apk_analysis_records(
-            analysis_id, sha256, package_name, main_activity, target_sdk_version
+            analysis_id,
+            sha256,
+            package_name,
+            main_activity,
+            min_sdk_version,
+            target_sdk_version
         )
-    
     except Exception as e:
         print(f"\nFailed to insert record into the database. Error: {e}")
+
+def process_permissions(analysis_id, apk_id, permissions):
+    permissions_cnt = len(permissions)
+    print(f"\nPermissions: {permissions_cnt}")
+    if permissions:
+        for index in permissions:
+            save_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])
+    else:
+        print("No data.")
 
 def process_activities(analysis_id, apk_id, activities):
     activities_cnt = len(activities)
@@ -109,15 +125,6 @@ def process_receivers(analysis_id, apk_id, receivers):
     else:
         print("No data.")
 
-def process_androguard_data(analysis_id, andro_data):
-    apk_id = DB_ApkRecords.get_apk_id_by_sha256(andro_data.get_sha256())
-
-    process_metadata(analysis_id, andro_data)
-    process_permissions(analysis_id, apk_id, andro_data.get_permissions())
-    process_activities(analysis_id, apk_id, andro_data.get_activities())
-    process_services(analysis_id, apk_id, andro_data.get_services())
-    process_receivers(analysis_id, apk_id, andro_data.get_receivers())
-
 def read_hash_data():
     hash_file_path = "input\\Hash-Data.txt"
     hashes = []
@@ -129,7 +136,7 @@ def read_hash_data():
             if hash_value:
                 hashes.append(hash_value)
 
-    records = DB_ApkRecords.get_apk_samples_by_md5_list(hashes)
+    records = DB_ApkRecords.get_apk_samples_by_md5(hashes)
     if not records:
         print("Error: no records returned from the database .")
         return

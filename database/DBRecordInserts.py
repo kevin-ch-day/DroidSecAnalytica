@@ -122,18 +122,28 @@ def get_next_unknown_permission_id() -> int:
     return result[0][0] + 1 if result and result[0][0] is not None else 1
 
 # Create a new apk_analysis record
-def create_apk_analysis_records(id: int, sha256: str, package_name: str, main_activity: str, target_sdk: int) -> Optional[bool]:
+def create_apk_analysis_records(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int , target_sdk: int) -> Optional[bool]:
     query = """
-    INSERT INTO apk_analysis (analysis_id, sha256_hash, package_name, main_activity, target_sdk_version)
+    INSERT INTO apk_analysis (
+            analysis_id,
+            sha256_hash,
+            package_name,
+            main_activity,
+            target_min_version,
+            target_sdk_version)
     VALUES (%s, %s, %s, %s, %s)
     """
-    params = (id, sha256, package_name, main_activity, target_sdk)
+    params = (id, sha256, package_name, main_activity, min_sdk, target_sdk)
     return execute_sql(query, params)
 
 # Update counts in apk_analysis table
 def update_apk_analysis_counts(analysis_id: int, receivers: int, activities: int, services: int, libraries: int) -> Optional[bool]:
     query = """
-    UPDATE apk_analysis SET num_receivers = %s, num_activities = %s, num_services = %s, num_libraries = %s
+    UPDATE apk_analysis
+        SET num_receivers = %s,
+        num_activities = %s,
+        num_services = %s,
+        num_libraries = %s
     WHERE analysis_id = %s
     """
     params = (receivers, activities, services, libraries, analysis_id)
