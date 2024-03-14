@@ -26,12 +26,14 @@ def process_unknown_permission(analysis_id, apk_id, perm_name):
         if record:
             permission_id = record[0]
         else:
-            print(f"New unknown permission detected: {perm_name.name}")
+            print(f"\nNew unknown permission detected: {perm_name.name}")
             if user_prompts.user_for_confirmation("Save this permission?"):
                 permission_id = prompt_and_insert_new_permission(perm_name, analysis_id, apk_id)
             else:
                 user_prompts.pause_until_keypress()
                 return
+            
+            print() # new line
 
         if permission_id:
             save_unknown_permission(analysis_id, apk_id, permission_id, perm_name)
@@ -39,10 +41,10 @@ def process_unknown_permission(analysis_id, apk_id, perm_name):
     except Exception as e:
         logging_utils.log_error(f"An error occurred while processing unknown permission '{perm_name}': {e}")
 
-def prompt_and_insert_new_permission(permission_name, analysis_id, apk_id):
-    record = DB_Perm.insert_unknown_permission_record(permission_name)
-    logging_utils.log_info(f"New Unknown Permission ID: {record[0]}")
-    logging_utils.log_info(f"Permission '{permission_name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
+def prompt_and_insert_new_permission(perm_adt, analysis_id, apk_id):
+    record = DB_Perm.insert_unknown_permission_record(perm_adt.name, perm_adt.short_desc, perm_adt.long_desc, perm_adt.permission_type)
+    print(f"New Unknown Permission ID: {record[0]}")
+    print(f"Permission '{perm_adt.name}' saved and linked with analysis ID {analysis_id} and APK ID {apk_id}.")
     return record[0]
 
 def save_unknown_permission(analysis_id, apk_id, permission_id, permission_name):

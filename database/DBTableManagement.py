@@ -48,6 +48,7 @@ def truncate_analysis_data_tables() -> bool:
         "vt_receivers",
         "vt_scan_analysis",
         "vt_services",
+        "vt_providers",
         "apk_analysis"
     ]
     

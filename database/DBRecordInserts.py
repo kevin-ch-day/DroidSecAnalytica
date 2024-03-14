@@ -114,6 +114,11 @@ def insert_vt_receivers(analysis_id: int, receiver_name: str, apk_id: int) -> Op
     params = (analysis_id, receiver_name, apk_id)
     return execute_sql(query, params)
 
+def insert_vt_providers(analysis_id: int, provider_name: str, apk_id: int) -> Optional[bool]:
+    query = "INSERT INTO vt_receivers (analysis_id, provider_name, apk_id) VALUES (%s, %s, %s)"
+    params = (analysis_id, provider_name, apk_id)
+    return execute_sql(query, params)
+
 # Get the next unknown permission ID
 def get_next_unknown_permission_id() -> int:
     query = "SELECT MAX(permission_id) FROM unknown_permissions"
@@ -131,7 +136,7 @@ def create_apk_analysis_records(id: int, sha256: str, package_name: str, main_ac
             main_activity,
             target_min_version,
             target_sdk_version)
-    VALUES (%s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s , %s)
     """
     params = (id, sha256, package_name, main_activity, min_sdk, target_sdk)
     return execute_sql(query, params)

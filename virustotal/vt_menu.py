@@ -8,13 +8,12 @@ def virustotal_menu():
         menu_title = "VirusTotal Analysis Menu"
         menu_options = {
             1: "Submit a sample",
-            2: "Analyze Malware IOC Hash Data",
-            3: "Run Database Malware IOC Analysis",
-            4: "Test Virustotal.com Connection",
-            5: "Ping 8.8.8.8"
+            2: "Analyze Malware IOC Data",
+            3: "Test Virustotal.com Connection",
+            4: "Ping 8.8.8.8"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(5)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(4)])
 
         # exit
         if user_choice == '0':
@@ -43,18 +42,14 @@ def virustotal_menu():
 
         # analysis process alpha
         elif user_choice == '2':
-            vt_analysis.read_hash_data()
+            vt_analysis.analyze_hash_data_input()
         
         # check connection to virustotal.com
         elif user_choice == '3':
-            vt_analysis.run_analysis()
-        
-        # check connection to virustotal.com
-        elif user_choice == '4':
             vt_utils.check_virustotal_access()
         
         # check 8.8.8.8
-        elif user_choice == '5':
+        elif user_choice == '4':
             vt_utils.check_ping()
         
         else:

@@ -72,7 +72,6 @@ def process_metadata(analysis_id, andro_data):
     print(f"Minimum SDK Version: {min_sdk_version}")
     print(f"Target SDK Version: {target_sdk_version}")
     
-    
     # Attempt to insert the record into the database with error handling
     try:
         DBRecordInserts.create_apk_analysis_records(
@@ -125,7 +124,17 @@ def process_receivers(analysis_id, apk_id, receivers):
     else:
         print("No data.")
 
-def read_hash_data():
+def process_providers(analysis_id, apk_id, providers):
+    providers_cnt = len(providers)
+    print(f"\nProviders ({providers_cnt})")
+    if providers:
+        for index in providers:
+            #print(f"- {receiver}") # Debugging
+            DBRecordInserts.insert_vt_providers(analysis_id, index, apk_id)
+    else:
+        print("No data.")
+
+def analyze_hash_data_input():
     hash_file_path = "input\\Hash-Data.txt"
     hashes = []
 
