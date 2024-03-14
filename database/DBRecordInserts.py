@@ -115,7 +115,7 @@ def insert_vt_receivers(analysis_id: int, receiver_name: str, apk_id: int) -> Op
     return execute_sql(query, params)
 
 def insert_vt_providers(analysis_id: int, provider_name: str, apk_id: int) -> Optional[bool]:
-    query = "INSERT INTO vt_receivers (analysis_id, provider_name, apk_id) VALUES (%s, %s, %s)"
+    query = "INSERT INTO vt_providers (analysis_id, provider_name, apk_id) VALUES (%s, %s, %s)"
     params = (analysis_id, provider_name, apk_id)
     return execute_sql(query, params)
 

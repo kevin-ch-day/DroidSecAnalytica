@@ -52,6 +52,7 @@ def process_androguard_data(analysis_id, andro_data):
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
+    process_providers(analysis_id, apk_id, andro_data.get_providers())
 
 def process_metadata(analysis_id, andro_data):    
     # Retrieve data with checks for None values or defaulting to 'Not Available'
