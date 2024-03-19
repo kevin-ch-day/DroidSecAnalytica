@@ -68,8 +68,7 @@ def format_seconds_to_dhms(seconds):
     return f"{days}d {hours}h {minutes}m {seconds}s"
 
 def pause_with_updates(wait_time: int, update_interval: int = 60, display_text: Optional[str] = None):
-    # Pauses execution while providing updates on the remaining time. Can be used to pause
-    # with progress feedback or wait for the next batch with less frequent updates.
+    # Pauses execution while providing updates on the remaining time.
 
     try:
         if not display_text:

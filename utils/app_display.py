@@ -3,7 +3,7 @@
 import datetime
 import os
 
-from . import app_utils, logging_utils
+from . import app_utils
 
 APP_NAME = "DroidSecAnalytica"
 
@@ -100,71 +100,3 @@ def display_app_name():
     print(" " + middle_border)
     print(" " + tagline_header)
     print(" " + bottom_border)
-
-def display_tables_info(database_tables_info):
-    if not database_tables_info:
-        print("No table information available.")
-        return
-
-    table_header = "Table Name"
-    columns_header = "Columns"
-    rows_header = "Rows"
-
-    try:
-        #print("Debug: Raw table data:", database_tables_info) # DEBUGGING
-
-        max_table_len = max(len(table_header), max(len(table[0]) for table in database_tables_info)) + 2
-        max_columns_len = max(len(columns_header), max(len(str(table[1])) for table in database_tables_info)) + 2
-        max_rows_len = max(len(rows_header), max(len(str(table[2])) for table in database_tables_info)) + 2
-
-        print(f"{table_header.ljust(max_table_len)} | {columns_header.ljust(max_columns_len)} | {rows_header.ljust(max_rows_len)}")
-        print("-" * (max_table_len + max_columns_len + max_rows_len + 6))
-
-        for table in database_tables_info:
-            if len(table) < 3:
-                print(f"Debug: Incomplete table information for: {table}")
-                continue
-
-            table_name, num_columns, num_rows = table
-            print(f"{table_name.ljust(max_table_len)} | {str(num_columns).ljust(max_columns_len)} | {str(num_rows).ljust(max_rows_len)}")
-
-    except Exception as e:
-        print(f"Error displaying table information: {str(e)}")
-
-def display_query_statistics(query_stats):
-    if query_stats:
-        print("\nQuery Statistics:")
-        for stat in query_stats:
-            print(f"{stat[0]}: {stat[1]}")
-    else:
-        print("No query statistics available.")
-
-def display_disk_usage(disk_usage):
-    if disk_usage:
-        # Header
-        print("\nDisk Usage Report:")
-        header = f"{'Table':<30} | {'Data Size (MB)':>15} | {'Index Size (MB)':>15} | {'Total Size (MB)':>15}"
-        print(header)
-        print("-" * len(header))
-
-        # Data rows
-        for usage in disk_usage:
-            table, data_size, index_size, total_size = usage
-            print(f"{table:<30} | {data_size:>15} | {index_size:>15} | {total_size:>15}")
-
-        # Footer
-        print("-" * len(header))
-    else:
-        print("No disk usage data available.")
-
-def display_thread_information(thread_info):
-    if thread_info:
-        print("\nThread Information:")
-        
-        # Formatting for a neat tabular display
-        max_metric_length = max(len(info[0]) for info in thread_info)
-        for metric, value in thread_info:
-            print(f"{metric:<{max_metric_length}} : {value}")
-
-    else:
-        print("No thread information available.")
