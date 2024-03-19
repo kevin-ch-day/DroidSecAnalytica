@@ -14,10 +14,7 @@ def analyze_hash_data():
             if hash_value:
                 hashes.append(hash_value)
 
-    print(f"# hashes {len(hashes)}")
-
     records = db_get_records.get_apk_samples_by_md5(hashes)
-    print(f"# Record returned: {len(records)}")
     if not records:
         print("[!!] Error: no database records")
         return
@@ -32,7 +29,7 @@ def analyze_hash_data():
 def process_vt_response(response, analysis_name, sample_type):
     try:
         analysis_id = db_create_records.create_analysis_record(analysis_name, sample_type)
-        print(f"Analysis ID: {analysis_id}")
+        print(f"\nAnalysis ID: {analysis_id}")
         
         andro_data = vt_androguard.handle_androguard_response(response)
         if andro_data:
@@ -78,7 +75,6 @@ def process_androguard_data(analysis_id, andro_data):
     process_providers(analysis_id, apk_id, andro_data.get_providers())
 
 def process_metadata(analysis_id, andro_data):    
-    # Retrieve data with checks for None values or defaulting to 'Not Available'
     md5 = andro_data.get_md5() or 'Not Available'
     sha1 = andro_data.get_sha1() or 'Not Available'
     sha256 = andro_data.get_sha256() or 'Not Available'
@@ -88,7 +84,7 @@ def process_metadata(analysis_id, andro_data):
     min_sdk = andro_data.get_min_sdk_version() or 'Not Available'
     
     # Display the retrieved information
-    print(f"MD5:                {md5}")
+    print(f"\nMD5:                {md5}")
     print(f"SHA1:               {sha1}")
     print(f"SHA256:             {sha256}")
     print(f"Package Name:       {package_name}")
@@ -108,8 +104,6 @@ def process_permissions(analysis_id, apk_id, permissions):
     if permissions:
         for index in permissions:
             record_permissions.save_detected_permission(analysis_id, apk_id, permissions[index])
-    else:
-        print("No data.")
 
 def process_activities(analysis_id, apk_id, activities):
     print(f"\n# Activities: {len(activities)}")
@@ -118,8 +112,6 @@ def process_activities(analysis_id, apk_id, activities):
         for activity in activities:
             #print(f"- {activity}") # Debugging
             db_insert_records.insert_vt_activities(analysis_id, activity, apk_id)
-    else:
-        print("No data.")
 
 def process_services(analysis_id, apk_id, services):
     print(f"\n# Services: {len(services)}")
@@ -128,8 +120,6 @@ def process_services(analysis_id, apk_id, services):
         for service in services:
             #print(f"- {service}") # Debugging
             db_insert_records.insert_vt_services(analysis_id, service, apk_id)
-    else:
-        print("No data.")
 
 def process_receivers(analysis_id, apk_id, receivers):
     print(f"\n# Receivers: {len(receivers)}")
@@ -138,8 +128,6 @@ def process_receivers(analysis_id, apk_id, receivers):
         for receiver in receivers:
             #print(f"- {receiver}") # Debugging
             db_insert_records.insert_vt_receivers(analysis_id, receiver, apk_id)
-    else:
-        print("No data.")
 
 def process_providers(analysis_id, apk_id, providers):
     print(f"\n# Providers: {len(providers)}")
@@ -148,5 +136,3 @@ def process_providers(analysis_id, apk_id, providers):
         for index in providers:
             #print(f"- {provider:}") # Debugging
             db_insert_records.insert_vt_providers(analysis_id, index, apk_id)
-    else:
-        print("No data.")
