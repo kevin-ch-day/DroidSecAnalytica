@@ -1,4 +1,4 @@
-# DBFunct_ApkRecords.py
+# db_get_records.py
 
 from typing import Optional, Tuple, List, Dict
 from . import db_conn
@@ -60,7 +60,7 @@ def get_next_unknown_permission_id() -> int:
     # Increment and return the next ID or start at 1 if table is empty
     return result[0][0] + 1 if result and result[0][0] is not None else 1
 
-def get_vt_scan_analysis_column_names():
+def get_vt_scan_analysis_columns():
     query = "SHOW COLUMNS FROM vt_scan_analysis"
     column_names = []
     with db_conn.database_connection() as conn:
