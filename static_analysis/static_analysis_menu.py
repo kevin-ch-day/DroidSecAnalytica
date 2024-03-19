@@ -1,8 +1,7 @@
 # static_analysis_menu.py
 
 from utils import app_display, user_prompts
-from . import manifest_analysis, static_analysis, apk_decompilation
-from permission_audit import save_permissions
+from . import manifest_analysis, static_analysis, save_permissions
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():
@@ -13,7 +12,6 @@ def show_menu():
         print(app_display.format_menu_option(3, "Display APK Hash"))
         print(app_display.format_menu_option(4, "Perform Static Analysis"))
         print(app_display.format_menu_option(5, "Perform AndroidManifest.xml Analysis"))
-        print(app_display.format_menu_option(6, "Perform Permission Analysis"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
         menu_choice =  user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(6)])
     
@@ -23,7 +21,7 @@ def show_menu():
         
         # Decompile APK file
         if menu_choice == '2':
-            apk_decompilation.handle_apk_decompilation()
+            static_analysis.handle_apk_decompilation()
 
         # Display APK Hash
         if menu_choice == '3':
