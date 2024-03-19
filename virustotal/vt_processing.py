@@ -28,8 +28,8 @@ def process_metadata(analysis_id, andro_data):
     print(f"SHA256:             {sha256}")
     print(f"Package Name:       {package_name}")
     print(f"Main Activity:      {main_activity}")
-    print(f"Minimum SDK Version: {min_sdk}")
-    print(f"Target SDK Version: {target_sdk}")
+    print(f"Minimum SDK: {min_sdk}")
+    print(f"Target SDK: {target_sdk}")
     
     # Insert the record into the database
     try:
