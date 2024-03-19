@@ -17,55 +17,39 @@ def run_query(sql: str, params: Optional[tuple] = None, query_type: str = "selec
         logging_utils.log_error(f"Failed to execute query: {sql} with params: {params}", e)
         return []
 
+def create_malware_record(file_name, family, md5, sha1, sha256, file_size):
+    query = """
+    INSERT INTO malware_samples (name, family, md5, sha1, sha256, file_size)
+    VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    return run_query(query, (file_name, family, md5, sha1, sha256, file_size))
+
 # Creates a new analysis record
-def create_analysis_record(analysis_name: str):
+def create_analysis_record(analysis_name: str, sample_type: str):
     query = "SELECT MAX(analysis_id) AS max_id FROM analysis_metadata"
-    result_max_id = run_query(query)
+    results = run_query(query)
 
     # Check if result_max_id is not empty and then extract the max_id
-    max_id = result_max_id[0][0] if result_max_id and result_max_id[0][0] is not None else 0
+    max_id = results[0][0] if results and results[0][0] is not None else 0
     next_id = max_id + 1
     
-    query = "INSERT INTO analysis_metadata (analysis_id, analysis_name, analysis_status) VALUES (%s, %s, %s)"
-    params = (next_id, analysis_name, 'InProgress')
+    query = "INSERT INTO analysis_metadata (analysis_id, analysis_name, analysis_status, sample_type) VALUES (%s, %s, %s, %s)"
+    params = (next_id, analysis_name, 'InProgress', sample_type)
     run_query(query, params, query_type="insert")
     return next_id
 
-# Create a new apk_analysis record
-def create_apk_analysis_records(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int , target_sdk: int) -> Optional[bool]:
+def update_analysis_metadata(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int, target_sdk: int) -> Optional[bool]:
     query = """
-    INSERT INTO apk_analysis (
-            analysis_id,
-            sha256_hash,
-            package_name,
-            main_activity,
-            target_min_version,
-            target_sdk_version)
-    VALUES (%s, %s, %s, %s, %s , %s)
+    UPDATE analysis_metadata
+    SET sha256_hash = %s,
+        package_name = %s,
+        main_activity = %s,
+        target_min_version = %s,
+        target_sdk_version = %s
+    WHERE analysis_id = %s;
     """
-    params = (id, sha256, package_name, main_activity, min_sdk, target_sdk)
+    params = (sha256, package_name, main_activity, min_sdk, target_sdk, id)
     return run_query(query, params)
-
-def create_apk_sample_record(file_name, file_size, md5, sha1, sha256):
-    query = """
-    INSERT INTO apk_samples (file_name, file_size, md5, sha1, sha256)
-    VALUES (%s, %s, %s, %s, %s)
-    """
-    return run_query(query, (file_name, file_size, md5, sha1, sha256))
-
-# Creates a new analysis record
-def create_analysis_record(analysis_name: str):
-    query = "SELECT MAX(analysis_id) AS max_id FROM analysis_metadata"
-    result_max_id = run_query(query)
-
-    # Check if result_max_id is not empty and then extract the max_id
-    max_id = result_max_id[0][0] if result_max_id and result_max_id[0][0] is not None else 0
-    next_id = max_id + 1
-    
-    query = "INSERT INTO analysis_metadata (analysis_id, analysis_name, analysis_status) VALUES (%s, %s, %s)"
-    params = (next_id, analysis_name, 'InProgress')
-    run_query(query, params, query_type="insert")
-    return next_id
 
 # Function to create vt_scan_analysis record
 def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:

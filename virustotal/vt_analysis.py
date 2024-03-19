@@ -1,15 +1,14 @@
 # vt_analysis.py
 
 from database import db_update_records, db_get_records, db_insert_records, db_create_records
-from permission_audit import save_permissions
-from . import vt_androguard, vt_requests
+from static_analysis import save_permissions
+from . import vt_androguard, vt_requests, vt_utils_
 
 def analyze_hash_data():
-    hash_file_path = "input\\Hash-Data.txt"
     hashes = []
 
     print("\nRead Hash Data...")
-    with open(hash_file_path, 'r') as file:
+    with open("input\\Hash-Data.txt", 'r') as file:
         for line in file:
             hash_value = line.strip()
             if hash_value:
@@ -17,26 +16,29 @@ def analyze_hash_data():
 
     records = db_get_records.get_apk_samples_by_md5(hashes)
     if not records:
-        print("Error: no records returned from the database .")
+        print("[!!] Error: no database records")
         return
     
     print("\nProcessing Hash Data...")
     for index in records:
-        response = vt_requests.query_hash(index[1])
-        analysis_name = "Hash IOC Analysis"
-        process_vt_response(response, analysis_name)
+        response = vt_requests.query_hash(index[4])
+        analysis_name = "Test Run"
+        sample_type = "Hash"
+        process_vt_response(response, analysis_name, sample_type)
 
-def process_vt_response(response, analysis_name):
+def process_vt_response(response, analysis_name, sample_type):
     try:
-        analysis_id = db_create_records.create_analysis_record(analysis_name)
+        analysis_id = db_create_records.create_analysis_record(analysis_name, sample_type)
         print(f"Analysis ID: {analysis_id}")
         
         andro_data = vt_androguard.handle_androguard_response(response)
         if andro_data:
             process_androguard_data(analysis_id, andro_data)
+        
         else:
             print("No Androguard data returned...")
 
+        exit()
         vt_data = vt_requests.parse_virustotal_response(response)
         if vt_data:
             apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
@@ -67,9 +69,11 @@ def process_vt_response(response, analysis_name):
 
 def process_androguard_data(analysis_id, andro_data):
     apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
-
+    print(f"Sample ID: {apk_id}")
     process_metadata(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
+    exit()
+    
     process_activities(analysis_id, apk_id, andro_data.get_activities())
     process_services(analysis_id, apk_id, andro_data.get_services())
     process_receivers(analysis_id, apk_id, andro_data.get_receivers())
@@ -82,8 +86,8 @@ def process_metadata(analysis_id, andro_data):
     sha256 = andro_data.get_sha256() or 'Not Available'
     package_name = andro_data.get_package() or 'Not Available'
     main_activity = andro_data.get_main_activity() or 'Not Available'
-    target_sdk_version = andro_data.get_target_sdk_version() or 'Not Available'
-    min_sdk_version = andro_data.get_min_sdk_version() or 'Not Available'
+    target_sdk = andro_data.get_target_sdk_version() or 'Not Available'
+    min_sdk = andro_data.get_min_sdk_version() or 'Not Available'
     
     # Display the retrieved information
     print(f"MD5:                {md5}")
@@ -91,18 +95,18 @@ def process_metadata(analysis_id, andro_data):
     print(f"SHA256:             {sha256}")
     print(f"Package Name:       {package_name}")
     print(f"Main Activity:      {main_activity}")
-    print(f"Minimum SDK Version: {min_sdk_version}")
-    print(f"Target SDK Version: {target_sdk_version}")
+    print(f"Minimum SDK Version: {min_sdk}")
+    print(f"Target SDK Version: {target_sdk}")
     
     # Attempt to insert the record into the database with error handling
     try:
-        db_create_records.create_apk_analysis_records(
+        db_create_records.update_analysis_metadata(
             analysis_id,
             sha256,
             package_name,
             main_activity,
-            min_sdk_version,
-            target_sdk_version
+            min_sdk,
+            target_sdk
         )
     except Exception as e:
         print(f"\nFailed to insert record into the database. Error: {e}")

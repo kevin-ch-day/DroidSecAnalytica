@@ -1,41 +1,39 @@
 # vt_androguard.py
 
 import re
-from . import AndroguardADT, AndroPermissionADT
+from . import AndroguardADT, AndroPermissionADT, vt_utils
 from utils import logging_utils
 
 def handle_androguard_response(api_response):
     try:
-        data = api_response.get('data', {})
-        if not data:
+        response_data = api_response.get('data', {})
+        if not response_data:
             raise ValueError("No 'data' key in api response.")
         
-        attributes = data.get('attributes', {})
-        return populate_androguard_data(attributes)
-    
+        data_attributes = response_data.get('attributes', {})
+        json_data = data_attributes.get('androguard', None)
+        if not json_data:
+            return None
+        
+        vt_utils.save_json_response(json_data, "JSON_DATA.txt") # DEBUGGING
+        exit()
+        androguard = AndroguardADT.AndroguardADT()
+
+        # Populate Hash data
+        androguard.set_md5(data_attributes.get('md5', 'N/A'))
+        androguard.set_sha1(data_attributes.get('sha1', 'N/A'))
+        androguard.set_sha256(data_attributes.get('sha256', 'N/A'))
+
+        populate_manifest_metadata(androguard, json_data)
+        populate_manifest_components(androguard, json_data)
+        populate_permissions(androguard, json_data)
+        #populate_certificate_data(androguard, json_data)
+        #populate_intent_filters(androguard, json_data)
+        return androguard
+
     except Exception as e:
         logging_utils.log_error(f"Error in handle_androguard_response(): {e}")
         return None
-
-def populate_androguard_data(attributes):
-    json_data = attributes.get('androguard', None)
-    if not json_data:
-        return None
-    
-    #print(json_data) # DEBUGGING
-    androguard = AndroguardADT.AndroguardADT()
-
-    # Populate Hash data
-    androguard.set_md5(attributes.get('md5', 'N/A'))
-    androguard.set_sha1(attributes.get('sha1', 'N/A'))
-    androguard.set_sha256(attributes.get('sha256', 'N/A'))
-
-    populate_manifest_metadata(androguard, json_data)
-    populate_manifest_components(androguard, json_data)
-    populate_permissions(androguard, json_data)
-    #populate_certificate_data(androguard, json_data)
-    #populate_intent_filters(androguard, json_data)
-    return androguard
 
 def display_dict_data(data):
     for key in data:

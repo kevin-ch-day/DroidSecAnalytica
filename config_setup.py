@@ -64,7 +64,6 @@ def main():
     print("-----------------------------")
     
     user_config = get_user_input()
-
     if compare_config(user_config):
         print("\nDatabase configuration is identical to the existing configuration.")
     else:

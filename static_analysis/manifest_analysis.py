@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 from typing import Optional, Dict, List
 
 from utils import load_data
-from . import intent_filters_analysis, save_permissions
+from . import save_permissions
 
 # Constants
 METADATA_ELEMENTS = ["uses-permission", "application", "activity", "service",
@@ -68,8 +68,8 @@ def heuristic_analysis(manifest_data: Dict) -> Dict:
     analysis_results['unusual_activities_services'] = check_unusual_activities_services(manifest_data)
 
     # Heuristic 5: Analyze Intent Filters
-    analysis_results['suspicious_intent_filters'] = intent_filters_analysis.analyze_intent_filters(manifest_data)
-    analysis_results['custom_intent_filter_analysis_result'] = intent_filters_analysis.custom_intent_filter_analysis(manifest_data)
+    #analysis_results['suspicious_intent_filters'] = intent_filters_analysis.analyze_intent_filters(manifest_data)
+    #analysis_results['custom_intent_filter_analysis_result'] = intent_filters_analysis.custom_intent_filter_analysis(manifest_data)
 
     # Heuristic 6: Network-related Permissions
     analysis_results['network_related_permissions'] = save_permissions.check_network_permissions(manifest_data)

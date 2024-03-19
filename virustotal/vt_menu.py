@@ -10,11 +10,11 @@ def virustotal_menu():
         menu_options = {
             1: "Submit a sample",
             2: "Analyze Malware Hash Data",
-            3: "Test Virustotal.com Connection",
+            3: "Test connection to Virustotal.com",
             4: "Ping 8.8.8.8"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(4)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(5)])
 
         # exit
         if user_choice == '0':

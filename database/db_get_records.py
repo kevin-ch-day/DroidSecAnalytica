@@ -18,7 +18,7 @@ def get_malware_hash_samples() -> List[Dict]:
     return run_query("SELECT * FROM malware_ioc_threats")
 
 def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
-    sql = "SELECT apk_id FROM apk_samples WHERE sha256 = %s"
+    sql = "SELECT id FROM malware_samples WHERE sha256 = %s"
     params = (sha256_hash,)
     result = run_query(sql, params)
     if result:
@@ -48,7 +48,7 @@ def get_apk_samples_by_md5(md5_list: List[str]) -> List[Dict]:
     # Queries the apk_samples table for records matching a list of MD5 hashes.
     matching_records = []
     for index in md5_list:
-        records = run_query("SELECT * FROM apk_samples WHERE md5 = %s", (index,))
+        records = run_query("SELECT * FROM malware_samples WHERE md5 = %s", (index,))
         if records:
             matching_records.extend(records)
     return matching_records

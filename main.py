@@ -1,8 +1,11 @@
+# main.py
+
+# Standard libraries
 import os
 import sys
 import logging
 
-# Import custom libraries
+# Custom libraries
 from static_analysis import static_analysis_menu
 from virustotal import vt_menu
 from dynamic_analysis import dynamic_analysis
@@ -18,6 +21,7 @@ if not os.path.exists('logs'):
 # Configure Logging using logging_utils
 logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
+# Main menu
 def main_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
@@ -27,6 +31,7 @@ def main_menu():
     print(app_display.format_menu_option(5, "Database Management"))
     print(app_display.format_menu_option(0, "Exit"))
 
+# Main
 def main():
     while True:
         main_menu()
