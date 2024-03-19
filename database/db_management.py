@@ -45,19 +45,20 @@ def truncate_analysis_data_tables() -> bool:
         "vt_scan_analysis",
         "vt_services",
         "vt_providers",
-        "apk_analysis"
-    ]
+        "vt_intent_filters_actions",
+        "vt_intent_filters_categories"
+        ]
     
     try:
         for table_name in table_names:
             execute_sql(f"TRUNCATE TABLE {table_name}")
-            print(f"Successfully truncated table: {table_name}")
+            print(f"Truncated: {table_name}")
 
-        print("All specified tables were successfully truncated.")
+        print("\nAll specified tables were successfully truncated.")
         return True
     
     except Exception as e:
-        logging_utils.log_error("An error occurred while truncating tables. Transaction has been rolled back.", e)
+        logging_utils.log_error("An error occurred while truncating tables.", e)
         return False
 
 # Updates a user's information based on the provided keyword arguments

@@ -34,21 +34,8 @@ def update_status_to_completed(analysis_id: int):
 def update_status_to_failed(analysis_id: int):
     update_analysis_status(analysis_id, 'Failed')
 
-# Update counts in apk_analysis table
-def update_apk_analysis_counts(analysis_id: int, receivers: int, activities: int, services: int, libraries: int) -> Optional[bool]:
-    query = """
-    UPDATE analysis_metadata
-        SET num_receivers = %s,
-        num_activities = %s,
-        num_services = %s,
-        num_libraries = %s
-    WHERE analysis_id = %s
-    """
-    params = (receivers, activities, services, libraries, analysis_id)
-    return run_query(query, params)
-
 # Function to create vt_scan_analysis record
-def update_vt_engine_records(analysis_id: int, detections: list):
+def update_vt_engine_column(analysis_id: int, detections: list):
     # Fetch and prepare the column names.
     column_names = db_get_records.get_vt_scan_analysis_columns()
     valid_columns = {col.replace('_', '-'): col for col in column_names}  # Reverse mapping for normalization.
@@ -71,7 +58,7 @@ def update_vt_engine_records(analysis_id: int, detections: list):
         else:
             logging_utils.log_error(f"Invalid AV vendor name: {av_vendor}")
 
-def update_vt_engine_columns(analysis_id: int, summary_stat: dict):
+def update_vt_engine_detection_metadata(analysis_id: int, summary_stat: dict):
     with db_conn.database_connection() as conn:
         cursor = conn.cursor()
         for key, value in summary_stat.items():
@@ -85,3 +72,21 @@ def update_vt_engine_columns(analysis_id: int, summary_stat: dict):
                 conn.commit()
             except Exception as e:
                 logging_utils.log_error(f"Error updating {column_name} for analysis_id {analysis_id}", e)
+
+def update_analysis_metadata(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int, target_sdk: int) -> Optional[bool]:
+    query = """
+    UPDATE analysis_metadata
+    SET sha256_hash = %s,
+        package_name = %s,
+        main_activity = %s,
+        target_min_version = %s,
+        target_sdk_version = %s
+    WHERE analysis_id = %s;
+    """
+    params = (sha256, package_name, main_activity, min_sdk, target_sdk, id)
+    return run_query(query, params)
+
+def update_analysis_metadata_column(analysis_id: int, column_name: str, column_value: int) -> Optional[bool]:
+    query = f"UPDATE analysis_metadata SET {column_name} = %s WHERE analysis_id = %s"
+    params = (column_value, analysis_id)
+    return run_query(query, params)

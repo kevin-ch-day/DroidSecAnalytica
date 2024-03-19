@@ -5,17 +5,18 @@ from utils import logging_utils, user_prompts
 logging_utils.setup_logger()
 
 # Process permissions extracted from the APK
-def save_detected_permission(analysis_id, apk_id, permission_data):
+def save_detected_permission(analysis_id, apk_id, permission_adt):
     try:
-        perm_id = db_permissions.get_permission_id_by_name(permission_data)
-        if perm_id:
-            print(f"{permission_data.name} [{permission_data.permission_type}]")
+        result = db_permissions.get_permission_record_by_name(permission_adt.name)
+        if result:
+            perm_id = result[0]
+            print(f"{permission_adt.name} [{permission_adt.permission_type}]")
             db_insert_records.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
-            process_unknown_permission(analysis_id, apk_id, permission_data)
+            process_unknown_permission(analysis_id, apk_id, permission_adt)
 
     except Exception as e:
-        logging_utils.log_error(f"Error processing permission {permission_data}: {e}")
+        logging_utils.log_error(f"Error processing [{permission_adt.name}]: {e}")
 
 def process_unknown_permission(analysis_id, apk_id, perm_name):
     try:

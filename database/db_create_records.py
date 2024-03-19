@@ -38,19 +38,6 @@ def create_analysis_record(analysis_name: str, sample_type: str):
     run_query(query, params, query_type="insert")
     return next_id
 
-def update_analysis_metadata(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int, target_sdk: int) -> Optional[bool]:
-    query = """
-    UPDATE analysis_metadata
-    SET sha256_hash = %s,
-        package_name = %s,
-        main_activity = %s,
-        target_min_version = %s,
-        target_sdk_version = %s
-    WHERE analysis_id = %s;
-    """
-    params = (sha256, package_name, main_activity, min_sdk, target_sdk, id)
-    return run_query(query, params)
-
 # Function to create vt_scan_analysis record
 def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:
     query = "INSERT INTO vt_scan_analysis (analysis_id, apk_id)"

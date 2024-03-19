@@ -15,8 +15,7 @@ def handle_androguard_response(api_response):
         if not json_data:
             return None
         
-        vt_utils.save_json_response(json_data, "JSON_DATA.txt") # DEBUGGING
-        exit()
+        #vt_utils.save_json_response(json_data, "JSON_DATA.txt") # DEBUGGING
         androguard = AndroguardADT.AndroguardADT()
 
         # Populate Hash data
