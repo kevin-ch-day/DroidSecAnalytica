@@ -44,14 +44,14 @@ def get_apk_samples_by_sha256(sha256_list: List[str]) -> List[Dict]:
             matching_records.extend(records)
     return matching_records
 
-def get_apk_samples_by_md5(md5_list: List[str]) -> List[Dict]:
+def get_apk_samples_by_md5(md5_hashes: List[str]) -> List[Dict]:
     # Queries the apk_samples table for records matching a list of MD5 hashes.
-    matching_records = []
-    for index in md5_list:
+    records = []
+    for index in md5_hashes:
         records = run_query("SELECT * FROM malware_samples WHERE md5 = %s", (index,))
         if records:
-            matching_records.extend(records)
-    return matching_records
+            records.append(records)
+    return records
 
 def get_vt_scan_analysis_columns():
     query = "SHOW COLUMNS FROM vt_scan_analysis"

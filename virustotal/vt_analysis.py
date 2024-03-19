@@ -15,9 +15,12 @@ def analyze_hash_data():
                 hashes.append(hash_value)
 
     records = db_get_records.get_apk_samples_by_md5(hashes)
+    print(f"# Record returned: {len(records)}")
     if not records:
         print("[!!] Error: no database records")
         return
+    
+    exit()
     
     print("\nProcessing Hash Data...")
     for index in records:
@@ -53,14 +56,14 @@ def process_vt_response(response, analysis_name, sample_type):
             #print(f"{vendor_data}") # DEBUGGING
             print(f"Adding engine results.")
             db_update_records.update_vt_engine_column(analysis_id, vendor_data)
+            exit()
 
             # Saving json response
             #json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
             #vt_utils.save_json_response(vt_data, json_filename)
 
-        db_update_records.update_status_to_completed(analysis_id)
+        db_update_records.update_analysis_status(analysis_id, "Completed")
         #user_prompts.pause_until_keypress()
-        print()
 
     except Exception as e:
         print(f"Error processing APK samples: {e}")
@@ -110,7 +113,7 @@ def process_permissions(analysis_id, apk_id, permissions):
         print("No data.")
 
 def process_activities(analysis_id, apk_id, activities):
-    print(f"\n# Activities: ({len(activities)})")
+    print(f"\n# Activities: {len(activities)}")
     db_update_records.update_analysis_metadata_column(analysis_id, "activities", len(activities))
     if activities:
         for activity in activities:
@@ -120,7 +123,7 @@ def process_activities(analysis_id, apk_id, activities):
         print("No data.")
 
 def process_services(analysis_id, apk_id, services):
-    print(f"\n# Services: ({len(services)})")
+    print(f"\n# Services: {len(services)}")
     db_update_records.update_analysis_metadata_column(analysis_id, "services", len(services))
     if services:
         for service in services:
@@ -130,7 +133,7 @@ def process_services(analysis_id, apk_id, services):
         print("No data.")
 
 def process_receivers(analysis_id, apk_id, receivers):
-    print(f"\n# Receivers: ({len(receivers)})")
+    print(f"\n# Receivers: {len(receivers)}")
     db_update_records.update_analysis_metadata_column(analysis_id, "receivers", len(receivers))
     if receivers:
         for receiver in receivers:
@@ -140,7 +143,7 @@ def process_receivers(analysis_id, apk_id, receivers):
         print("No data.")
 
 def process_providers(analysis_id, apk_id, providers):
-    print(f"\n# Providers: ({len(providers)})")
+    print(f"\n# Providers: {len(providers)}")
     db_update_records.update_analysis_metadata_column(analysis_id, "providers", len(providers))
     if providers:
         for index in providers:

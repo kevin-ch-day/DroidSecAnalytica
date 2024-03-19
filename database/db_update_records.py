@@ -24,15 +24,7 @@ def update_virustotal_report_url(id, url):
 # Update the status of an analysis record
 def update_analysis_status(analysis_id: int, status: str):
     query = "UPDATE analysis_metadata SET analysis_status = %s WHERE analysis_id = %s"
-    run_query(query, (status, analysis_id), query_type="update")
-
-# Set analysis record status to Completed
-def update_status_to_completed(analysis_id: int):
-    update_analysis_status(analysis_id, 'Completed')
-
-# Set analysis record status to Failed
-def update_status_to_failed(analysis_id: int):
-    update_analysis_status(analysis_id, 'Failed')
+    run_query(query, (status, analysis_id))
 
 # Function to create vt_scan_analysis record
 def update_vt_engine_column(analysis_id: int, detections: list):
