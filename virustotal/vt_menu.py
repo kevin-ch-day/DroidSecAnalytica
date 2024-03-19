@@ -1,6 +1,7 @@
 # vt_menu.py
 
-from . import vt_utils, vt_androguard, vt_analysis
+import os
+from . import vt_utils, vt_androguard, vt_analysis, vt_requests
 from utils import user_prompts, app_display
 
 def virustotal_menu():
@@ -8,7 +9,7 @@ def virustotal_menu():
         menu_title = "VirusTotal Analysis Menu"
         menu_options = {
             1: "Submit a sample",
-            2: "Analyze Malware IOC Data",
+            2: "Analyze Malware Hash Data",
             3: "Test Virustotal.com Connection",
             4: "Ping 8.8.8.8"
         }
@@ -31,18 +32,18 @@ def virustotal_menu():
                 return
             
             elif choice == '1': # Submit APK
-                response = vt_utils.submit_apk()
+                response = submit_apk()
                 if response:
                     handle_response_data(response)
             
             elif choice == '2': # Submit Hash
-                response = vt_utils.submit_hash()
+                response = submit_hash()
                 if response:
                     handle_response_data(response)
 
         # analysis process alpha
         elif user_choice == '2':
-            vt_analysis.analyze_hash_data_input()
+            vt_analysis.analyze_hash_data()
         
         # check connection to virustotal.com
         elif user_choice == '3':
@@ -130,3 +131,20 @@ def display_androguard_data(response):
             
             else:
                 print("Invalid choice.")
+
+def submit_apk():
+    apk_file_path = user_prompts.user_enter_apk_path()
+    if os.path.isfile(apk_file_path):
+        try:
+            return vt_requests.query_apk(apk_file_path)
+        except Exception as e:
+            print(f"Error submitting the APK: {e}")
+    else:
+        print("Invalid APK file path.")
+
+def submit_hash():
+    hash_value = user_prompts.user_enter_hash_ioc()
+    try:
+        return vt_requests.query_hash(hash_value)
+    except Exception as e:
+        print(f"Error submitting the hash: {e}")

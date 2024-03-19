@@ -8,7 +8,7 @@ from virustotal import vt_menu
 from dynamic_analysis import dynamic_analysis
 from reporting import reporting
 from utils import app_display, user_prompts
-from database import DBMenu
+from database import db_menu
 from utils import logging_utils
 
 # Create logs directory if it doesn't exist
@@ -46,7 +46,7 @@ def main():
                 reporting.report_menu()
             
             elif choice == '5':
-                DBMenu.database_menu()
+                db_menu.database_menu()
             
             elif choice == '0':
                 print("\nExiting. Goodbye!\n")

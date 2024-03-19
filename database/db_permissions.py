@@ -1,5 +1,7 @@
+# db_permissions.py
+
 from typing import Optional, List, Dict
-from . import DBConnectionManager as dbConnect
+from . import db_conn as dbConnect
 
 def run_query(sql: str, params: Optional[tuple] = None, is_select: bool = True) -> List[tuple]:
     try:

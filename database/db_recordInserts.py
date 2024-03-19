@@ -1,7 +1,7 @@
-# DBRecordInserts.py
+# db_recordInserts.py
 
 from typing import Optional
-from database import DBConnectionManager as dbConnect
+from database import db_conn as dbConnect
 from utils import logging_utils
 
 # Execute SQL queries

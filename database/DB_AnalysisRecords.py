@@ -1,7 +1,7 @@
-# DBFunct_AnalysisRecords.py
+# db_analyisRecords.py
 
 from typing import Optional, Tuple, List, Dict
-from . import DBConnectionManager as dbConnect
+from . import db_conn as dbConnect
 from utils import logging_utils
 
 # Function to execute SQL queries with optional parameters and distinguish query types

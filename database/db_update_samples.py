@@ -1,7 +1,7 @@
 # DBFunct_ApkRecords.py
 
 from typing import Optional, Tuple, List, Dict
-from . import DBConnectionManager as dbConnect
+from . import db_conn as dbConnect
 from utils import logging_utils, hash_utils
 
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:

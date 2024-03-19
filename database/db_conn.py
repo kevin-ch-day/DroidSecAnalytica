@@ -1,9 +1,9 @@
-# DBConnectionManager.py
+# db_conn.py
 
 import mysql.connector
 from contextlib import contextmanager
 from utils import logging_utils
-from database.DBConfig import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
+from database.db_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 
 @contextmanager
 def database_connection():

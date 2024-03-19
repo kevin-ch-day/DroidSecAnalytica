@@ -1,4 +1,4 @@
-from database import DBConnectionManager as DBConn
+from database import db_conn as DBConn
 
 def truncate_table():
     query = "TRUNCATE TABLE android_permissions"

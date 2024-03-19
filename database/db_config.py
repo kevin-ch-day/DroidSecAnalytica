@@ -1,4 +1,4 @@
-# database_config.py
+# db_config.py
 
 # Database credentials
 DB_HOST = "localhost"
