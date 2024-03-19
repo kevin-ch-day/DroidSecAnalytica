@@ -29,23 +29,8 @@ def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
 def get_apk_sample_record_by_sha256(sha256) -> List[Dict]:
     return run_query(f"SELECT * FROM apk_samples where sha256 = '{sha256}' ORDER BY apk_id")
 
-def get_apk_samples_sha256() -> List[Dict]:
+def get_samples_id_sha256() -> List[Dict]:
     return run_query("SELECT apk_id, sha256 FROM apk_samples ORDER BY apk_id")
-
-def get_apk_records_sha256(apk_id: Optional[int] = None) -> Optional[List[Tuple[int, str]]]:
-    query = """
-    SELECT a.apk_id, a.sha256
-    FROM apk_samples a
-    JOIN malware_ioc_threats b
-        ON a.sha256 = b.sha256
-    WHERE b.no_virustotal_data IS NULL
-    """
-    params = ()
-    if apk_id:
-        query += " AND a.apk_id >= %s"
-        params = (apk_id,)
-    query += " ORDER BY a.apk_id asc"
-    return run_query(query, params)
 
 def get_apk_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
     return next(iter(run_query("SELECT apk_id, sha256 FROM apk_samples WHERE apk_id = %s", (apk_id,))), None)
@@ -68,9 +53,18 @@ def get_apk_samples_by_md5(md5_list: List[str]) -> List[Dict]:
             matching_records.extend(records)
     return matching_records
 
-# Get the next unknown permission ID
 def get_next_unknown_permission_id() -> int:
+    # Get the next unknown permission ID
     query = "SELECT MAX(permission_id) FROM unknown_permissions"
     result = run_query(query)
     # Increment and return the next ID or start at 1 if table is empty
     return result[0][0] + 1 if result and result[0][0] is not None else 1
+
+def get_vt_scan_analysis_column_names():
+    query = "SHOW COLUMNS FROM vt_scan_analysis"
+    column_names = []
+    with db_conn.database_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(query)
+        column_names = [column[0] for column in cursor.fetchall()]
+    return column_names

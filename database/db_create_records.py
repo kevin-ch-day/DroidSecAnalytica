@@ -66,3 +66,10 @@ def create_analysis_record(analysis_name: str):
     params = (next_id, analysis_name, 'InProgress')
     run_query(query, params, query_type="insert")
     return next_id
+
+# Function to create vt_scan_analysis record
+def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:
+    query = "INSERT INTO vt_scan_analysis (analysis_id, apk_id)"
+    query += " VALUES (%s, %s)"
+    params = (analysis_id, apk_id)
+    return run_query(query, params)

@@ -1,7 +1,6 @@
 # vt_analysis.py
 
 from database import db_update_records, db_get_records, db_insert_records, db_create_records
-from utils import app_utils
 from permission_audit import save_permissions
 from . import vt_androguard, vt_requests
 
@@ -24,37 +23,8 @@ def analyze_hash_data():
     print("\nProcessing Hash Data...")
     for index in records:
         response = vt_requests.query_hash(index[1])
-        analysis_name = "Hash Data Analysis"
+        analysis_name = "Hash IOC Analysis"
         process_vt_response(response, analysis_name)
-
-def process_apk_sample(record):
-    print(f"Android APK ID: {record[0]} Hash: {record[1]}")
-    hash_value = record[1]  # hash value
-    response = vt_requests.query_hash(hash_value)
-    analysis_name = "Processing APK Sample"
-    process_vt_response(response, analysis_name)
-
-def run_analysis(iterative_mode=False):
-    try:
-        apk_records = db_get_records.get_apk_records_sha256()
-        if not apk_records:
-            print("No APK samples found in the database.")
-            return
-        
-        print("\nProcessing APK Samples")
-        wait_time = 4 * 60 if iterative_mode else 0
-        iteration = 0
-        for record in apk_records:
-            process_apk_sample(record)
-            if iterative_mode and iteration == 4:
-                iteration = 0
-                app_utils.pause_with_updates(wait_time)
-            else:
-                iteration += 1
-
-            #user_prompts.pause_until_keypress()
-    except Exception as e:
-        print(f"Error running the analysis: {e}")
 
 def process_vt_response(response, analysis_name):
     try:
@@ -126,7 +96,7 @@ def process_metadata(analysis_id, andro_data):
     
     # Attempt to insert the record into the database with error handling
     try:
-        db_insert_records.create_apk_analysis_records(
+        db_create_records.create_apk_analysis_records(
             analysis_id,
             sha256,
             package_name,
