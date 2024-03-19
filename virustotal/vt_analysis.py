@@ -1,6 +1,6 @@
 # vt_analysis.py
 
-from database import db_analysisRecords, db_get_records, db_insert_records
+from database import db_update_records, db_get_records, db_insert_records, db_create_records
 from utils import app_utils
 from permission_audit import save_permissions
 from . import vt_androguard, vt_requests
@@ -58,7 +58,7 @@ def run_analysis(iterative_mode=False):
 
 def process_vt_response(response, analysis_name):
     try:
-        analysis_id = db_analysisRecords.create_analysis_record(analysis_name)
+        analysis_id = db_create_records.create_analysis_record(analysis_name)
         print(f"Analysis ID: {analysis_id}")
         
         andro_data = vt_androguard.handle_androguard_response(response)
@@ -88,7 +88,7 @@ def process_vt_response(response, analysis_name):
             #json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
             #vt_utils.save_json_response(vt_data, json_filename)
 
-        db_analysisRecords.update_status_to_completed(analysis_id)
+        db_update_records.update_status_to_completed(analysis_id)
         #user_prompts.pause_until_keypress()
         print()
 

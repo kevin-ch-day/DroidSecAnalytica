@@ -99,7 +99,7 @@ def handle_response_data(response):
             print("Invalid choice. Please enter a number between 0 and 5.")
 
 def display_androguard_data(response):
-    androguard = vt_androguard.androguard_data(response)
+    androguard = vt_androguard.handle_androguard_response(response)
     if androguard:
         while True:
             menu_title = "Androguard Data"
