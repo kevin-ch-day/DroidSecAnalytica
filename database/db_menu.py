@@ -1,7 +1,8 @@
 # db_menu.py
 
-from utils import app_display, user_prompts, logging_utils
-from . import db_conn, db_info, db_management
+import mysql.connector
+from utils import logging_utils, app_display, user_prompts
+from . import db_conn, db_config, db_management
 
 # Database management menu
 def database_menu():
@@ -39,6 +40,73 @@ def database_menu():
 
         input("\nPress any key to continue.")
 
+def execute_query(query, params=None, fetch=False):
+    try:
+        return db_conn.execute_query(query, params=params, fetch=fetch)
+    except mysql.connector.Error as e:
+        logging_utils.log_error("Database query failed", e)
+        return []
+
+def disk_usage(min_size_mb: float = 0.0):
+    query = """
+    SELECT table_name AS 'Table',
+        ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
+        ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
+    FROM information_schema.TABLES
+    WHERE table_schema = %s
+    GROUP BY table_name
+    HAVING `Total Size in MB` >= %s
+    ORDER BY `Total Size in MB` DESC;
+    """
+    return execute_query(query, params=(db_config.DB_DATABASE, min_size_mb), fetch=True)
+
+def database_summary():
+    try:
+        with db_conn.database_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT VERSION();")
+            version = cursor.fetchone()
+            cursor.execute("SHOW STATUS LIKE 'Uptime';")
+            uptime = cursor.fetchone()
+            cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
+            connections = cursor.fetchone()
+            return version, uptime, connections
+    except mysql.connector.Error as e:
+        logging_utils.log_error("Error fetching database information", e)
+        return None
+
+def thread_summary():
+    query = """
+    SELECT VARIABLE_NAME AS 'Metric', VARIABLE_VALUE AS 'Value'
+    FROM information_schema.GLOBAL_STATUS
+    WHERE VARIABLE_NAME IN ('Threads_connected', 'Threads_running', 'Threads_cached', 'Threads_created', 'Threads_waiting');
+    """
+    return execute_query(query, fetch=True)
+
+def get_query_statistics():
+    query = "SHOW STATUS LIKE 'Queries';"
+    return execute_query(query, fetch=True)
+
+def tables_summary():
+    result = execute_query("SHOW TABLES;", fetch=True)
+    table_info = []
+    for (table_name,) in result:
+        num_columns = len(execute_query(f"SHOW COLUMNS FROM {table_name};", fetch=True))
+        num_rows = execute_query(f"SELECT COUNT(*) FROM {table_name};", fetch=True)[0][0]
+
+        size_query = """
+        SELECT table_schema 'Database', ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
+        FROM information_schema.TABLES
+        WHERE table_schema = %s AND table_name = %s
+        GROUP BY table_schema, table_name;
+        """
+        size_result = execute_query(size_query, params=(db_config.DB_DATABASE, table_name), fetch=True)
+        size_mb = size_result[0][1] if size_result else 0.0
+
+        table_info.append((table_name, num_columns, num_rows, size_mb))
+    return table_info
+
 def show_table_information():
     try:
         table_data = db_management.list_tables()
@@ -48,21 +116,21 @@ def show_table_information():
 
 def show_query_statistics():
     try:
-        query_stats = db_info.get_query_statistics()
+        query_stats = get_query_statistics()
         app_display.display_query_statistics(query_stats)
     except Exception as e:
         logging_utils.log_error("Error displaying query statistics", e)
 
 def display_disk_usage():
     try:
-        disk_usage = db_info.get_disk_usage()
+        disk_usage = disk_usage()
         app_display.display_disk_usage(disk_usage)
     except Exception as e:
         logging_utils.log_error("Error displaying disk usage", e)
 
 def display_thread_information():
     try:
-        thread_info = db_info.get_thread_information()
+        thread_info = thread_summary()
         app_display.display_thread_information(thread_info)
     except Exception as e:
         logging_utils.log_error("Error displaying thread information", e)
