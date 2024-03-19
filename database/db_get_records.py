@@ -53,13 +53,6 @@ def get_apk_samples_by_md5(md5_list: List[str]) -> List[Dict]:
             matching_records.extend(records)
     return matching_records
 
-def get_next_unknown_permission_id() -> int:
-    # Get the next unknown permission ID
-    query = "SELECT MAX(permission_id) FROM unknown_permissions"
-    result = run_query(query)
-    # Increment and return the next ID or start at 1 if table is empty
-    return result[0][0] + 1 if result and result[0][0] is not None else 1
-
 def get_vt_scan_analysis_columns():
     query = "SHOW COLUMNS FROM vt_scan_analysis"
     column_names = []

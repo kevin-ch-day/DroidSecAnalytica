@@ -22,17 +22,13 @@ def run_query(sql: str, params: Optional[tuple] = None, is_select: bool = True) 
             cursor.close()
         return []
 
-def get_permission_id_by_name(permission_adt: str) -> Optional[int]:
-    result = run_query("SELECT permission_id FROM android_permissions WHERE constant_value = %s", (permission_adt.name,))
-    return result[0][0] if result else None
+def get_permission_record_by_id(perm_id: int) -> Optional[Dict]:
+    result = run_query("SELECT * FROM android_permissions WHERE permission_id = %s", (perm_id,))
+    return result[0] if result else None
 
 def get_permission_record_by_name(perm_name: str) -> Optional[Dict]:
     result = run_query("SELECT * FROM android_permissions WHERE constant_value = %s", (perm_name,))
     return result[0] if result else None
-
-def get_unknown_permission_id(perm_name: str) -> Optional[int]:
-    result = run_query("SELECT permission_id FROM android_permissions_unknown WHERE constant_value = %s", (perm_name,))
-    return result[0][0] if result else None
 
 def get_unknown_permission_record_by_id(perm_id: int) -> Optional[Dict]:
     result = run_query("SELECT * FROM android_permissions_unknown WHERE permission_id = %s", (perm_id,))
@@ -92,7 +88,6 @@ def check_permission_record(id, short_desc, long_desc, perm_type, table_name):
 
     except Exception as e:
         print(f"An error occurred while checking the permission record: {e}")
-
 
 def retrieve_permission_record(id, table_name):
     result = run_query(f"SELECT andro_short_desc, andro_long_desc, andro_type FROM {table_name} WHERE permission_id = %s", (id,))
