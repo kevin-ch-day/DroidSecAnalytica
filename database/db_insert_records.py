@@ -119,28 +119,6 @@ def insert_vt_providers(analysis_id: int, provider_name: str, apk_id: int) -> Op
     params = (analysis_id, provider_name, apk_id)
     return execute_sql(query, params)
 
-# Get the next unknown permission ID
-def get_next_unknown_permission_id() -> int:
-    query = "SELECT MAX(permission_id) FROM unknown_permissions"
-    result = execute_sql(query, should_fetch=True)
-    # Increment and return the next ID or start at 1 if table is empty
-    return result[0][0] + 1 if result and result[0][0] is not None else 1
-
-# Create a new apk_analysis record
-def create_apk_analysis_records(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int , target_sdk: int) -> Optional[bool]:
-    query = """
-    INSERT INTO apk_analysis (
-            analysis_id,
-            sha256_hash,
-            package_name,
-            main_activity,
-            target_min_version,
-            target_sdk_version)
-    VALUES (%s, %s, %s, %s, %s , %s)
-    """
-    params = (id, sha256, package_name, main_activity, min_sdk, target_sdk)
-    return execute_sql(query, params)
-
 # Update counts in apk_analysis table
 def update_apk_analysis_counts(analysis_id: int, receivers: int, activities: int, services: int, libraries: int) -> Optional[bool]:
     query = """
@@ -153,10 +131,3 @@ def update_apk_analysis_counts(analysis_id: int, receivers: int, activities: int
     """
     params = (receivers, activities, services, libraries, analysis_id)
     return execute_sql(query, params)
-
-def create_apk_sample_record(file_name, file_size, md5, sha1, sha256):
-    query = """
-    INSERT INTO apk_samples (file_name, file_size, md5, sha1, sha256)
-    VALUES (%s, %s, %s, %s, %s)
-    """
-    return execute_sql(query, (file_name, file_size, md5, sha1, sha256))

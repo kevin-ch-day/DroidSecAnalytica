@@ -1,6 +1,5 @@
 
-from utils import user_prompts, logging_utils
-from . import vt_requests
+from utils import logging_utils
 
 def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")

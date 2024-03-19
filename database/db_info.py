@@ -6,8 +6,8 @@ from utils import logging_utils
 from . import db_conn
 from database.db_config import DB_DATABASE
 
-# Get disk usage  
-def get_disk_usage(min_size_mb: float = 0.0):
+# Disk usage  
+def disk_usage(min_size_mb: float = 0.0):
     try:
         query = """
         SELECT table_name AS 'Table',
@@ -25,24 +25,28 @@ def get_disk_usage(min_size_mb: float = 0.0):
         logging_utils.log_error("Error fetching disk usage", e)
         return []
 
-# Get database information
-def get_database_info():
+# Database summary
+def database_summary():
     try:
         with db_conn.database_connection() as conn:
             cursor = conn.cursor()
+            
             cursor.execute("SELECT VERSION();")
             version = cursor.fetchone()
+            
             cursor.execute("SHOW STATUS LIKE 'Uptime';")
             uptime = cursor.fetchone()
+            
             cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
             connections = cursor.fetchone()
+
             return version, uptime, connections
     except mysql.connector.Error as e:
         logging_utils.log_error("Error fetching database information", e)
         return None
 
 # Thread information
-def get_thread_information():
+def thread_summary():
     try:
         sql = "SELECT VARIABLE_NAME AS 'Metric', VARIABLE_VALUE AS 'Value' "
         sql += "FROM information_schema.GLOBAL_STATUS "
@@ -63,7 +67,7 @@ def get_query_statistics():
         return []
     
 # Get database table info
-def database_tables_info():
+def tables_summary():
     try:
         result = db_conn.execute_query("SHOW TABLES;", fetch=True)
         table_info = []

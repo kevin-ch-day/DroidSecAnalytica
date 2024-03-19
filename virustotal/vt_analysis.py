@@ -1,9 +1,60 @@
 # vt_analysis.py
 
-from database import db_analysisRecords, db_recordInserts, db_update_samples
+from database import db_analysisRecords, db_get_records, db_insert_records
 from utils import app_utils
 from permission_audit import save_permissions
 from . import vt_androguard, vt_requests
+
+def analyze_hash_data():
+    hash_file_path = "input\\Hash-Data.txt"
+    hashes = []
+
+    print("\nRead Hash Data...")
+    with open(hash_file_path, 'r') as file:
+        for line in file:
+            hash_value = line.strip()
+            if hash_value:
+                hashes.append(hash_value)
+
+    records = db_get_records.get_apk_samples_by_md5(hashes)
+    if not records:
+        print("Error: no records returned from the database .")
+        return
+    
+    print("\nProcessing Hash Data...")
+    for index in records:
+        response = vt_requests.query_hash(index[1])
+        analysis_name = "Hash Data Analysis"
+        process_vt_response(response, analysis_name)
+
+def process_apk_sample(record):
+    print(f"Android APK ID: {record[0]} Hash: {record[1]}")
+    hash_value = record[1]  # hash value
+    response = vt_requests.query_hash(hash_value)
+    analysis_name = "Processing APK Sample"
+    process_vt_response(response, analysis_name)
+
+def run_analysis(iterative_mode=False):
+    try:
+        apk_records = db_get_records.get_apk_records_sha256()
+        if not apk_records:
+            print("No APK samples found in the database.")
+            return
+        
+        print("\nProcessing APK Samples")
+        wait_time = 4 * 60 if iterative_mode else 0
+        iteration = 0
+        for record in apk_records:
+            process_apk_sample(record)
+            if iterative_mode and iteration == 4:
+                iteration = 0
+                app_utils.pause_with_updates(wait_time)
+            else:
+                iteration += 1
+
+            #user_prompts.pause_until_keypress()
+    except Exception as e:
+        print(f"Error running the analysis: {e}")
 
 def process_vt_response(response, analysis_name):
     try:
@@ -18,20 +69,20 @@ def process_vt_response(response, analysis_name):
 
         vt_data = vt_requests.parse_virustotal_response(response)
         if vt_data:
-            apk_id = db_update_samples.get_apk_id_by_sha256(andro_data.get_sha256())
+            apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
 
             print(f"\nCreating Virustotal engine record..")
-            db_recordInserts.create_vt_engine_record(analysis_id, apk_id) 
+            db_insert_records.create_vt_engine_record(analysis_id, apk_id) 
 
             summary_stat = vt_data["Analysis Result"]["summary_statistics"]
             #print(f"{summary_stat}\n") # DEBUGGING
             print(f"Adding summary stats.")
-            db_recordInserts.update_vt_engine_detection(analysis_id, summary_stat)
+            db_insert_records.update_vt_engine_detection(analysis_id, summary_stat)
    
             vendor_data = vt_data["Analysis Result"]["engine_detection"]
             #print(f"{vendor_data}") # DEBUGGING
             print(f"Adding engine results.")
-            db_recordInserts.update_vt_engine_records(analysis_id, vendor_data)
+            db_insert_records.update_vt_engine_records(analysis_id, vendor_data)
 
             # Saving json response
             #json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
@@ -45,7 +96,7 @@ def process_vt_response(response, analysis_name):
         print(f"Error processing APK samples: {e}")
 
 def process_androguard_data(analysis_id, andro_data):
-    apk_id = db_update_samples.get_apk_id_by_sha256(andro_data.get_sha256())
+    apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
 
     process_metadata(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())
@@ -75,7 +126,7 @@ def process_metadata(analysis_id, andro_data):
     
     # Attempt to insert the record into the database with error handling
     try:
-        db_recordInserts.create_apk_analysis_records(
+        db_insert_records.create_apk_analysis_records(
             analysis_id,
             sha256,
             package_name,
@@ -101,7 +152,7 @@ def process_activities(analysis_id, apk_id, activities):
     if activities:
         for activity in activities:
             #print(f"- {activity}") # Debugging
-            db_recordInserts.insert_vt_activities(analysis_id, activity, apk_id)
+            db_insert_records.insert_vt_activities(analysis_id, activity, apk_id)
     else:
         print("No data.")
 
@@ -111,7 +162,7 @@ def process_services(analysis_id, apk_id, services):
     if services:
         for service in services:
             #print(f"- {service}") # Debugging
-            db_recordInserts.insert_vt_services(analysis_id, service, apk_id)
+            db_insert_records.insert_vt_services(analysis_id, service, apk_id)
     else:
         print("No data.")
 
@@ -121,7 +172,7 @@ def process_receivers(analysis_id, apk_id, receivers):
     if receivers:
         for receiver in receivers:
             #print(f"- {receiver}") # Debugging
-            db_recordInserts.insert_vt_receivers(analysis_id, receiver, apk_id)
+            db_insert_records.insert_vt_receivers(analysis_id, receiver, apk_id)
     else:
         print("No data.")
 
@@ -131,57 +182,6 @@ def process_providers(analysis_id, apk_id, providers):
     if providers:
         for index in providers:
             #print(f"- {receiver}") # Debugging
-            db_recordInserts.insert_vt_providers(analysis_id, index, apk_id)
+            db_insert_records.insert_vt_providers(analysis_id, index, apk_id)
     else:
         print("No data.")
-
-def analyze_hash_data():
-    hash_file_path = "input\\Hash-Data.txt"
-    hashes = []
-
-    print("\nRead Hash Data...")
-    with open(hash_file_path, 'r') as file:
-        for line in file:
-            hash_value = line.strip()
-            if hash_value:
-                hashes.append(hash_value)
-
-    records = db_update_samples.get_apk_samples_by_md5(hashes)
-    if not records:
-        print("Error: no records returned from the database .")
-        return
-    
-    print("\nProcessing Hash Data...")
-    for index in records:
-        response = vt_requests.query_hash(index[1])
-        analysis_name = "Hash Data Analysis"
-        process_vt_response(response, analysis_name)
-
-def process_apk_sample(record):
-    print(f"Android APK ID: {record[0]} Hash: {record[1]}")
-    hash_value = record[1]  # hash value
-    response = vt_requests.query_hash(hash_value)
-    analysis_name = "Processing APK Sample"
-    process_vt_response(response, analysis_name)
-
-def run_analysis(iterative_mode=False):
-    try:
-        apk_records = db_update_samples.get_apk_records_sha256()
-        if not apk_records:
-            print("No APK samples found in the database.")
-            return
-        
-        print("\nProcessing APK Samples")
-        wait_time = 4 * 60 if iterative_mode else 0
-        iteration = 0
-        for record in apk_records:
-            process_apk_sample(record)
-            if iterative_mode and iteration == 4:
-                iteration = 0
-                app_utils.pause_with_updates(wait_time)
-            else:
-                iteration += 1
-
-            #user_prompts.pause_until_keypress()
-    except Exception as e:
-        print(f"Error running the analysis: {e}")

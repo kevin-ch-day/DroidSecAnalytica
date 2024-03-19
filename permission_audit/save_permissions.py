@@ -1,4 +1,4 @@
-from database import db_permissions, db_recordInserts
+from database import db_insert_records, db_permissions
 from utils import logging_utils, user_prompts
 
 # Setup logging
@@ -10,7 +10,7 @@ def save_detected_permission(analysis_id, apk_id, permission_data):
         perm_id = db_permissions.get_permission_id_by_name(permission_data)
         if perm_id:
             print(f"{permission_data.name} [{permission_data.permission_type}]")
-            db_recordInserts.insert_vt_permission(analysis_id, apk_id, perm_id, None)
+            db_insert_records.insert_vt_permission(analysis_id, apk_id, perm_id, None)
         else:
             process_unknown_permission(analysis_id, apk_id, permission_data)
 
@@ -48,6 +48,6 @@ def prompt_and_insert_new_permission(perm_adt, analysis_id, apk_id):
     return record[0]
 
 def save_unknown_permission(analysis_id, apk_id, permission_id, permission_name):
-    if not db_recordInserts.insert_vt_permission(analysis_id, apk_id, None, permission_id):
+    if not db_insert_records.insert_vt_permission(analysis_id, apk_id, None, permission_id):
         logging_utils.log_error(f"[!!] Failed to insert Analysis ID: {analysis_id} APK ID: {apk_id} Permission: {permission_name}")
         user_prompts.pause_until_keypress()

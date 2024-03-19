@@ -1,59 +1,21 @@
 # DBFunct_ApkRecords.py
 
 from typing import Optional, Tuple, List, Dict
-from . import db_conn as dbConnect
-from utils import logging_utils, hash_utils
+from . import db_conn
+from utils import logging_utils
 
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
     try:
-        return dbConnect.execute_query(sql, params, fetch=True) or []
+        return db_conn.execute_query(sql, params, fetch=True) or []
     except Exception as e:
         logging_utils.log_error(f"Error executing SQL query: {sql}", e)
         return []
-
 
 def get_apk_samples() -> List[Dict]:
     return run_query("SELECT * FROM apk_samples ORDER BY apk_id")
 
 def get_malware_hash_samples() -> List[Dict]:
     return run_query("SELECT * FROM malware_ioc_threats")
-
-def update_apk_record(record_id: int, data: Dict) -> None:
-    updates = ", ".join([f"{k} = %s" for k in data.keys()])
-    values = list(data.values()) + [record_id]
-    query = f"UPDATE apk_samples SET {updates} WHERE apk_id = %s"
-    dbConnect.execute_query(query, tuple(values), fetch=False)
-
-def get_unanalyzed_malware_ioc_threats():
-    query = """
-    SELECT * FROM malware_ioc_threats x
-    WHERE x.virustotal_url IS NULL AND x.no_virustotal_data IS NULL
-    ORDER BY x.no_virustotal_data ASC
-    """
-    return run_query(query)
-
-def update_malware_ioc_vt_url(id, url):
-    query = "UPDATE malware_ioc_threats SET virustotal_url = %s WHERE id = %s"
-    return run_query(query, (url, id))
-
-def hash_query_alpha(hashes):
-    """Query for each hash and collect matching and non-matching hashes."""
-    matching_records = []
-    non_matching_hashes = set(hashes)
-    for hash_str in hashes:
-        hash_type = hash_utils.determine_hash_type(hash_str)
-        if hash_type:
-            query = f"""
-                SELECT a.apk_id, a.md5, a.sha256, a.source, b.name_1, b.name_2, b.virustotal_label, b.month, b.year
-                FROM apk_samples a
-                JOIN malware_ioc_threats b ON a.sha256 = b.sha256
-                WHERE a.{hash_type} = %s
-            """
-            results = run_query(query, (hash_str,))
-            if results:
-                matching_records.extend(results)
-                non_matching_hashes.remove(hash_str)
-    return matching_records, non_matching_hashes
 
 def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
     sql = "SELECT apk_id FROM apk_samples WHERE sha256 = %s"
@@ -105,3 +67,10 @@ def get_apk_samples_by_md5(md5_list: List[str]) -> List[Dict]:
         if records:
             matching_records.extend(records)
     return matching_records
+
+# Get the next unknown permission ID
+def get_next_unknown_permission_id() -> int:
+    query = "SELECT MAX(permission_id) FROM unknown_permissions"
+    result = run_query(query)
+    # Increment and return the next ID or start at 1 if table is empty
+    return result[0][0] + 1 if result and result[0][0] is not None else 1

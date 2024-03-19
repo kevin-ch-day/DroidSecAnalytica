@@ -1,7 +1,7 @@
 # vt_menu.py
 
 import os
-from . import vt_utils, vt_androguard, vt_analysis, vt_requests
+from . import vt_display, vt_androguard, vt_analysis, vt_requests, vt_utils
 from utils import user_prompts, app_display
 
 def virustotal_menu():
@@ -20,7 +20,7 @@ def virustotal_menu():
         if user_choice == '0':
             break
         
-        # submit a sample to virustotal.com
+        # submit to virustotal.com
         elif user_choice == '1':
             menu_title = "VirusTotal Submission:"
             menu_options = {1: "APK", 2: "Hash"}
@@ -31,17 +31,19 @@ def virustotal_menu():
             if choice == '0':
                 return
             
-            elif choice == '1': # Submit APK
+            # Submit APK
+            elif choice == '1':
                 response = submit_apk()
                 if response:
                     handle_response_data(response)
             
-            elif choice == '2': # Submit Hash
+            # Submit Hash
+            elif choice == '2':
                 response = submit_hash()
                 if response:
                     handle_response_data(response)
 
-        # analysis process alpha
+        # analysis hash data input
         elif user_choice == '2':
             vt_analysis.analyze_hash_data()
         
@@ -76,21 +78,22 @@ def handle_response_data(response):
         if choice == "0":
             return
         
-        elif choice == "1":
-            vt_analysis.display_report(report_data)
+        elif choice == "1": # display report
+            # vt_analysis.display_report(report_data)
+            print("TODO: display virustotal report [!!]")
         
-        elif choice == "2":
-            vt_analysis.write_report_to_file(report_data)
-            print("Report saved to file.")
+        elif choice == "2": # save report
+            # vt_analysis.write_report_to_file(report_data) # 
+            print("TODO: save virustotal report [!!]")
         
         elif choice == "3":
             display_androguard_data(response)
         
         elif choice == "4":
-            vt_utils.view_summary_statistics(report_data)
+            vt_display.display_summary_statistics(report_data)
         
         elif choice == "5":
-            vt_utils.view_detection_breakdown(report_data)
+            vt_display.display_detection_breakdown(report_data)
         
         else:
             print("Invalid choice. Please enter a number between 0 and 5.")
@@ -115,19 +118,19 @@ def display_androguard_data(response):
                 break
             
             elif choice == "1":
-                vt_utils.display_main_activity(androguard)
+                vt_display.display_main_activity(androguard)
             
             elif choice == "2":
-                vt_utils.display_manifest_components(androguard)
+                vt_display.display_manifest_components(androguard)
             
             elif choice == "3":
-                vt_utils.display_certificate_details(androguard)
+                vt_display.display_certificate_details(androguard)
             
             elif choice == "4":
-                vt_utils.display_permissions(androguard)
+                vt_display.display_permissions(androguard)
             
             elif choice == "5":
-                vt_utils.display_intent_filters(androguard)
+                vt_display.display_intent_filters(androguard)
             
             else:
                 print("Invalid choice.")
