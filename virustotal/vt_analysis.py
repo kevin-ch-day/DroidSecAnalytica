@@ -14,13 +14,13 @@ def analyze_hash_data():
             if hash_value:
                 hashes.append(hash_value)
 
+    print(f"# hashes {len(hashes)}")
+
     records = db_get_records.get_apk_samples_by_md5(hashes)
     print(f"# Record returned: {len(records)}")
     if not records:
         print("[!!] Error: no database records")
         return
-    
-    exit()
     
     print("\nProcessing Hash Data...")
     for index in records:
@@ -56,7 +56,6 @@ def process_vt_response(response, analysis_name, sample_type):
             #print(f"{vendor_data}") # DEBUGGING
             print(f"Adding engine results.")
             db_update_records.update_vt_engine_column(analysis_id, vendor_data)
-            exit()
 
             # Saving json response
             #json_filename = "output\\" + andro_data.get_sha256() + "_json_data.txt"
