@@ -4,34 +4,25 @@ from . import vt_report_utils
 
 def print_summary_intro(report):
     vt_report_utils.format_section_title("Report Overview")
-    # Dynamically determining the overall status based on the report's findings.
+
     malicious_count = report.get('Analysis Result', {}).get('summary_statistics', {}).get('Malicious', 0)
-    status = 'Suspicious' if malicious_count > 0 else 'Clean'
-
-    # Crafting a detailed and engaging introduction to the report.
-    intro_message = ("Welcome to the VirusTotal Analysis Report. This document provides a comprehensive "
-                     "assessment of the analyzed file, employing the collective intelligence of numerous "
-                     "antivirus engines and datasets to gauge the potential security risks.\n")
+    undetected_count = report.get('Analysis Result', {}).get('summary_statistics', {}).get('Undetected', 0)
     
-    # Elaborating on the significance of the overall status, with a focus on actionable insights.
-    status_message = f"Overall File Status: {status}"
-    if malicious_count > 0:
-        status_detail = (f"This file has been flagged as Suspicious by {malicious_count} antivirus engines, "
-                         "indicating potential harmful activities or characteristics commonly associated with malware.")
+    status = 'Suspicious' if malicious_count else 'Clean'
+
+    intro_message = "VirusTotal Analysis Report."
+    status_message = f"Overall File Status: {status}."
+    
+    if status == 'Suspicious':
+        status_detail = (f"The analysis flagged this file as suspicious based on detections from {malicious_count} antivirus engines. "
+                         f"Conversely, {undetected_count} engines did not identify any threats.")
     else:
-        status_detail = ("No significant threats have been detected, suggesting the file is generally considered Safe. "
-                         "However, it's essential to remain cautious as new threats can emerge.")
-    
-    # Setting expectations for the detailed analysis that follows.
-    follow_up = ("Detailed findings, including specific antivirus engine results and detected threats, are "
-                 "presented in the subsequent sections to provide a thorough understanding of the file's security posture.")
+        status_detail = "No significant threats were detected by the antivirus engines, suggesting the file is generally considered safe."
 
-    # Printing the compiled messages.
-    print(intro_message)
-    print(status_message)
-    print(status_detail)
-    print("\n" + follow_up)
+    follow_up = "Below, there is a detailed breakdown of the findings, including insights into the antivirus engine results and any identified threats."
 
+    # Combining and printing the constructed message parts for a smooth introduction.
+    print("\n".join([intro_message, status_message, status_detail, "\n" + follow_up]))
 
 def print_analysis_result(report):
     # Check for the presence of 'Analysis Result' in the report for safety.
@@ -50,30 +41,47 @@ def print_other_sections(report):
     excluded_keys = ["Analysis Result"]
     for key, value in report.items():
         if key not in excluded_keys:
+            # Check if the value is a dictionary
             if isinstance(value, dict):
-                vt_report_utils.print_dictionary_items(f"Details: {key}", value)
+                print_nested_dictionary(key, value)
+            # Check if the value is a list
             elif isinstance(value, list) and value:
-                vt_report_utils.print_list_items(f"List: {key}", value)
+                print_list_section(key, value)
+            # Print individual key-value pairs
             else:
-                # Improved formatting for individual key-value pairs.
-                vt_report_utils.format_section_title(key)
-                print(value)
+                print_key_value_pair(key, value)
+
+def print_nested_dictionary(title, dictionary, level=1):
+    """Recursively prints nested dictionaries with proper indentation."""
+    vt_report_utils.format_section_title(title)
+    for key, value in dictionary.items():
+        # Add indentation based on the level of nesting
+        indentation = "  " * level
+        if isinstance(value, dict):
+            print_nested_dictionary(f"{indentation}{key}", value, level + 1)
+        else:
+            print(f"{indentation}{key}: {value}")
+
+def print_list_section(title, list_items):
+    """Prints items of a list under a given title."""
+    vt_report_utils.format_section_title(title)
+    for item in list_items:
+        print(f"- {item}")
+
+def print_key_value_pair(key, value):
+    """Prints a single key-value pair."""
+    print(f"{key}: {value}")
+
 
 def print_conclusion():
     # Further enhanced conclusion with more specific actionable insights and recommendations.
     vt_report_utils.format_section_title("Conclusion")
     
-    # Detailed advice based on analysis status.
-    print("The analysis has concluded, offering a detailed perspective on the security implications associated with the file in question. "
-          "Based on the findings, the following recommendations are provided:")
-    
-    # Conditionally render advice based on the overall status, which could be extended with more conditions as needed.
+    print("Based on the findings, the following recommendations are provided:")
     if 'Suspicious' in globals().get('status', 'Clean'):
-        print("- The file has been marked as Suspicious by one or more antivirus engines. "
-              "It's strongly advised to not proceed with its execution or distribution until further manual verification is conducted. ")
+        print("- [Suspicions] The file has been marked as Suspicious by one or more antivirus engines. "
+              "It's advised to not proceed with its execution or distribution. ")
     else:
-        print("- The file appears to be Clean with no significant threats detected by the antivirus engines. ")
+        print("- [Clean] No significant threats detected by the antivirus engines. ")
     
-    # General advice applicable in all scenarios.
-    print("\nRegardless of the file's current assessment, maintaining an up-to-date cybersecurity posture is crucial. ")
 

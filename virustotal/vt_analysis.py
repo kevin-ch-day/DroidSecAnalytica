@@ -2,6 +2,7 @@
 
 from database import db_update_records, db_get_records, db_create_records
 from utils import user_prompts
+from reporting import vt_report_sections
 from . import vt_androguard, vt_requests, vt_processing, vt_utils
 
 def analyze_hash_data():
@@ -35,12 +36,12 @@ def load_hashes_from_file(filepath):
 def query_database_for_records(hashes):
     print("\n[Step 2] Querying Database for Records...")
     records = db_get_records.get_apk_samples_by_md5(hashes)
-    if records:
+    if not records:
+        print("[Warning] No matching records found in the database.")
+        return []
+    else:
         print(f"Found {len(records)} record(s) matching the hash(es).")
         return records
-    else:
-        print("[Warning] No matching records found in the database.")
-    return []
 
 def process_hashes(records):
     print("\n[Step 3] Processing Hash Data...")
@@ -59,13 +60,19 @@ def process_vt_response(response, analysis_name, sample_type, save_json, pause_p
     print("\n[Processing] VirusTotal Response...")
     try:
         analysis_id = create_analysis_record(analysis_name, sample_type)
-        andro_data = handle_androguard_response(response)
-        if andro_data:
-            vt_processing.process_androguard_data(analysis_id, andro_data)
-        else:
+        andro_data = vt_androguard.handle_androguard_response(response)
+        if not andro_data:
             print("No Androguard data returned...")
+        else:
+            vt_processing.process_androguard_data(analysis_id, andro_data)
         
-        vt_data = handle_vt_response(response, analysis_id, andro_data, save_json)
+        vt_data = parse_virustotal_response(response)
+        if vt_data:
+            process_vt_data(analysis_id, andro_data, vt_data, save_json)
+            create_vt_report(vt_data)
+
+        else:
+            print("No VirusTotal data found in response.")
         finalize_analysis(analysis_id, pause_process)
     except Exception as e:
         print(f"Error processing APK samples: {e}")
@@ -74,20 +81,6 @@ def create_analysis_record(analysis_name, sample_type):
     analysis_id = db_create_records.create_analysis_record(analysis_name, sample_type)
     print(f"Analysis ID: {analysis_id}")
     return analysis_id
-
-def handle_androguard_response(response):
-    andro_data = vt_androguard.handle_androguard_response(response)
-    if not andro_data:
-        print("No Androguard data returned...")
-    return andro_data
-
-def handle_vt_response(response, analysis_id, andro_data, save_json):
-    vt_data = parse_virustotal_response(response)
-    if vt_data:
-        process_vt_data(analysis_id, andro_data, vt_data, save_json)
-    else:
-        print("No VirusTotal data found in response.")
-    return vt_data
 
 def process_vt_data(analysis_id, andro_data, vt_data, save_json):
     apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
@@ -144,3 +137,6 @@ def parse_virustotal_response(response):
 def parse_engine_detection(attributes):
     detailed_breakdown = attributes.get('last_analysis_results', {})
     return [[engine, data.get('result', 'N/A')] for engine, data in sorted(detailed_breakdown.items())]
+
+def create_vt_report(vt_data):
+    if vt_data:
