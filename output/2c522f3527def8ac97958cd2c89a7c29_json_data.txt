@@ -1,0 +1,181 @@
+{
+    "Report URL": "https://www.virustotal.com/api/v3/files/889392ed44a613bb3618f6b9a05a663f801c9cd7086ff8d3d7531c3bc57d97be",
+    "Size": 282607,
+    "Formatted Size": "275.98 KB",
+    "MD5": "2c522f3527def8ac97958cd2c89a7c29",
+    "SHA1": "0dab200e6a6d81a80dadd13723bfa4d0a20bcc1a",
+    "SHA256": "889392ed44a613bb3618f6b9a05a663f801c9cd7086ff8d3d7531c3bc57d97be",
+    "Last Submission Date": "11:49:19 PM 03-17-2024",
+    "Last Analysis Date": "02:03:41 PM 05-23-2023",
+    "Other Names": [
+        "0dab200e6a6d81a80dadd13723bfa4d0a20bcc1a.apk",
+        "2c1806c8-f97c-11ed-b017-8c1cda40b87e.apk",
+        "2c522f3527def8ac97958cd2c89a7c29.apk",
+        "FlashPlayer.apk",
+        "apknew_268.apk",
+        "covid-19.apk",
+        "mar_CovidAnubis",
+        "mar_CovidAnubis.apk",
+        "march_CovidCerberus",
+        "march_CovidCerberus.apk",
+        "output.153111914.txt"
+    ],
+    "Analysis Result": {
+        "summary_statistics": {
+            "Malicious": 36,
+            "Suspicious": 0,
+            "Undetected": 28,
+            "Harmless": 0,
+            "Timeout": 0,
+            "Confirmed-timeout": 0,
+            "Failure": 0,
+            "Type-unsupported": 11
+        },
+        "engine_detection": [
+            [
+                "AVG",
+                "Android:Banker-SZ [Trj]"
+            ],
+            [
+                "AhnLab-V3",
+                "Trojan/Android.Banker.873381"
+            ],
+            [
+                "Alibaba",
+                "TrojanSpy:Android/Anubis.cdc926d4"
+            ],
+            [
+                "Antiy-AVL",
+                "Trojan/Generic.ASMalwAD.3A"
+            ],
+            [
+                "Avast",
+                "Android:Banker-SZ [Trj]"
+            ],
+            [
+                "Avast-Mobile",
+                "Android:Evo-gen [Trj]"
+            ],
+            [
+                "Avira",
+                "ANDROID/Spy.Banker.CGXA.Gen"
+            ],
+            [
+                "BitDefenderFalx",
+                "Android.Trojan.Banker.VQ"
+            ],
+            [
+                "CAT-QuickHeal",
+                "Android.Anubis.GEN24512"
+            ],
+            [
+                "ClamAV",
+                "Andr.Trojan.Anubis-6692604-3"
+            ],
+            [
+                "Cynet",
+                "Malicious (score: 99)"
+            ],
+            [
+                "Cyren",
+                "AndroidOS/Banker.AA.gen!Eldorado"
+            ],
+            [
+                "DrWeb",
+                "Android.BankBot.670.origin"
+            ],
+            [
+                "ESET-NOD32",
+                "a variant of Android/Spy.Banker.AOG"
+            ],
+            [
+                "F-Secure",
+                "Malware.ANDROID/Spy.Banker.CGXA.Gen"
+            ],
+            [
+                "Fortinet",
+                "Android/Banker.RM!tr.spy"
+            ],
+            [
+                "Google",
+                "Detected"
+            ],
+            [
+                "Ikarus",
+                "Trojan-Banker.AndroidOS.Anubis"
+            ],
+            [
+                "K7GW",
+                "Trojan ( 0053b5f91 )"
+            ],
+            [
+                "Kaspersky",
+                "HEUR:Trojan-Banker.AndroidOS.Anubis.n"
+            ],
+            [
+                "Lionic",
+                "Trojan.AndroidOS.Anubis.C!c"
+            ],
+            [
+                "MAX",
+                "malware (ai score=100)"
+            ],
+            [
+                "MaxSecure",
+                "Android.Android.WIN32.Anubis.n"
+            ],
+            [
+                "McAfee",
+                "Generic .la"
+            ],
+            [
+                "McAfee-GW-Edition",
+                "Generic trojan.la"
+            ],
+            [
+                "Microsoft",
+                "TrojanSpy:AndroidOS/Anubis.A!MTB"
+            ],
+            [
+                "NANO-Antivirus",
+                "Trojan.Android.BankBot.fjpsxy"
+            ],
+            [
+                "Sophos",
+                "Andr/Banker-HAI"
+            ],
+            [
+                "Symantec",
+                "Trojan.Gen.MBT"
+            ],
+            [
+                "SymantecMobileInsight",
+                "Other:Android.Reputation.1"
+            ],
+            [
+                "Tencent",
+                "a.privacy.BankAnubisTrojan"
+            ],
+            [
+                "TrendMicro",
+                "TROJ_FRS.0NA103CH20"
+            ],
+            [
+                "TrendMicro-HouseCall",
+                "TROJ_FRS.0NA103CH20"
+            ],
+            [
+                "Trustlook",
+                "Android.Malware.Trojan"
+            ],
+            [
+                "Xcitium",
+                "Malware@#kve7mrf8n1nv"
+            ],
+            [
+                "ZoneAlarm",
+                "HEUR:Trojan-Banker.AndroidOS.Anubis.n"
+            ]
+        ]
+    }
+}

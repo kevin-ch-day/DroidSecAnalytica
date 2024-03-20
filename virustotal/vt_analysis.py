@@ -43,13 +43,13 @@ def query_database_for_records(hashes):
     return []
 
 def process_hashes(records):
-    print("\n[Step 3] Processing Hash Data and Sending Requests...")
+    print("\n[Step 3] Processing Hash Data...")
     for count, record in enumerate(records, start=1):
-        response = vt_requests.query_hash(record[4])  # md5 hash
+        response = vt_requests.query_hash(record[4])  # MD5 hash
         analysis_name = "Test Run"
         sample_type = "Hash"
-        save_json=False
-        pause_process=False
+        save_json = False
+        pause_process = False
         process_vt_response(response, analysis_name, sample_type, save_json, pause_process)
         print(f"Processed {count}/{len(records)} records.")
     
@@ -82,7 +82,7 @@ def handle_androguard_response(response):
     return andro_data
 
 def handle_vt_response(response, analysis_id, andro_data, save_json):
-    vt_data = vt_requests.parse_virustotal_response(response)
+    vt_data = parse_virustotal_response(response)
     if vt_data:
         process_vt_data(analysis_id, andro_data, vt_data, save_json)
     else:
@@ -105,3 +105,42 @@ def finalize_analysis(analysis_id, pause_process):
     if pause_process:
         print("Press any key to continue...")
         user_prompts.pause_until_keypress()
+
+def parse_virustotal_response(response):
+    print("\nParsing VirusTotal response...")
+    try:
+        data = response.get('data', {})
+        if not data:
+            raise ValueError("No 'data' key in response.")
+        
+        attributes = data.get('attributes', {})
+        if not attributes:
+            raise ValueError("No valid attributes found in the data.")
+
+        analysis_result = {
+            'summary_statistics': {key.capitalize(): value for key, value in attributes.get('last_analysis_stats', {}).items()},
+            'engine_detection': parse_engine_detection(attributes)
+        }
+
+        report = {
+            "Report URL": data['links']['self'],
+            "Size": attributes['size'],
+            "Formatted Size": vt_utils.format_file_size(attributes['size']),
+            "MD5": attributes['md5'],
+            "SHA1": attributes['sha1'],
+            "SHA256": attributes['sha256'],
+            "Last Submission Date": vt_utils.format_timestamp(attributes['last_submission_date']),
+            "Last Analysis Date": vt_utils.format_timestamp(attributes['last_analysis_date']),
+            "Other Names": sorted(attributes.get('names', [])),
+            "Analysis Result": analysis_result
+        }
+
+        print("VirusTotal response parsed successfully.")
+        return report
+    except Exception as e:
+        print(f"Error parsing VirusTotal response: {e}")
+        return None
+
+def parse_engine_detection(attributes):
+    detailed_breakdown = attributes.get('last_analysis_results', {})
+    return [[engine, data.get('result', 'N/A')] for engine, data in sorted(detailed_breakdown.items())]

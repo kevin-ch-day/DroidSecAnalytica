@@ -1,5 +1,5 @@
 from . import generate_data
-from . import generate_reports
+from . import generate_vt_reports
 
 # Set up logging
 STATIC_ANALYSIS_LOG_FILE_PATH = 'logs/static_analysis.log'

@@ -9,7 +9,7 @@ import logging
 from static_analysis import static_analysis_menu
 from virustotal import vt_menu
 from dynamic_analysis import dynamic_analysis
-from reporting import reporting
+from reporting import reporting_menu
 from utils import app_display, user_prompts
 from database import db_menu
 from utils import logging_utils
@@ -48,7 +48,7 @@ def main():
                 vt_menu.virustotal_menu()
             
             elif choice == '4':
-                reporting.report_menu()
+                reporting_menu.report_menu()
             
             elif choice == '5':
                 db_menu.database_menu()
