@@ -1,59 +1,78 @@
 from tabulate import tabulate
 
-def format_section_title(title):
-    print(f"\n{' ' + title.upper() + ' ':=^60}")
+def write_section_title_to_file(title, file):
+    """Writes a section title with additional padding for better visibility."""
+    file.write(f"\n{' ' + title.upper() + ' ':=^60}\n")
 
-def print_table_section(title, data, table_format="fancy_grid"):
+def write_table_section_to_file(title, data, file, table_format="fancy_grid"):
+    """Writes a section as a table to the file."""
     if title:
-        format_section_title(title)
-    if data and len(data) > 1:
-        print(tabulate(data, headers="firstrow", tablefmt=table_format))
-    else:
-        print("No data available.")
+        write_section_title_to_file(title, file)
+    
+    if not data or len(data) <= 1:
+        file.write("No data available.\n")
+        return
+    
+    table = tabulate(data, headers="firstrow", tablefmt=table_format)
+    file.write(table + '\n')
 
-def print_list_section(title, list_items, as_table=False):
+def write_list_section_to_file(title, list_items, file, as_table=False):
+    """Writes a section as a list to the file."""
     if title:
-        format_section_title(title)
+        write_section_title_to_file(title, file)
     
     if not list_items:
-        print("No items to display.")
+        file.write("No items to display.\n")
         return
     
     if as_table:
-        print(tabulate([item for item in list_items], headers="keys", tablefmt="fancy_grid"))
+        headers = ["Items"]
+        table = tabulate([[item] for item in list_items], headers=headers, tablefmt="fancy_grid")
+        file.write(table + '\n')
     else:
         for item in list_items:
-            print(f"- {item}")
+            file.write(f"- {item}\n")
 
-def print_dictionary_section(title, dictionary, exclude_keys=None, as_table=False):
+def write_dictionary_section_to_file(title, dictionary, file, exclude_keys=None, as_table=False):
+    """Writes a section as a dictionary to the file."""
     if title:
-        format_section_title(title)
+        write_section_title_to_file(title, file)
+    
     exclude_keys = exclude_keys or []
     filtered_dict = {k: v for k, v in dictionary.items() if k not in exclude_keys}
+    
     if not filtered_dict:
-        print("No details available.")
+        file.write("No details available.\n")
         return
+    
     if as_table:
-        print(tabulate([{'Key': k, 'Value': v} for k, v in filtered_dict.items()], headers="keys", tablefmt="fancy_grid"))
+        headers = ["Key", "Value"]
+        table = tabulate(filtered_dict.items(), headers=headers, tablefmt="fancy_grid")
+        file.write(table + '\n')
     else:
         for key, value in sorted(filtered_dict.items()):
-            print(f"{key.replace('_', ' ').capitalize()}: {value}")
+            file.write(f"{key.replace('_', ' ').capitalize()}: {value}\n")
 
-def print_key_value_pair(key, value, separator=": "):
-    print(f"{key.replace('_', ' ').capitalize()}{separator}{value}")
+def write_key_value_pair_to_file(key, value, file, separator=": "):
+    """Writes a single key-value pair to the file."""
+    file.write(f"{key.replace('_', ' ').capitalize()}{separator}{value}\n")
 
-def print_nested_dictionary(title, dictionary, level=0, exclude_keys=None):
-    """Recursively prints nested dictionaries."""
+def write_nested_dictionary_to_file(title, dictionary, file, level=0, exclude_keys=None):
+    """Recursively writes nested dictionaries to the file."""
     if title:
-        format_section_title(title)
+        write_section_title_to_file(title, file)
+    
     exclude_keys = exclude_keys or []
-    separator = ": "  # Define the separator here
+    separator = ": "
+    
     for key, value in sorted(dictionary.items()):
         if key in exclude_keys:
             continue
+        
         indent = "  " * level
+        
         if isinstance(value, dict):
-            print(f"{indent}{key.replace('_', ' ').capitalize()}:")
-            print_nested_dictionary(None, value, level + 1, exclude_keys)
+            file.write(f"{indent}{key.replace('_', ' ').capitalize()}: \n")
+            write_nested_dictionary_to_file(None, value, file, level + 1, exclude_keys)
         else:
-            print(f"{indent}{key.replace('_', ' ').capitalize()}{separator}{value}")
+            file.write(f"{indent}{key.replace('_', ' ').capitalize()}{separator}{value}\n")
