@@ -19,7 +19,7 @@ class AndroguardADT:
         self.libraries = []
         self.certificate = {}
         self.intent_filters = IntentFilterADT.IntentFilterADT() 
-        self.permissions_manager = PermissionManager.PermissionManager()  # Using PermissionManager
+        self.permissions_manager = PermissionManager.PermissionManager()
 
     def get_md5(self):
         return self.md5

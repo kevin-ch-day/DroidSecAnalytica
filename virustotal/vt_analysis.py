@@ -69,7 +69,7 @@ def process_vt_response(response, analysis_name, sample_type, save_json, pause_p
         vt_data = parse_virustotal_response(response)
         if vt_data:
             process_vt_data(analysis_id, andro_data, vt_data, save_json)
-            create_vt_report(vt_data)
+            create_vt_report(andro_data, vt_data)
 
         else:
             print("No VirusTotal data found in response.")
@@ -138,9 +138,15 @@ def parse_engine_detection(attributes):
     detailed_breakdown = attributes.get('last_analysis_results', {})
     return [[engine, data.get('result', 'N/A')] for engine, data in sorted(detailed_breakdown.items())]
 
-def create_vt_report(vt_data):
-    if vt_data:
-        # Generate the VirusTotal Analysis Report using the provided data
-        vt_reports.generate_report(vt_data)
+def create_vt_report(andro_data, vt_data):
+    """
+    Generates and saves the VirusTotal analysis report.
+    """
+    if vt_data and andro_data:
+        try:
+            vt_reports.generate_report(andro_data, vt_data)
+            print("VirusTotal analysis report generated successfully.")
+        except Exception as e:
+            print(f"Error generating VirusTotal analysis report: {e}")
     else:
-        print("No data available to generate the report.")
+        print("No VirusTotal data available to generate the report.")
