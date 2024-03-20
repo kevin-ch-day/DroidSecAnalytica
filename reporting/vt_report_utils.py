@@ -14,11 +14,12 @@ def print_table_section(title, data, table_format="fancy_grid"):
 def print_list_section(title, list_items, as_table=False):
     if title:
         format_section_title(title)
+    
     if not list_items:
         print("No items to display.")
         return
+    
     if as_table:
-        # Assuming all list items are dictionaries for table display
         print(tabulate([item for item in list_items], headers="keys", tablefmt="fancy_grid"))
     else:
         for item in list_items:
@@ -46,6 +47,7 @@ def print_nested_dictionary(title, dictionary, level=0, exclude_keys=None):
     if title:
         format_section_title(title)
     exclude_keys = exclude_keys or []
+    separator = ": "  # Define the separator here
     for key, value in sorted(dictionary.items()):
         if key in exclude_keys:
             continue

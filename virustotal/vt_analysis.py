@@ -2,7 +2,7 @@
 
 from database import db_update_records, db_get_records, db_create_records
 from utils import user_prompts
-from reporting import vt_report_sections
+from reporting import generate_vt_reports
 from . import vt_androguard, vt_requests, vt_processing, vt_utils
 
 def analyze_hash_data():
@@ -69,6 +69,8 @@ def process_vt_response(response, analysis_name, sample_type, save_json, pause_p
         vt_data = parse_virustotal_response(response)
         if vt_data:
             process_vt_data(analysis_id, andro_data, vt_data, save_json)
+            print(vt_data['MD5'])
+            exit()
             create_vt_report(vt_data)
 
         else:
@@ -140,3 +142,7 @@ def parse_engine_detection(attributes):
 
 def create_vt_report(vt_data):
     if vt_data:
+        # Generate the VirusTotal Analysis Report using the provided data
+        generate_vt_reports.print_vt_report(vt_data)
+    else:
+        print("No data available to generate the report.")
