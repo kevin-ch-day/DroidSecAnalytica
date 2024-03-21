@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from database import db_update_records, db_get_records, db_create_records, db_classification_func
+from database import db_update_records, db_get_records, db_create_records, db_classification_func, db_util_func
 from utils import user_prompts
 from reporting import generate_vt_reports as vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
@@ -106,7 +106,7 @@ def process_vt_response(response, analysis_name, sample_type, save_json, pause_p
                 # Assuming the dictionary has one key-value pair since there's only one record
                 apk_id, vt_engine_data = next(iter(analysis_results.items()))
                 new_label = vendor_classifications.data_classification(vt_engine_data)
-                print(f"ID: {apk_id} Classification: {new_label}")
+                print(f"Generated Classification: {new_label}")
                 db_classification_func.update_analysis_classification(apk_id, new_label)
                 
             else:
@@ -120,7 +120,7 @@ def process_vt_response(response, analysis_name, sample_type, save_json, pause_p
             try:
                 print("\n** Generating Virustotal.com Report **")
                 # vt_reports.generate_report(andro_data, vt_data)
-                print("VirusTotal analysis report generated successfully.")
+                # print("VirusTotal analysis report generated successfully.")
             except Exception as e:
                 print(f"Error generating VirusTotal analysis report: {e}")
 
@@ -136,18 +136,35 @@ def create_analysis_record(analysis_name, sample_type):
     return analysis_id
 
 def process_vt_data(analysis_id, andro_data, vt_data, save_json):
+
+    # get record id
+    apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
+
+    # check virustotal report url
+    if not db_util_func.check_vt_malware_url(apk_id):
+        report_url = vt_data["Report URL"]
+        db_util_func.update_virustotal_url(apk_id, report_url)
+    
+    # check virustotal size
+    if not db_util_func.check_vt_malware_size(apk_id):
+        sample_size = vt_data["Size"]
+        db_util_func.update_sample_size(apk_id, sample_size)
+    
+    # check virustotal formatted size
+    if not db_util_func.check_vt_malware_formatted_size(apk_id):
+        formatted_sample_size = vt_data["Formatted Size"]
+        db_util_func.update_formatted_size_sample(apk_id, formatted_sample_size)
     
     # create row record for results
-    print(f"\nCreating VirusTotal engine record for analysis ID {analysis_id}...")
-    apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
+    print(f"\nCreating engine detected record.")
     db_create_records.create_vt_engine_record(analysis_id, apk_id)
 
-    # virustotal.com summary stats
+    # VirusTotal.com summary stats
     print("Added summary stats results.")
     summary_stat = vt_data["Analysis Result"]["summary_statistics"]
     db_update_records.update_vt_engine_detection_metadata(analysis_id, summary_stat)
 
-    # virustotal.com engine detection results
+    # VirusTotal.com engine detection results
     print("Added engine detection results.")
     vendor_data = vt_data["Analysis Result"]["engine_detection"]
     db_update_records.update_vt_engine_column(analysis_id, vendor_data)
@@ -159,13 +176,17 @@ def process_vt_data(analysis_id, andro_data, vt_data, save_json):
 
 def finalize_analysis(analysis_id, pause_process):
     db_update_records.update_analysis_status(analysis_id, "Completed")
-    print(f"\nAnalysis {analysis_id} completed.")
+    print(f"\nAnalysis # {analysis_id} completed.")
     if pause_process:
         print("Press any key to continue...")
         user_prompts.pause_until_keypress()
 
 def parse_virustotal_response(response):
     print("\nParsing VirusTotal response...")
+
+    json_filename = f"output/json_data.txt"
+    vt_utils.save_json_response(response, json_filename)
+
     try:
         data = response.get('data', {})
         if not data:
