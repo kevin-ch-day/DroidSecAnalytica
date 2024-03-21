@@ -50,12 +50,22 @@ def add_vt_engine_column(new_vt_engine, data_type="VARCHAR(100)"):
         print(f"Failed to add new vt_engine column \"{new_vt_engine}\": {e}")
 
 def update_analysis_classification(analysis_id, sample_classification):
+    #print(f"Starting update for analysis_id={analysis_id} with classification='{sample_classification}'.")
+
+    # Validate input parameters
     if not isinstance(analysis_id, int) or not isinstance(sample_classification, str) or not sample_classification:
-        raise ValueError("Invalid input for analysis_id or sample_classification.")
+        error_msg = "Invalid input: analysis_id must be an int, and sample_classification must be a non-empty string."
+        print(error_msg)
+        raise ValueError(error_msg)
     
     try:
         sql = "UPDATE analysis_metadata SET sample_classification = %s WHERE analysis_id = %s;"
         params = (sample_classification, analysis_id)
+        
+        #print(f"Executing SQL query: {sql} with params: {params}") # Debugging
         db_conn.execute_query(sql, params=params, fetch=False)
+
+        #print(f"Successfully updated classification for analysis_id={analysis_id} to '{sample_classification}'.")
     except Exception as e:
-        print(f"Failed to update analysis metadata for analysis_id={analysis_id}: {e}")
+        print(f"Failed to update analysis metadata for analysis_id={analysis_id} with exception: {e}")
+        # Optionally, you could log the exception in more detail or re-raise it for further handling.

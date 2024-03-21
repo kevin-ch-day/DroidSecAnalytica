@@ -9,5 +9,5 @@ DB_HOST = "localhost"
 DB_USER = "root"
 DB_PASSWORD = ""
 
-#DB_DATABASE = "droidsecanalytica_prod"
-DB_DATABASE = "droidsecanalytica_test"
+DB_DATABASE = "droidsecanalytica_prod"
+#DB_DATABASE = "droidsecanalytica_test"

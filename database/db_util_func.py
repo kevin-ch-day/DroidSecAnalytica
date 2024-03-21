@@ -32,7 +32,7 @@ def check_vt_malware_size(id):
     return check_column_value_by_id("malware_samples", "sample_size", id)
 
 def check_vt_malware_formatted_size(id):
-    return check_column_value_by_id("malware_samples", "formatted_size_sample", id)
+    return check_column_value_by_id("malware_samples", "formatted_sample_size", id)
 
 def check_vt_malware_url(id):
     return check_column_value_by_id("malware_samples", "virustotal_url", id)
@@ -41,7 +41,7 @@ def update_sample_size(id, new_value):
     update_column_value_by_id("malware_samples", "sample_size", new_value, id)
 
 def update_formatted_size_sample(id, new_value):
-    update_column_value_by_id("malware_samples", "formatted_size_sample", new_value, id)
+    update_column_value_by_id("malware_samples", "formatted_sample_size", new_value, id)
 
 def update_virustotal_url(id, new_value):
     update_column_value_by_id("malware_samples", "virustotal_url", new_value, id)

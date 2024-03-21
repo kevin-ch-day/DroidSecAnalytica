@@ -3,7 +3,7 @@ from . import andro_report_generator
 
 def generate_report(andro_data, vt_data):
     """Generate and save the VirusTotal and Android data analysis report."""
-    output_file = f"output\virustotal_{vt_data.get('MD5', 'unknown')}_report.txt"
+    output_file = f"output\\virustotal_{vt_data.get('MD5', 'unknown')}_report.txt"
     try:
         print("Generating report...")
         with open(output_file, 'w') as f:
