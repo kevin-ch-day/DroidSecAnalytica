@@ -1,9 +1,11 @@
 # vt_analysis.py
 
-from database import db_update_records, db_get_records, db_create_records
+import pandas as pd
+
+from database import db_update_records, db_get_records, db_create_records, db_classification_func
 from utils import user_prompts
 from reporting import generate_vt_reports as vt_reports
-from . import vt_androguard, vt_requests, vt_processing, vt_utils
+from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
 
 def analyze_hash_data():
     hashes = load_hashes_from_file("input/Test-Hash-Data.txt")
@@ -59,21 +61,72 @@ def process_hashes(records):
 def process_vt_response(response, analysis_name, sample_type, save_json, pause_process):
     print("\n[Processing] VirusTotal Response...")
     try:
-        analysis_id = create_analysis_record(analysis_name, sample_type)
+        analysis_id = create_analysis_record(analysis_name, sample_type)  # Create analysis record
+
+        # Process Androguard data
         andro_data = vt_androguard.handle_androguard_response(response)
-        if not andro_data:
-            print("No Androguard data returned...")
-        else:
+        if andro_data:
             vt_processing.process_androguard_data(analysis_id, andro_data)
-        
+        else:
+            print("No Androguard data found in response.")
+
+        # Process VirusTotal data
         vt_data = parse_virustotal_response(response)
         if vt_data:
             process_vt_data(analysis_id, andro_data, vt_data, save_json)
-            create_vt_report(andro_data, vt_data)
-
         else:
             print("No VirusTotal data found in response.")
+
+        # Malware classification
+        try:
+            if andro_data:
+                print("\n** Malware classification **")
+                results = db_classification_func.get_malware_classification(andro_data.get_sha256())
+                if not results:
+                    print("Error: no results from database")
+                    return None
+                
+                df_column_names = [
+                    'APK ID', 'Name', 'Family', 'Virustotal',
+                    'AhnLab_V3', 'Alibaba', 'Ikarus', 'Kaspersky',
+                    'Microsoft', 'Tencent', 'ZoneAlarm'
+                ]
+
+                df = pd.DataFrame(results, columns=df_column_names)
+                if df.empty:
+                    print("Error creating dataframe")
+                    return None
+                
+                # Analyze the classification of the single record
+                analysis_results = vendor_classifications.analyze_classifications(df)
+                if not analysis_results:
+                    print("No analysis results to process.")
+                    return None
+                
+                # Assuming the dictionary has one key-value pair since there's only one record
+                apk_id, vt_engine_data = next(iter(analysis_results.items()))
+                new_label = vendor_classifications.data_classification(vt_engine_data)
+                print(f"ID: {apk_id} Classification: {new_label}")
+                db_classification_func.update_analysis_classification(apk_id, new_label)
+                
+            else:
+                print("Malware classification skipped due to missing Androguard data.")
+        
+        except Exception as e:
+            print(f"Error during malware classification: {e}")
+
+        # Generate VirusTotal report
+        if vt_data and andro_data:
+            try:
+                print("\n** Generating Virustotal.com Report **")
+                # vt_reports.generate_report(andro_data, vt_data)
+                print("VirusTotal analysis report generated successfully.")
+            except Exception as e:
+                print(f"Error generating VirusTotal analysis report: {e}")
+
+        # Finalize analysis
         finalize_analysis(analysis_id, pause_process)
+
     except Exception as e:
         print(f"Error processing APK samples: {e}")
 
@@ -83,10 +136,22 @@ def create_analysis_record(analysis_name, sample_type):
     return analysis_id
 
 def process_vt_data(analysis_id, andro_data, vt_data, save_json):
-    apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
+    
+    # create row record for results
     print(f"\nCreating VirusTotal engine record for analysis ID {analysis_id}...")
+    apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
     db_create_records.create_vt_engine_record(analysis_id, apk_id)
-    print("Added summary stats and engine results to the database.")
+
+    # virustotal.com summary stats
+    print("Added summary stats results.")
+    summary_stat = vt_data["Analysis Result"]["summary_statistics"]
+    db_update_records.update_vt_engine_detection_metadata(analysis_id, summary_stat)
+
+    # virustotal.com engine detection results
+    print("Added engine detection results.")
+    vendor_data = vt_data["Analysis Result"]["engine_detection"]
+    db_update_records.update_vt_engine_column(analysis_id, vendor_data)
+    
     if save_json:
         json_filename = f"output/{andro_data.get_md5()}_json_data.txt"
         vt_utils.save_json_response(vt_data, json_filename)
@@ -94,7 +159,7 @@ def process_vt_data(analysis_id, andro_data, vt_data, save_json):
 
 def finalize_analysis(analysis_id, pause_process):
     db_update_records.update_analysis_status(analysis_id, "Completed")
-    print(f"Analysis {analysis_id} completed.")
+    print(f"\nAnalysis {analysis_id} completed.")
     if pause_process:
         print("Press any key to continue...")
         user_prompts.pause_until_keypress()
@@ -139,9 +204,7 @@ def parse_engine_detection(attributes):
     return [[engine, data.get('result', 'N/A')] for engine, data in sorted(detailed_breakdown.items())]
 
 def create_vt_report(andro_data, vt_data):
-    """
-    Generates and saves the VirusTotal analysis report.
-    """
+    # Generates and saves the VirusTotal analysis report.
     if vt_data and andro_data:
         try:
             vt_reports.generate_report(andro_data, vt_data)

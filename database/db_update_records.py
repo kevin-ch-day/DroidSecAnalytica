@@ -1,7 +1,7 @@
 # db_update_records.py
 
 from typing import Optional, List, Dict
-from . import db_conn, db_get_records
+from . import db_conn, db_get_records, db_classification_func
 from utils import logging_utils
 
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
@@ -28,13 +28,11 @@ def update_analysis_status(analysis_id: int, status: str):
 
 # Function to create vt_scan_analysis record
 def update_vt_engine_column(analysis_id: int, detections: list):
-    # Fetch and prepare the column names.
     column_names = db_get_records.get_vt_scan_analysis_columns()
-    valid_columns = {col.replace('_', '-'): col for col in column_names}  # Reverse mapping for normalization.
+    valid_columns = {col.replace('_', '-'): col for col in column_names}
 
     for detection in detections:
         av_vendor, result = detection
-        # Normalize AV vendor names to match column names, considering the reverse mapping.
         column_name = valid_columns.get(av_vendor)
 
         if column_name:
@@ -47,8 +45,11 @@ def update_vt_engine_column(analysis_id: int, detections: list):
                     conn.commit()
             except Exception as e:
                 logging_utils.log_error(f"Error updating record for {av_vendor} in analysis {analysis_id}", e)
+        
         else:
-            logging_utils.log_error(f"Invalid AV vendor name: {av_vendor}")
+            # add new vendor
+            print(f"Missing AV vendor name: {av_vendor}")
+            db_classification_func.add_vt_engine_column(av_vendor)
 
 def update_vt_engine_detection_metadata(analysis_id: int, summary_stat: dict):
     with db_conn.database_connection() as conn:
