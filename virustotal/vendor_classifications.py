@@ -201,7 +201,7 @@ def parse_ikarus_classification(classification):
 
         # Assign the extracted parts to the dictionary
         parsed_classification['ability'] = action_type
-        parsed_classification['platform'] = 'AndroidOS'
+        parsed_classification['platform'] = 'Android'
         parsed_classification['family'] = family
 
     return parsed_classification
