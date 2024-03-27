@@ -10,7 +10,7 @@ from . import vendor_classifications, vt_androguard, vt_requests, vt_processing,
 def process_hashes(records):
     print("\n[Step 3] Processing Hash Data...")
     for count, record in enumerate(records, start=1):
-        response = vt_requests.query_hash(record[4])  # MD5 hash
+        response = vt_requests.query_hash(record[0])  # MD5 hash
         analysis_name = "Test Run"
         sample_type = "Hash"
         save_json = False
@@ -20,7 +20,7 @@ def process_hashes(records):
     print("\nAll hash data processed successfully.")
 
 def analyze_hash_data():
-    hashes = load_hashes_from_file("input/Hash-Data.txt")
+    hashes = load_hashes_from_file("input/Full-Hash-Data.txt")
     if hashes is None:
         return  # Error message is handled within the function
 
@@ -28,7 +28,8 @@ def analyze_hash_data():
         print("[Warning] No hashes were found in the file.")
         return
 
-    records = query_database_for_records(hashes)
+    #records = query_database_for_records(hashes)
+    records = query_database_for_records()
     if not records:
         return  # Error or warning message is handled within the function
 
@@ -47,9 +48,13 @@ def load_hashes_from_file(filepath):
         print(f"[Error] An unexpected error occurred while reading the file: {e}")
     return None
 
-def query_database_for_records(hashes):
+def query_database_for_records(hashes=False):
     print("\n[Step 2] Querying Database for Records...")
-    records = db_get_records.get_apk_samples_by_md5(hashes)
+    if not hashes:
+        records = db_get_records.get_all_sample_md5_to_analyze()
+    else:
+        records = db_get_records.get_apk_samples_by_md5(hashes)
+    
     if not records:
         print("[Warning] No matching records found in the database.")
         return []

@@ -17,8 +17,8 @@ def handle_api_error(e):
 def print_connection_issues(e):
     logging.error("Network Issue: %s", e)
 
-def simple_retry_request(method, url, **kwargs):
-    """A simple retry mechanism for HTTP requests."""
+def https_request(method, url, **kwargs):
+    """ HTTP requests."""
     max_retries = 3
     retry_delay = 1  # seconds
     for attempt in range(max_retries):
@@ -38,7 +38,7 @@ def query_hash(hash_value):
     logging.info("Querying VirusTotal for hash: %s", hash_value)
     url = f"https://www.virustotal.com/api/v3/files/{hash_value}"
     try:
-        response = simple_retry_request("GET", url, headers=set_headers())
+        response = https_request("GET", url, headers=set_headers())
         logging.info("Query successful.")
         return response.json()
     except requests.HTTPError as e:
@@ -57,7 +57,7 @@ def query_apk(file_path):
     try:
         with open(file_path, 'rb') as file:
             files = {'file': (file_path, file)}
-            response = simple_retry_request("POST", url, headers=set_headers(), files=files)
+            response = https_request("POST", url, headers=set_headers(), files=files)
             logging.info("Upload and query successful.")
             return response.json()
     except requests.HTTPError as e:

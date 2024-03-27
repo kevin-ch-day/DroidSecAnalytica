@@ -51,6 +51,16 @@ def get_apk_samples_by_md5(md5_hashes: List[str]) -> List[Dict]:
     records = run_query(query, md5_hashes)
     return records
 
+def get_all_sample_md5_to_analyze() -> List[Dict]:
+    sql = """
+    select DISTINCT ms.md5
+    from malware_samples ms
+    left join analysis_metadata am
+        on ms.sha256 = am.sha256_hash
+    order by ms.id
+    """
+    return run_query(sql)
+
 def get_vt_scan_analysis_columns():
     query = "SHOW COLUMNS FROM vt_scan_analysis"
     column_names = []

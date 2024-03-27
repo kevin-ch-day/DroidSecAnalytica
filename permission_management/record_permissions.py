@@ -28,15 +28,7 @@ def process_unknown_permission(analysis_id, apk_id, perm_name):
             permission_id = record[0]
         else:
             print(f"\nNew unknown permission detected: {perm_name.name}")
-            if user_prompts.user_for_confirmation("Save this permission?"):
-                permission_id = prompt_and_insert_new_permission(perm_name, analysis_id, apk_id)
-            else:
-                user_prompts.pause_until_keypress()
-                return
-            
-            print() # new line
-
-        if permission_id:
+            permission_id = prompt_and_insert_new_permission(perm_name, analysis_id, apk_id)
             save_unknown_permission(analysis_id, apk_id, permission_id, perm_name)
 
     except Exception as e:
