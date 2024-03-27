@@ -1,7 +1,8 @@
 # static_analysis_menu.py
 
 from utils import app_display, user_prompts
-from . import manifest_analysis, record_permissions, static_analysis
+from permission_management import record_permissions
+from . import manifest_analysis, static_analysis
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():

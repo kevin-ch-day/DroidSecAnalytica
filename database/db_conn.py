@@ -32,12 +32,14 @@ def get_database_connection():
 
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     with database_connection() as conn:
+        #cursor = conn.cursor(dictionary=True)
         cursor = conn.cursor()
         cursor.execute(query, params or ())
         if fetch:
             return cursor.fetchall()
         
         conn.commit()
+        return True
 
 def execute_insert(table, data):
     try:

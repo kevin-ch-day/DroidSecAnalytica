@@ -1,6 +1,6 @@
 # main.py
 
-import data_process, missing_vendor_analysis
+from . import data_process, missing_vendor_analysis
 
 def main():
     while True:
