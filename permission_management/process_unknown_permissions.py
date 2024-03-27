@@ -1,4 +1,4 @@
-# main.py
+# process_unknown_permissions.py
 
 from . import data_process, missing_vendor_analysis
 

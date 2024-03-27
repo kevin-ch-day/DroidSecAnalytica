@@ -1,6 +1,6 @@
 # db_func.py
 
-from . import db_conn
+from . import db_conn_v2 as db_conn
 
 def execute_sql_query(sql_query):
     # Execute the given SQL query and handle exceptions

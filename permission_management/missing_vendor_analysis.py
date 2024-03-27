@@ -1,6 +1,6 @@
 # check_for_missing_vendors.py
 
-from database import db_permissions_2
+from database import db_permission_2
 from utils import display_perm_utils
 
 def get_permissions_by_vendor(manufacturer_permissions):
@@ -54,8 +54,8 @@ def check_for_missing_vendors():
     display_perm_utils.print_header("Checking for Missing Vendors")
 
     # Fetch data from the database
-    manufacturer_permissions = db_permissions_2.fetch_manufacturer_permissions()
-    vendor_details = db_permissions_2.fetch_vendor_data()
+    manufacturer_permissions = db_permission_2.fetch_manufacturer_permissions()
+    vendor_details = db_permission_2.fetch_vendor_data()
 
     # Analyze permissions and vendors
     permissions_by_vendor = get_permissions_by_vendor(manufacturer_permissions)
