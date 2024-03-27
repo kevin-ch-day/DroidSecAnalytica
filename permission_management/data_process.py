@@ -1,13 +1,13 @@
 import pandas as pd
 import os
 
-from database import db_permission_2
+from database import db_permissions_2
 from  utils import display_perm_utils
 
 def remove_duplicate_permissions():
     display_perm_utils.print_header("Removing Duplicate Permissions")
-    unknown_permissions = db_permission_2.fetch_unknown_permissions()
-    manufacturer_permissions = db_permission_2.fetch_manufacturer_permissions()
+    unknown_permissions = db_permissions_2.fetch_unknown_permissions()
+    manufacturer_permissions = db_permissions_2.fetch_manufacturer_permissions()
     
     # Convert the list of dictionaries to sets for faster lookup
     manufacturer_perm_set = {perm['constant_value'] for perm in manufacturer_permissions}
@@ -17,7 +17,7 @@ def remove_duplicate_permissions():
         # Check if the permission's constant_value exists in the manufacturer permissions
         if perm['constant_value'] in manufacturer_perm_set:
             # If it exists, delete it from the unknown permissions table
-            if db_permission_2.remove_permission_from_unknown_table(perm['permission_id']):
+            if db_permissions_2.remove_permission_from_unknown_table(perm['permission_id']):
                 removed_count += 1
                 print(f"Removed duplicate permission: {perm['constant_value']}")
 
@@ -25,7 +25,7 @@ def remove_duplicate_permissions():
 
 def save_vendor_manufacturer_permission_prefixes():
     display_perm_utils.print_header("Vendor Manufacturer Permission Prefixes")
-    data = db_permission_2.fetch_vendor_manufacturer_permission_prefixes()
+    data = db_permissions_2.fetch_vendor_manufacturer_permission_prefixes()
     if data:
         save_permissions_to_excel(data, "unknown_permissions.xlsx")
     else:
@@ -33,7 +33,7 @@ def save_vendor_manufacturer_permission_prefixes():
 
 def fetch_unknown_permission_prefixes():
     display_perm_utils.print_header("Unknown Permission Prefixes")
-    data = db_permission_2.fetch_all_unknown_permission_prefixes()
+    data = db_permissions_2.fetch_all_unknown_permission_prefixes()
     if data:
         df = pd.DataFrame(data)
         display_perm_utils.display_results(df, "Unknown Permission Prefixes")
@@ -43,8 +43,8 @@ def fetch_unknown_permission_prefixes():
 
 def check_unknown_permission_for_vendors():
     print("\nChecking unknown permissions table for vendors...")
-    unknown_permissions = db_permission_2.fetch_unknown_permissions()
-    vendor_data = db_permission_2.fetch_vendor_data()
+    unknown_permissions = db_permissions_2.fetch_unknown_permissions()
+    vendor_data = db_permissions_2.fetch_vendor_data()
     process_permissions(unknown_permissions, vendor_data)
 
 def categorize_permissions(unknown_permissions, manufacturer_prefixes):
@@ -91,13 +91,13 @@ def migrate_permission(permission, unknown_permissions):
     record = next((p for p in unknown_permissions if p['constant_value'] == permission), None)
 
     # Check if the permission already exists in the android_manufacturer_permissions table
-    if not db_permission_2.check_constant_value_exists(record['constant_value']):
+    if not db_permissions_2.check_constant_value_exists(record['constant_value']):
         
         # If the record is found
         if record:
             # Attempt to insert the permission into the manufacturer table and remove it from the unknown table
-            success_insert = db_permission_2.insert_permission_into_manufacturer_table(record)
-            success_remove = db_permission_2.remove_permission_from_unknown_table(record['permission_id'])
+            success_insert = db_permissions_2.insert_permission_into_manufacturer_table(record)
+            success_remove = db_permissions_2.remove_permission_from_unknown_table(record['permission_id'])
             
             # If both operations are successful
             if success_insert and success_remove:
@@ -117,7 +117,7 @@ def fetch_and_save_unknown_permissions():
     Fetches unknown permissions and saves them to an Excel sheet.
     """
     display_perm_utils.print_header("Unknown Permissions")
-    data = db_permission_2.fetch_unknown_permissions()
+    data = db_permissions_2.fetch_unknown_permissions()
     if data:
         save_permissions_to_excel(data, "unknown_permissions.xlsx")
     else:
@@ -128,7 +128,7 @@ def fetch_and_save_manufacturer_permissions():
     Fetches manufacturer permissions and saves them to an Excel sheet.
     """
     display_perm_utils.print_header("Manufacturer Permissions")
-    data = db_permission_2.fetch_manufacturer_permissions()
+    data = db_permissions_2.fetch_manufacturer_permissions()
     if data:
         save_permissions_to_excel(data, "manufacturer_permissions.xlsx")
     else:
@@ -136,7 +136,7 @@ def fetch_and_save_manufacturer_permissions():
 
 def fix_manufacturer_permissions():
     print("Starting to process duplicate manufacturer permissions entries...")
-    duplicates = db_permission_2.find_duplicate_constant_values()
+    duplicates = db_permissions_2.find_duplicate_constant_values()
     total_deleted = 0
     if not duplicates:
         print("No duplicates found.")
@@ -145,9 +145,9 @@ def fix_manufacturer_permissions():
     for duplicate in duplicates:
         constant_value, count = duplicate['constant_value'], duplicate['cnt']
         print(f"Processing {constant_value} with {count - 1} duplicates to delete...")
-        id_to_keep = db_permission_2.get_id_to_keep_for_duplicate(constant_value)
+        id_to_keep = db_permissions_2.get_id_to_keep_for_duplicate(constant_value)
         if id_to_keep:
-            deleted_rows = db_permission_2.delete_duplicate_rows(constant_value, id_to_keep)
+            deleted_rows = db_permissions_2.delete_duplicate_rows(constant_value, id_to_keep)
             total_deleted += deleted_rows
             print(f"Deleted {deleted_rows} duplicate rows for constant_value '{constant_value}'.")
     
