@@ -153,3 +153,8 @@ def check_constant_value_exists(value):
     """
     result = db_conn.execute_query(query, (value,), fetch=True)
     return result[0]['cnt'] > 0
+
+def fetch_android_manufacturer_permission_id_by_value(constant_value):
+    query = "SELECT permission_id FROM android_manufacturer_permissions WHERE constant_value = %s"
+    result = db_conn.execute_query(query, (constant_value,), fetch=True)
+    return result[0]['permission_id'] if result else None

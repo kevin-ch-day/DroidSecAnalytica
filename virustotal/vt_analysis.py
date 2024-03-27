@@ -10,7 +10,7 @@ from . import vendor_classifications, vt_androguard, vt_requests, vt_processing,
 def process_hashes(records):
     print("\n[Step 3] Processing Hash Data...")
     for count, record in enumerate(records, start=1):
-        response = vt_requests.query_hash(record[0])  # MD5 hash
+        response = vt_requests.query_hash(record[6])  # MD5 hash
         analysis_name = "Test Run"
         sample_type = "Hash"
         save_json = False
@@ -28,8 +28,8 @@ def analyze_hash_data():
         print("[Warning] No hashes were found in the file.")
         return
 
-    #records = query_database_for_records(hashes)
-    records = query_database_for_records()
+    records = query_database_for_records(hashes)
+    #records = query_database_for_records()
     if not records:
         return  # Error or warning message is handled within the function
 

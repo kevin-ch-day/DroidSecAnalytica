@@ -14,23 +14,16 @@ def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool =
         return None
 
 # Function to insert data into vt_permissions table
-def insert_vt_permission(analysis_id: int, apk_id: int, known_permission_id: Optional[int], unknown_permission_id: Optional[int]) -> Optional[bool]:
-    query = "INSERT INTO vt_permissions (analysis_id, apk_id, known_permission_id, unknown_permission_id)"
-    query += " VALUES (%s, %s, %s, %s)"
-    params = (analysis_id, apk_id, known_permission_id, unknown_permission_id)
+def insert_vt_permission(analysis_id: int, apk_id: int, standard_perm_id: Optional[int], unknown_perm_id: Optional[int], manuf_perm_id: Optional[int]) -> Optional[bool]:
+    query = "INSERT INTO vt_permissions (analysis_id, apk_id, known_permission_id, unknown_permission_id, manufacturer_permission_id)"
+    query += " VALUES (%s, %s, %s, %s, %s)"
+    params = (analysis_id, apk_id, standard_perm_id, unknown_perm_id, manuf_perm_id)
     return execute_sql(query, params)
 
 # Insert a new unknown permission record
-def insert_unknown_permission(index) -> Optional[bool]:
-    id = get_next_unknown_permission_id()
-    if not id:
-        print("Error: Could not retrieve the next permission ID.")
-        return None
-    
-    query = "INSERT INTO unknown_permissions (permission_id, constant_value, protection_level, andro_short_desc, andro_long_desc) VALUES (%s, %s, %s, %s, %s)"
-    params = (id, index.name, index.
-              
-              permission_type, index.short_desc, index.long_desc)
+def insert_new_unknown_permission(index) -> Optional[bool]:
+    query = "INSERT INTO unknown_permissions (constant_value, protection_level, andro_short_desc, andro_long_desc) VALUES (%s, %s, %s, %s, %s)"
+    params = (index.name, index.permission_type, index.short_desc, index.long_desc)
     return execute_sql(query, params)
 
 # Insert a new android permission record more concisely
