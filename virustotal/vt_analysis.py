@@ -11,7 +11,7 @@ def process_hashes(records):
     print("\n[Step 3] Processing Hash Data...")
     for count, record in enumerate(records, start=1):
         response = vt_requests.query_hash(record[6])  # MD5 hash
-        analysis_name = "Test Run"
+        analysis_name = "Analysis"
         sample_type = "Hash"
         save_json = False
         pause_process = False
