@@ -2,7 +2,7 @@
 
 from . import db_conn
 
-def get_malware_classification(sha256_hash):
+def get_malware_classification(sha256):
     # Retrieves malware classification information for a given SHA-256 hash.
     sql = """
         SELECT m.id,
@@ -21,7 +21,7 @@ def get_malware_classification(sha256_hash):
         WHERE m.sha256 = %s
         ORDER BY m.id
     """
-    params = (sha256_hash,)  # Parameters passed in a tuple
+    params = (sha256,)  # Parameters passed in a tuple
 
     try:
         results = db_conn.execute_query(sql, params=params, fetch=True)

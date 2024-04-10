@@ -20,7 +20,7 @@ def process_hashes(records):
     print("\nAll hash data processed successfully.")
 
 def analyze_hash_data():
-    hashes = load_hashes_from_file("input/Full-Hash-Data.txt")
+    hashes = load_hashes_from_file("input/Hash-Data.txt")
     if hashes is None:
         return  # Error message is handled within the function
 

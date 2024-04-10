@@ -17,9 +17,9 @@ def get_apk_samples() -> List[Dict]:
 def get_malware_hash_samples() -> List[Dict]:
     return run_query("SELECT * FROM malware_ioc_threats")
 
-def get_apk_id_by_sha256(sha256_hash: str) -> Optional[int]:
+def get_apk_id_by_sha256(sha256: str) -> Optional[int]:
     sql = "SELECT id FROM malware_samples WHERE sha256 = %s"
-    params = (sha256_hash,)
+    params = (sha256,)
     result = run_query(sql, params)
     if result:
         return result[0][0]
@@ -56,7 +56,7 @@ def get_all_sample_md5_to_analyze() -> List[Dict]:
     select DISTINCT ms.md5
     from malware_samples ms
     left join analysis_metadata am
-        on ms.sha256 = am.sha256_hash
+        on ms.sha256 = am.sha256
     order by ms.id
     """
     return run_query(sql)

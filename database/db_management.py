@@ -39,14 +39,14 @@ def truncate_analysis_data_tables() -> bool:
     table_names = [
         "analysis_metadata",
         "vt_activities",
-        "vt_certificates",
         "vt_permissions",
         "vt_receivers",
         "vt_scan_analysis",
         "vt_services",
-        "vt_providers",
-        "vt_intent_filters_actions",
-        "vt_intent_filters_categories"
+        "vt_providers"
+        #"vt_certificates",
+        #"vt_intent_filters_actions",
+        #"vt_intent_filters_categories"
         ]
     
     try:

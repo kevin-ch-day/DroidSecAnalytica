@@ -69,7 +69,7 @@ def update_vt_engine_detection_metadata(analysis_id: int, summary_stat: dict):
 def update_analysis_metadata(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int, target_sdk: int) -> Optional[bool]:
     query = """
     UPDATE analysis_metadata
-    SET sha256_hash = %s,
+    SET sha256 = %s,
         package_name = %s,
         main_activity = %s,
         target_min_version = %s,
