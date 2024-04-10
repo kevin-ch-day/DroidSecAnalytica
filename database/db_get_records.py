@@ -69,3 +69,32 @@ def get_vt_scan_analysis_columns():
         cursor.execute(query)
         column_names = [column[0] for column in cursor.fetchall()]
     return column_names
+
+def get_malware_classification(sha256):
+    # Retrieves malware classification information for a given SHA-256 hash.
+    sql = """
+        SELECT m.id,
+               m.name_1 AS Name,
+               m.name_2 AS Family,
+               m.virustotal_label,
+               s.AhnLab_V3,
+               s.Alibaba,
+               s.Ikarus,
+               s.Kaspersky,
+               s.microsoft,
+               s.Tencent,
+               s.ZoneAlarm
+        FROM malware_samples m
+        JOIN vt_scan_analysis s ON s.apk_id = m.id
+        WHERE m.sha256 = %s
+        ORDER BY m.id
+    """
+    params = (sha256,)  # Parameters passed in a tuple
+
+    try:
+        results = db_conn.execute_query(sql, params=params, fetch=True)
+        return results
+    
+    except Exception as e:
+        print(f"Error fetching malware classification: {e}")
+        return []

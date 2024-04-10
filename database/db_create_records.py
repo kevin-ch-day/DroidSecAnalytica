@@ -44,3 +44,34 @@ def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:
     query += " VALUES (%s, %s)"
     params = (analysis_id, apk_id)
     return run_query(query, params)
+
+def create_vt_engine_column(new_vt_engine, data_type="VARCHAR(100)"):
+    # Ensure the new column name is a string and appropriate
+    if not isinstance(new_vt_engine, str) or not new_vt_engine.strip():
+        raise ValueError("Invalid vt engine name.")
+
+    # Check if the column already exists
+    existing_columns = run_query("SHOW COLUMNS FROM vt_scan_analysis", fetch=True)
+    if any(col[0] == new_vt_engine for col in existing_columns):
+        raise ValueError(f"Column: '{new_vt_engine}' already exists.")
+
+    try:
+        sql = f"ALTER TABLE vt_scan_analysis ADD COLUMN {new_vt_engine} {data_type} AFTER type_unsupported;"
+        run_query(sql, fetch=False)
+        print(f"New vt_engine column \"{new_vt_engine}\" added successfully.")
+    
+    except Exception as e:
+        print(f"Failed to add new vt_engine column \"{new_vt_engine}\": {e}")
+
+def create_malware_project_mapping(malware_id, droidsecanalytica, family, md5):
+    report_id = 0
+    classification = droidsecanalytica
+    
+    try:
+        sql = "UPDATE malware_project_mapping SET droidsecanalytica_label = %s WHERE malware_id = %s;"
+        params = (malware_id, report_id, droidsecanalytica, family, md5)
+        run_query(sql, params=params, fetch=False)
+
+    except Exception as e:
+        print(f"Failed to update malware_project_mapping for malware id: {malware_id}")
+        print(f"Exception: {e}")
