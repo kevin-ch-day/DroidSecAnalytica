@@ -8,7 +8,6 @@ import logging
 # Custom libraries
 from static_analysis import static_analysis_menu
 from virustotal import vt_menu
-from dynamic_analysis import dynamic_analysis
 from reporting import reporting_menu
 from utils import app_display, user_prompts
 from database import db_menu
@@ -26,36 +25,32 @@ logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 def main_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
-    print(app_display.format_menu_option(2, "Dynamic Analysis"))
-    print(app_display.format_menu_option(3, "VirusTotal Analysis"))
-    print(app_display.format_menu_option(4, "Report Generation"))
-    print(app_display.format_menu_option(5, "Database Management"))
-    print(app_display.format_menu_option(6, "Permission Management"))
+    print(app_display.format_menu_option(2, "VirusTotal Analysis"))
+    print(app_display.format_menu_option(3, "Report Generation"))
+    print(app_display.format_menu_option(4, "Database Management"))
+    print(app_display.format_menu_option(5, "Permission Management"))
     print(app_display.format_menu_option(0, "Exit"))
 
 # Main
 def main():
     while True:
         main_menu()
-        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5', '6'])
+        choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5'])
 
         try:
             if choice == '1':
                 static_analysis_menu.show_menu()
             
             elif choice == '2':
-                dynamic_analysis.dynamic_menu()
-            
-            elif choice == '3':
                 vt_menu.virustotal_menu()
             
-            elif choice == '4':
+            elif choice == '3':
                 reporting_menu.report_menu()
             
-            elif choice == '5':
+            elif choice == '4':
                 db_menu.database_menu()
 
-            elif choice == '6':
+            elif choice == '5':
                 process_unknown_permissions.main()
             
             elif choice == '0':

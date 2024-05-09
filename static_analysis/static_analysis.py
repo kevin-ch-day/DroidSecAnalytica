@@ -1,9 +1,6 @@
-# static_analysis.py
-
 import os
 import subprocess
 import platform
-from typing import Optional
 
 from utils import logging_utils, app_utils
 from . import manifest_analysis
@@ -12,51 +9,48 @@ from . import manifest_analysis
 ANALYSIS_OUTPUT_DIR = 'output'
 
 def handle_apk_decompilation():
-    apk_path = app_utils.android_apk_selection()
-    decompile_apk(apk_path, 'output')
+    # Handle APK decompilation
+    apk_path = app_utils.android_apk_selection()  # Select APK file
+    if apk_path:
+        decompile_apk(apk_path, ANALYSIS_OUTPUT_DIR)
 
-def decompile_apk(apk_path: str, output_directory: str) -> Optional[str]:
-    # Check OS and exit if Windows
-    if platform.system() == "Windows":
-        logging_utils.log_error("This function cannot be executed on Windows.")
-        return None
+def decompile_apk(apk_path: str, output_directory: str) -> None:
+    # Decompile an APK file using apktool
+    try:
+        # Check if OS is Windows
+        if platform.system() == "Windows":
+            logging_utils.log_error("This function cannot be executed on Windows.")
+            return
 
-    # Check if OS is Kali Linux or Ubuntu
-    if "kali" in platform.version().lower() or "ubuntu" in platform.version().lower():
-        try:
-            subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
-            logging_utils.log_info(f"APK decompiled successfully. Output directory: {output_directory}")
-            return output_directory
-        except subprocess.CalledProcessError as e:
-            logging_utils.log_error(f"Error decompiling APK: {e}")
-            return None
-    else:
-        logging_utils.log_error("This function can only be executed on Kali Linux or Ubuntu.")
-        return None
+        # Use apktool to decompile APK
+        subprocess.run(["apktool", "d", "-f", apk_path, "-o", output_directory], check=True)
+        logging_utils.log_info(f"APK decompiled successfully. Output directory: {output_directory}")
+    
+    except subprocess.CalledProcessError as e:
+        logging_utils.log_error(f"Error decompiling APK: {e}")
+    except Exception as e:
+        logging_utils.log_error(f"An unexpected error occurred: {e}")
 
-# Run static analysis
 def apk_static_analysis(apk_path: str):
-
-    # local analysis
-    file_basename = os.path.basename(apk_path)
+    # Perform static analysis on an APK file.
     try:
-        output_directory = decompile_apk(apk_path, f"{ANALYSIS_OUTPUT_DIR}/{os.path.splitext(file_basename)[0]}")
-        if output_directory:
-            manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
-            manifest_data = manifest_analysis.analyze_android_manifest(manifest_path)
-            if manifest_data:
-                #manifest_element = manifest_analysis.analyze_manifest_element(manifest_path)
-                pass
-                
-        else:
-            print("Error decompiling the APK file")
+        # Decompile APK
+        output_directory = os.path.join(ANALYSIS_OUTPUT_DIR, os.path.splitext(os.path.basename(apk_path))[0])
+        decompile_apk(apk_path, output_directory)
+        if not os.path.exists(output_directory):
+            logging_utils.log_error("Error decompiling the APK file")
+            return
+
+        # Analyze AndroidManifest.xml
+        manifest_path = os.path.join(output_directory, "AndroidManifest.xml")
+        manifest_data = manifest_analysis.analyze_android_manifest(manifest_path)
+        if manifest_data:
+            pass  # Additional analysis can be performed here
     except Exception as e:
-        logging_utils.log_error(f"Error: static local analysis: {e}")
+        logging_utils.log_error(f"An unexpected error occurred during static analysis: {e}")
 
     try:
-        # Virustotal.com scan
-        # virustotal_analysis(apk_path)
         pass
-
+        # Additional analysis (e.g., VirusTotal scan) can be performed here
     except Exception as e:
-        logging_utils.log_error(f"Error: virustotal analysis: {e}")
+        logging_utils.log_error(f"Error performing additional analysis: {e}")

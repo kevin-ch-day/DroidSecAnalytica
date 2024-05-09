@@ -8,12 +8,36 @@ from . import app_utils
 APP_NAME = "DroidSecAnalytica"
 
 # Displays all .apk files in the current directory
-def display_apk_files():
-    apk_files = [f for f in os.listdir() if f.endswith('.apk')]
-    print("\nAvailable APK Files:" if apk_files else "No APK files found.")
-    for i, file in enumerate(apk_files, 1):
-        print(f" [{i}] {file}")
-    return apk_files
+def display_apk_files(directory='input'):
+    try:
+        apk_files = [f for f in os.listdir(directory) if f.endswith('.apk')]
+        apk_files.sort()  # Sort alphabetically
+        num_files = len(apk_files)
+
+        if num_files == 0:
+            print("No APK files found.")
+            return []
+
+        print("\nAvailable APK Files:")
+        page_size = 10  # Number of files to display per page
+        num_pages = (num_files + page_size - 1) // page_size
+
+        for page in range(num_pages):
+            start_index = page * page_size
+            end_index = min((page + 1) * page_size, num_files)
+            print(f"Page {page + 1}/{num_pages}:")
+            for i, file in enumerate(apk_files[start_index:end_index], start=start_index + 1):
+                print(f" [{i}] {file}")
+
+            if num_pages > 1 and page < num_pages - 1:
+                input("Press Enter to view next page...")
+
+    except FileNotFoundError:
+        print("Directory not found.")
+        return []
+    except PermissionError:
+        print("Permission denied.")
+        return []
 
 def display_menu(menu_title, menu_options):
     print(format_menu_title(menu_title))
