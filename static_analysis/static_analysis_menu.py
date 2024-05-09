@@ -1,6 +1,6 @@
 # static_analysis_menu.py
 
-from utils import app_display, user_prompts
+from utils import app_display, user_prompts, app_utils, hash_utils
 from permissions_analysis import record_permissions
 from . import manifest_analysis, static_analysis
 
@@ -9,8 +9,8 @@ def show_menu():
     while True:
         print(app_display.format_menu_title("Static Analysis Menu"))
         print(app_display.format_menu_option(1, "Display Available APK Files"))
-        print(app_display.format_menu_option(2, "Decompile APK File"))
-        print(app_display.format_menu_option(3, "Display APK Hash"))
+        print(app_display.format_menu_option(2, "Display APK Hash"))
+        print(app_display.format_menu_option(3, "Decompile APK File"))
         print(app_display.format_menu_option(4, "Perform Static Analysis"))
         print(app_display.format_menu_option(5, "Perform AndroidManifest.xml Analysis"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
@@ -19,16 +19,21 @@ def show_menu():
         # Display APK Files
         if menu_choice == "1":
             app_display.display_apk_files()
-        
-        # Decompile APK file
-        if menu_choice == '2':
-            static_analysis.handle_apk_decompilation()
 
         # Display APK Hash
-        if menu_choice == '3':
-            apk = app_display.display_apk_files()
-            # calc and display the hash
+        elif menu_choice == '2':
+            apk_path = app_utils.android_apk_selection()
+            if apk_path:
+                print("Calculating hashes for APK file:", apk_path)
+                hash_utils.calculate_hashes(apk_path)
+
+            else:
+                print("No APK file selected.")
         
+        # Decompile APK file
+        elif menu_choice == '3':
+            static_analysis.handle_apk_decompilation()
+                   
         # Static analysis
         elif menu_choice == '4':
             print("Static Analysis")

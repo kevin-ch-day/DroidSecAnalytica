@@ -7,19 +7,62 @@ import ctypes
 import ctypes.wintypes
 import subprocess
 import requests
+import os
 from typing import Optional
 
 from . import user_prompts, app_display, logging_utils
 
 # Constants
 ANALYSIS_RESULTS_DIR = 'output'
+ANALYSIS_INPUT_DIR = 'input'
 
 def android_apk_selection():
-    apk_files = app_display.display_apk_files()
-    if not apk_files:
-        return
-    apk_choice = user_prompts.user_menu_choice("Select an APK option: ", [str(i) for i in range(1, len(apk_files) + 1)])
-    return apk_files[int(apk_choice) - 1]
+    # Try to list APK files in the specified directory
+    try:
+        apk_files = [f for f in os.listdir(ANALYSIS_INPUT_DIR) if f.endswith('.apk')]
+        apk_files.sort()  # Sort alphabetically
+        num_files = len(apk_files)
+
+        # If no APK files found, print a message and return None
+        if num_files == 0:
+            print("No APK files found.")
+            return None
+
+        # Display APK files with pagination
+        print("\nAvailable APK Files:")
+        page_size = 10  # Number of files to display per page
+        num_pages = (num_files + page_size - 1) // page_size
+
+        for page in range(num_pages):
+            start_index = page * page_size
+            end_index = min((page + 1) * page_size, num_files)
+            print(f"Page {page + 1}/{num_pages}:")
+            for i, file in enumerate(apk_files[start_index:end_index], start=start_index + 1):
+                print(f" [{i}] {file}")
+
+            # If there are multiple pages, prompt user to view next page
+            if num_pages > 1 and page < num_pages - 1:
+                input("Press Enter to view next page...")
+
+        # Prompt user to select an APK file
+        apk_choice = input("Select an APK option: ")
+        apk_index = int(apk_choice) - 1
+
+        # Validate user choice
+        if apk_index < 0 or apk_index >= num_files:
+            print("Invalid selection.")
+            return None
+
+        # Return the selected APK file path
+        return os.path.join(ANALYSIS_INPUT_DIR, apk_files[apk_index])
+
+    except FileNotFoundError:
+        print("Directory not found.")
+        return None
+    
+    except PermissionError:
+        print("Permission denied.")
+        return None
 
 def enable_windows_ansi_support():
     if platform.system() == "Windows":

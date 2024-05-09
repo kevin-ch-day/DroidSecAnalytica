@@ -9,8 +9,8 @@ from . import manifest_analysis
 ANALYSIS_OUTPUT_DIR = 'output'
 
 def handle_apk_decompilation():
-    # Handle APK decompilation
-    apk_path = app_utils.android_apk_selection()  # Select APK file
+    # Select an APK to decompile
+    apk_path = app_utils.android_apk_selection()
     if apk_path:
         decompile_apk(apk_path, ANALYSIS_OUTPUT_DIR)
 

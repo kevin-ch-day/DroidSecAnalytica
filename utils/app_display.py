@@ -7,7 +7,6 @@ from . import app_utils
 
 APP_NAME = "DroidSecAnalytica"
 
-# Displays all .apk files in the current directory
 def display_apk_files(directory='input'):
     try:
         apk_files = [f for f in os.listdir(directory) if f.endswith('.apk')]
@@ -16,7 +15,7 @@ def display_apk_files(directory='input'):
 
         if num_files == 0:
             print("No APK files found.")
-            return []
+            return False
 
         print("\nAvailable APK Files:")
         page_size = 10  # Number of files to display per page
@@ -32,12 +31,15 @@ def display_apk_files(directory='input'):
             if num_pages > 1 and page < num_pages - 1:
                 input("Press Enter to view next page...")
 
+        return True
+
     except FileNotFoundError:
         print("Directory not found.")
-        return []
+        return False
+    
     except PermissionError:
         print("Permission denied.")
-        return []
+        return False
 
 def display_menu(menu_title, menu_options):
     print(format_menu_title(menu_title))
