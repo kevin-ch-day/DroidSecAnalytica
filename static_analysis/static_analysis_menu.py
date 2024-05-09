@@ -3,8 +3,7 @@
 import os
 
 from utils import app_display, user_prompts, app_utils, hash_utils
-from permissions_analysis import record_permissions
-from . import manifest_analysis, static_analysis
+from . import static_analysis
 
 # Display the static analysis menu and handle user interaction.
 def show_menu():
@@ -60,7 +59,7 @@ def show_menu():
                     choice = int(input("\nSelect: "))
                     if 1 <= choice <= len(manifest_directories):
                         selected_decompiled_apk = os.path.join('output', manifest_directories[choice - 1])
-                        static_analysis.run_static_analysis(selected_decompiled_apk)
+                        static_analysis.run_analysis(selected_decompiled_apk)
                     
                     elif choice == 0:
                         break

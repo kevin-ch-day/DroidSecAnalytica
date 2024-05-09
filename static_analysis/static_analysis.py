@@ -29,7 +29,7 @@ def handle_apk_decompilation():
         except Exception as e:
             logging_utils.log_error(f"An unexpected error occurred: {e}")
 
-def run_static_analysis(apk_path: str):
+def run_analysis(apk_path: str):
     # Perform static analysis on an APK file.
     try:
         # Analyze AndroidManifest.xml
