@@ -1,7 +1,7 @@
 # db_update_records.py
 
 from typing import Optional, List, Dict
-from . import db_conn, db_get_records, db_classification_func
+from . import db_conn, db_get_records, db_create_records
 from utils import logging_utils
 
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
@@ -49,7 +49,7 @@ def update_vt_engine_column(analysis_id: int, detections: list):
         else:
             # add new vendor
             print(f"Missing AV vendor name: {av_vendor}")
-            db_classification_func.add_vt_engine_column(av_vendor)
+            db_create_records.add_vt_engine_column(av_vendor)
 
 def update_vt_engine_detection_metadata(analysis_id: int, summary_stat: dict):
     with db_conn.database_connection() as conn:

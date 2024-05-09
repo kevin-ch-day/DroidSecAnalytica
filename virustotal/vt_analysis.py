@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from database import db_update_records, db_get_records, db_create_records, db_classification_func, db_util_func
+from database import db_update_records, db_get_records, db_create_records, db_util_func
 from utils import user_prompts
 from reporting import generate_vt_reports as vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
@@ -100,7 +100,7 @@ def process_virustotal_data(response, analysis_id, andro_data, save_json):
 def classify_and_update_malware(analysis_id, andro_data):
     try:
         print("\n** Malware classification **")
-        results = db_classification_func.get_malware_classification(andro_data.get_sha256())
+        results = db_get_records.get_malware_classification(andro_data.get_sha256())
         if not results:
             print("[Error] No results from database for malware classification.")
             return
