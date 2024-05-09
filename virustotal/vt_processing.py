@@ -1,7 +1,7 @@
 # vt_processing.py
 
 from database import db_update_records, db_get_records, db_insert_records
-from permission_management import record_permissions
+from permissions_analysis import record_permissions
 
 def process_androguard_data(analysis_id, andro_data):
     apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())

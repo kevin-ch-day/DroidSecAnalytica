@@ -13,7 +13,7 @@ from reporting import reporting_menu
 from utils import app_display, user_prompts
 from database import db_menu
 from utils import logging_utils
-from permission_analysis import process_unknown_permissions
+from permissions_analysis import process_unknown_permissions
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
