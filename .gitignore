@@ -1,0 +1,23 @@
+# Compiled Python files
+__pycache__/
+
+# Logs
+*.log
+
+# Virtual environment
+venv/
+
+# IDE files and directories
+.idea/
+.vscode/
+
+# Compiled files and directories
+*.pyc
+*.pyo
+__pycache__/
+
+# Project-specific files (customize as needed)
+data/
+
+# Ignore encryption key
+db_operations/encryption.key
