@@ -2,21 +2,22 @@
 
 import mysql.connector
 from utils import logging_utils, app_display, user_prompts
-from . import db_conn, db_config, db_management
+from . import db_conn, db_config, db_management, db_api_management
 
 # Database menu
 def database_menu():
     while True:
         print(app_display.format_menu_title("Database Menu"))
         print(app_display.format_menu_option(1, "Test Database Connection"))
-        print(app_display.format_menu_option(2, "Display Table Information"))
-        print(app_display.format_menu_option(3, "Show Query Statistics"))
-        print(app_display.format_menu_option(4, "Display Disk Usage"))
-        print(app_display.format_menu_option(5, "Show Thread Information"))
-        print(app_display.format_menu_option(6, "Clear analysis tables"))
+        print(app_display.format_menu_option(2, "Check VirusTotal API Key"))
+        print(app_display.format_menu_option(3, "Display Table Information"))
+        print(app_display.format_menu_option(4, "Show Query Statistics"))
+        print(app_display.format_menu_option(5, "Display Disk Usage"))
+        print(app_display.format_menu_option(6, "Show Thread Information"))
+        print(app_display.format_menu_option(7, "Clear analysis tables"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
 
-        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '0'])
+        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '7','0'])
         if menu_choice == '0':
             break
         
@@ -24,15 +25,18 @@ def database_menu():
             db_conn.test_connection()
 
         elif menu_choice == '2':
-            show_table_information()
+            db_api_management.vt_api_key_menu()
 
         elif menu_choice == '3':
-            display_query_statistics()
+            show_table_information()
 
         elif menu_choice == '4':
-            display_disk_usage()
+            display_query_statistics()
 
         elif menu_choice == '5':
+            display_disk_usage()
+
+        elif menu_choice == '7':
             display_thread_information()
 
         elif menu_choice == '6':

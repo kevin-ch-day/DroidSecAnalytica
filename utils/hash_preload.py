@@ -98,17 +98,16 @@ def get_all_hashes_list():
     # Process each record and extract hashes (MD5, SHA1, SHA256)
     if records:
         for index in records:
-            # Assuming the record is structured as a tuple (id, md5, sha1, sha256, created_at)
-            if index[1]:  # MD5
-                hash_list.append(index[1])
-            if index[2]:  # SHA1
-                hash_list.append(index[2])
+            # Assuming the record is structured as a tuple
             if index[3]:  # SHA256
                 hash_list.append(index[3])
+            
+            elif index[2]:  # SHA1
+                hash_list.append(index[2])
+            
+            elif index[1]:  # MD5
+                hash_list.append(index[1])
 
         print(f"Successfully retrieved {len(hash_list)} hash(es).")
-    
-    else:
-        print("No records found in 'hash_data_ioc'.")
 
     return hash_list
