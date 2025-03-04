@@ -73,6 +73,17 @@ def get_available_api_key() -> Optional[Dict]:
     else:
         print("[ERROR] No available API keys found (all have reached their request limit).")
         return None
+    
+# Retrieve the least recently used API key that is within request limits
+def get_virustotal_api_keys() -> Optional[Dict]:
+
+    sql = "SELECT id, api_key FROM vt_api_keys"
+    result = run_query(sql)
+    if result:
+        return result
+    else:
+        print("[ERROR] No available API keys found.")
+        return None
 
 # Insert a new API key into the database
 def insert_vt_api_key(api_key: str, api_type: str = 'free', max_requests: int = 500) -> bool:

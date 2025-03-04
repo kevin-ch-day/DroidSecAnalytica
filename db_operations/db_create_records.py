@@ -24,23 +24,27 @@ def create_malware_record(file_name, family, md5, sha1, sha256, file_size):
     """
     return run_query(query, (file_name, family, md5, sha1, sha256, file_size))
 
-# Creates a new analysis record
 def create_analysis_record(sample_type: str):
-    query = "SELECT MAX(analysis_id) AS max_id FROM analysis_metadata"
+    """
+    Creates a new analysis record, handling cases where there are no existing IDs.
+    """
+    query = "SELECT MAX(analysis_id) FROM analysis_metadata"
     results = run_query(query)
-
-    # Check if result_max_id is not empty and then extract the max_id
-    max_id = results[0][0] if results and results[0][0] is not None else 0
-    next_id = max_id + 1
-
-    #print(f"Next ID: {next_id}") # DEBUGGING
     
+    # If no results, start with ID 1; otherwise, increment the max ID
+    current_max_id = results[0][0] if results and results[0][0] is not None else 0
+    next_id = current_max_id + 1  # Ensure next ID is always valid
+
+    print(f"Next ID: {next_id}")  # DEBUGGING
+    
+
     query = "INSERT INTO analysis_metadata (analysis_id, analysis_status, sample_type) VALUES (%s, %s, %s)"
     params = (next_id, 'InProgress', sample_type)
 
     run_query(query, params, query_type="insert")
     
     return next_id
+
 
 # Function to create vt_scan_analysis record
 def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:

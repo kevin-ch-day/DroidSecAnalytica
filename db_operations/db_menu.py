@@ -13,8 +13,8 @@ def database_menu():
         print(app_display.format_menu_option(3, "Display Table Information"))
         print(app_display.format_menu_option(4, "Show Query Statistics"))
         print(app_display.format_menu_option(5, "Display Disk Usage"))
-        print(app_display.format_menu_option(6, "Show Thread Information"))
-        print(app_display.format_menu_option(7, "Clear analysis tables"))
+        print(app_display.format_menu_option(6, "Clear analysis tables"))
+        print(app_display.format_menu_option(7, "Show Thread Information"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
 
         menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '7','0'])
@@ -34,13 +34,13 @@ def database_menu():
             display_query_statistics()
 
         elif menu_choice == '5':
-            display_disk_usage()
-
-        elif menu_choice == '7':
-            display_thread_information()
+            disk_usage_report()
 
         elif menu_choice == '6':
             db_management.truncate_analysis_data_tables()
+
+        elif menu_choice == '7':
+            display_thread_information()
 
         input("\nPress any key to continue.")
 
@@ -50,20 +50,6 @@ def execute_query(query, params=None, fetch=False):
     except mysql.connector.Error as e:
         logging_utils.log_error("Database query failed", e)
         return []
-
-def disk_usage(min_size_mb: float = 0.0):
-    query = """
-    SELECT table_name AS 'Table',
-        ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
-        ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
-        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
-    FROM information_schema.TABLES
-    WHERE table_schema = %s
-    GROUP BY table_name
-    HAVING `Total Size in MB` >= %s
-    ORDER BY `Total Size in MB` DESC;
-    """
-    return execute_query(query, params=(db_config.DB_DATABASE, min_size_mb), fetch=True)
 
 def database_summary():
     try:
@@ -153,28 +139,71 @@ def display_query_statistics():
     except Exception as e:
         logging_utils.log_error("Error displaying query statistics", e)
 
-# Display disk usage
-def display_disk_usage():
+def disk_usage_report(min_size_mb: float = 0.0):
+    """
+    Retrieves and displays disk usage information for all tables in the database.
+    Filters tables by minimum size if specified. Provides a summary of total storage.
+    """
+    query = """
+    SELECT table_name AS 'Table',
+        ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
+        ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
+    FROM information_schema.TABLES
+    WHERE table_schema = %s
+    GROUP BY table_name
+    HAVING `Total Size in MB` >= %s
+    ORDER BY `Total Size in MB` DESC;
+    """
+    
     try:
-        disk_usage = disk_usage()
-        if disk_usage:
-            # Header
-            print("\nDisk Usage Report:")
-            header = f"{'Table':<30} | {'Data Size (MB)':>15} | {'Index Size (MB)':>15} | {'Total Size (MB)':>15}"
-            print(header)
-            print("-" * len(header))
+        # Fetch disk usage data
+        disk_usage = execute_query(query, params=(db_config.DB_DATABASE, min_size_mb), fetch=True)
 
-            # Data rows
-            for usage in disk_usage:
-                table, data_size, index_size, total_size = usage
-                print(f"{table:<30} | {data_size:>15} | {index_size:>15} | {total_size:>15}")
+        if not disk_usage:
+            print("\n[INFO] No disk usage data available.")
+            return
+        
+        # Compute total database usage
+        total_data_size = sum(row[1] for row in disk_usage)
+        total_index_size = sum(row[2] for row in disk_usage)
+        total_db_size = sum(row[3] for row in disk_usage)
 
-            # Footer
-            print("-" * len(header))
-        else:
-            print("No disk usage data available.")
+        # Identify the largest table (if available)
+        largest_table = max(disk_usage, key=lambda x: x[3]) if disk_usage else None
+
+        # Display summary
+        print("\n" + "=" * 60)
+        print(f" DATABASE DISK USAGE SUMMARY ({db_config.DB_DATABASE})")
+        print("=" * 60)
+        print(f" Total Tables: {len(disk_usage)}")
+        print(f" Largest Table: {largest_table[0]} ({largest_table[3]} MB)" if largest_table else " Largest Table: None")
+        print(f" Total Data Size: {total_data_size:.2f} MB")
+        print(f" Total Index Size: {total_index_size:.2f} MB")
+        print(f" Total Database Size: {total_db_size:.2f} MB")
+        print("=" * 60)
+
+        # Determine the longest table name for dynamic column sizing
+        max_table_name_length = max(len(row[0]) for row in disk_usage)
+        col_widths = [max(35, max_table_name_length), 15, 15, 15]
+
+        # Display Table Headers with Dynamic Column Width
+        header = f"{'Table':<{col_widths[0]}} | {'Data Size (MB)':>{col_widths[1]}} | {'Index Size (MB)':>{col_widths[2]}} | {'Total Size (MB)':>{col_widths[3]}}"
+        print("\nDisk Usage Details:")
+        print("-" * len(header))
+        print(header)
+        print("-" * len(header))
+
+        # Display Data Rows
+        for table, data_size, index_size, total_size in disk_usage:
+            print(f"{table:<{col_widths[0]}} | {data_size:>{col_widths[1]}.2f} | {index_size:>{col_widths[2]}.2f} | {total_size:>{col_widths[3]}.2f}")
+
+        # Footer
+        print("-" * len(header))
+
     except Exception as e:
-        logging_utils.log_error("Error displaying disk usage", e)
+        logging_utils.log_error("Error retrieving and displaying disk usage", e)
+
 
 # Display threat information
 def display_thread_information():

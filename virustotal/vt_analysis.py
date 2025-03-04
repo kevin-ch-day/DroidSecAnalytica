@@ -40,6 +40,23 @@ def load_hashes_from_source():
 
     return hashes
 
+def analyze_database_hash_data():
+    hashes = hash_preload.get_all_hashes_list()
+    if hashes is None:
+        print("[Error] Failed to load hashes from source.")
+        return
+    elif not hashes:
+        print("[Warning] No hashes were found.")
+        return
+    
+    for count, index in enumerate(hashes, start=1):
+        response = vt_requests.query_virustotal(index, "hash")
+        process_vt_response(response, "hash")
+        print(f"\nProcessed {count} of {len(hashes)} records.")
+        print(f"{'-' * 60}")
+        
+    print("\nAll hash data processed successfully.")
+
 def analyze_hash_data():
     # Step 1: Load the hashes from the file or source
     hashes = load_hashes_from_source()
@@ -65,7 +82,7 @@ def analyze_hash_data():
     # else:
     #     print(f"Found {len(records)} record(s) matching the hash(es).")
 
-    # Step 3: Process the hashes
+    # Step 3: Process the hasheshandle_androguard_response
     sample_type = "hash"
     for count, index in enumerate(hashes, start=1):
         response = vt_requests.query_virustotal(index, sample_type)
@@ -79,7 +96,6 @@ def process_vt_response(response, sample_type):
     print("Processing VirusTotal.com Response...")
     try:
         analysis_id = create_analysis_record(sample_type)
-
         andro_data = vt_androguard.handle_androguard_response(response)
         if andro_data:
             vt_data = process_virustotal_data(response, analysis_id, andro_data) # JSON response from VirusTotal.com

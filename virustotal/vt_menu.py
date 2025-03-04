@@ -10,11 +10,13 @@ def virustotal_menu():
         menu_options = {
             1: "Submit a sample",
             2: "Read hash file data",
-            3: "Test connection to Virustotal.com",
-            4: "Ping 8.8.8.8"
+            3: "Analyze database hash data",
+            4: "Check Virustotal.com",
+            5: "Check Virustotal API Keys",
+            6: "Ping 8.8.8.8"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(5)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])
 
         # exit
         if user_choice == '0':
@@ -43,16 +45,25 @@ def virustotal_menu():
                 if response:
                     handle_response_data(response, "Hash")
 
+        
         # analysis hash data input
         elif user_choice == '2':
             vt_analysis.analyze_hash_data()
         
-        # check connection to virustotal.com
+        # analysis hash data input
         elif user_choice == '3':
+            vt_analysis.analyze_database_hash_data()
+
+        # check connection to virustotal.com
+        elif user_choice == '4':
             vt_utils.check_virustotal_access()
+
+        # analysis hash data input
+        elif user_choice == '5':
+            vt_utils.check_virustotal_api()
         
         # check 8.8.8.8
-        elif user_choice == '4':
+        elif user_choice == '6':
             vt_utils.check_ping()
         
         else:
