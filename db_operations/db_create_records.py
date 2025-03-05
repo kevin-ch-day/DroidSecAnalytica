@@ -4,7 +4,7 @@ from typing import Optional, List, Dict
 from . import db_conn as dbConnect
 from utils import logging_utils
 
-# Function to execute SQL queries with optional parameters and distinguish query types
+# Execute SQL queries with optional parameters and distinguish query types
 def run_query(sql: str, params: Optional[tuple] = None, query_type: str = "select"):
     try:
         if query_type == "select":
@@ -24,20 +24,14 @@ def create_malware_record(file_name, family, md5, sha1, sha256, file_size):
     """
     return run_query(query, (file_name, family, md5, sha1, sha256, file_size))
 
+# Creates a new analysis record, handling cases where there are no existing IDs.
 def create_analysis_record(sample_type: str):
-    """
-    Creates a new analysis record, handling cases where there are no existing IDs.
-    """
     query = "SELECT MAX(analysis_id) FROM analysis_metadata"
     results = run_query(query)
     
     # If no results, start with ID 1; otherwise, increment the max ID
     current_max_id = results[0][0] if results and results[0][0] is not None else 0
     next_id = current_max_id + 1  # Ensure next ID is always valid
-
-    print(f"Next ID: {next_id}")  # DEBUGGING
-    
-
     query = "INSERT INTO analysis_metadata (analysis_id, analysis_status, sample_type) VALUES (%s, %s, %s)"
     params = (next_id, 'InProgress', sample_type)
 
@@ -60,7 +54,6 @@ def create_vt_engine_column(new_vt_engine, data_type="VARCHAR(100)"):
     
     try:
         # Check if the column already exists in the `vt_scan_analysis` table
-        # The query retrieves all column names from the table (implicitly treated as a 'select' query)
         existing_columns = run_query("SHOW COLUMNS FROM vt_scan_analysis", query_type="select")
         
         # If the new column name matches any existing column name, raise an error
@@ -70,12 +63,8 @@ def create_vt_engine_column(new_vt_engine, data_type="VARCHAR(100)"):
         # Prepare the SQL query to add the new column with the specified data type
         # The new column is added after the `type_unsupported` column in the table
         sql = f"ALTER TABLE vt_scan_analysis ADD COLUMN {new_vt_engine} {data_type} AFTER type_unsupported;"
-        
-        # Execute the ALTER TABLE query to modify the database schema
-        # No fetching is required for ALTER TABLE queries
         run_query(sql)
         
-        # Print a success message if the column is added successfully
         print(f"New vt_engine column \"{new_vt_engine}\" added successfully.")
     
     except Exception as e:

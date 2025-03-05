@@ -121,12 +121,12 @@ def get_request_details(data, query_type, headers):
     Determines the request URL, method, and file data based on the query type.
     """
     if query_type == 'hash':
-        log_event(f"\nHash: {data}")
-        log_event(f"API key ending in {headers['x-apikey'][-8:]}\n")
+        print(f"Hash: {data}")
+        print(f"API key ending in {headers['x-apikey'][-8:]}\n")
         return f"{BASE_URL}/{data}", "GET", None
 
     elif query_type == 'apk':
-        log_event(f"Uploading APK with API key ending in {headers['x-apikey'][-8:]}")
+        print(f"Uploading APK with API key ending in {headers['x-apikey'][-8:]}")
         try:
             with open(data, 'rb') as file:
                 return BASE_URL, "POST", {'file': (data, file)}

@@ -26,9 +26,9 @@ def process_metadata(analysis_id, andro_data):
     print("\n" + "="*45)
     print("          *** HASH DATA GENERATED ***          ")
     print("="*45)
-    print(f"{'MD5 Hash:':<15} {md5}")
-    print(f"{'SHA1 Hash:':<15} {sha1}")
-    print(f"{'SHA256 Hash:':<15} {sha256}")
+    print(f"{'MD5:':<15} {md5}")
+    print(f"{'SHA1:':<15} {sha1}")
+    print(f"{'SHA256:':<15} {sha256}")
     print("="*45 + "\n")
 
     # Display the retrieved metadata information

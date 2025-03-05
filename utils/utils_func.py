@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 
 def read_hash_file_data(filepath):
     print(f"Reading hash data from {filepath}...")
@@ -17,6 +18,9 @@ def read_hash_file_data(filepath):
         print(f"[Error] An unexpected error occurred while reading the file: {e}")
     
     return None
+
+def is_valid_sha256(hash_str: str) -> bool:
+    return bool(re.fullmatch(r'^[a-fA-F0-9]{64}$', hash_str))
 
 def calculate_hashes(apk_file_path):
     # Check if the file is an APK file

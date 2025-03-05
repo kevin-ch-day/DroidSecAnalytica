@@ -111,3 +111,28 @@ def get_all_hashes_list():
         print(f"Successfully retrieved {len(hash_list)} hash(es).")
 
     return hash_list
+
+def get_unanalyzed_hashes():
+    # Fetches all unanalyzed SHA256 hashes from the 'hash_data_ioc' table 
+    # and returns them as a list of strings.
+
+    # Display section title
+    print("\n" + "=" * 80)
+    print("FETCHING UNANALYZED SHA256 HASHES".center(80))
+    print("=" * 80 + "\n")
+
+    # Retrieve records from the database
+    records = db_get_records.get_unanalyzed_database_hashes()
+
+    # Extract SHA256 hashes into a list
+    hash_list = [record["sha256"] for record in records] if records else []
+
+    # Display results
+    if hash_list:
+        print(f"Retrieved {len(hash_list):,} unanalyzed hash(es).")
+        print("These hashes have NOT yet been analyzed in the database.\n")
+    else:
+        print("No unanalyzed hashes found. All entries in 'hash_data_ioc' have been processed.\n")
+
+    print("=" * 80 + "\n")
+    return hash_list

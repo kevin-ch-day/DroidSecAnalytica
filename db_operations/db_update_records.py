@@ -181,3 +181,20 @@ def update_zoneAlarm_not_a_virus(apk_id: int, is_not_a_virus: bool) -> Optional[
     except Exception as e:
         print(f"[ERROR] Failed to update 'ZoneAlarm_not_a_virus' for apk_id {apk_id}: {e}")
         return None
+
+def update_malware_type_description(sha256: str, data_type_description: str) -> Optional[bool]:
+    # Update the data_type_description in the malware_samples table for a given sha256 hash.
+
+    query = """
+        UPDATE malware_samples
+        SET data_type_description = %s
+        WHERE sha256 = %s
+    """
+    params = (data_type_description, sha256)
+
+    try:
+        result = run_query(query, params)
+        return True if result else False  # Return True if updated, False if no rows were affected
+    except Exception as e:
+        logging_utils.log_error(f"Error updating data_type_description for SHA256 {sha256}", e)
+        return None

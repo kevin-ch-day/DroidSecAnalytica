@@ -2,7 +2,7 @@
 
 import pandas as pd
 from db_operations import db_analysis_func
-from . import report_data_func
+from . import report_data_func, hash_database_audit
 from utils import user_prompts, app_display, file_output_func, statistical_visuals
 
 # Set up logging
@@ -14,10 +14,11 @@ def report_generation_menu():
         menu_options = {
             1: "Detection Results",
             2: "Permisssion Analysis Results I",
-            3: "Permisssion Analysis Results II"
+            3: "Permisssion Analysis Results II",
+            4: "Hash Database Audit"
         }
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nChoice: ", [str(i) for i in range(4)])
+        user_choice = user_prompts.user_menu_choice("\nChoice: ", [str(i) for i in range(5)])
 
         # Report to main menu
         if user_choice == '0':
@@ -35,11 +36,9 @@ def report_generation_menu():
         elif user_choice == '3':
             permission_reports_beta()
 
-        # permission_reports_gamma
-        elif user_choice == '3':
-            print("FIX: permission_reports_gamma() COMMENTED OUT [!!]")
-            #permission_reports_gamma()
-            pass
+        # hash_database_audit
+        elif user_choice == '4':
+            hash_database_audit.run_audit()
 
         # Invalid choice
         else:

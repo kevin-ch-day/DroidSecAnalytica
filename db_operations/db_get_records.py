@@ -161,3 +161,27 @@ def get_all_hash_data() -> List[Dict]:
     except Exception as e:
         print(f"[ERROR] Error retrieving records from 'hash_data_ioc': {e}")
         return []
+    
+from typing import List, Dict
+
+def get_unanalyzed_database_hashes() -> List[Dict]:
+    try:
+        sql = """
+            SELECT x.sha256
+            FROM hash_data_ioc x
+            LEFT JOIN analysis_metadata a
+                ON x.sha256 = a.sha256
+            WHERE a.sha256 IS NULL
+        """
+        
+        records = db_conn.execute_query(sql, fetch=True)
+        if records:
+            return [{"sha256": row[0]} for row in records]
+        else:
+            print("No unanalyzed SHA256 hashes found in 'hash_data_ioc'.")
+            return []
+    
+    except Exception as e:
+        print(f"[ERROR] Error retrieving unanalyzed SHA256 hashes: {e}")
+        return []
+

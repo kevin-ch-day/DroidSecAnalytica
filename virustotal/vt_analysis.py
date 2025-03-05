@@ -10,6 +10,11 @@ from utils import utils_func, hash_preload
 from reporting import generate_vt_reports as vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
 
+def test_hash_virustotal():
+    hash = "fdb64ef888a0f1fe8c305453803b3ee7029dc0d4f42c70af34b6d4aaee4359b4"
+    response = vt_requests.query_virustotal(hash, "hash")
+    process_vt_response(response, "hash")
+
 def load_hashes_from_source():
     print("\n" + "="*40)
     print("          *** HASH LOADING MENU ***          ")
@@ -41,18 +46,18 @@ def load_hashes_from_source():
     return hashes
 
 def analyze_database_hash_data():
-    hashes = hash_preload.get_all_hashes_list()
-    if hashes is None:
+    hash_results = hash_preload.get_unanalyzed_hashes()
+    if hash_results is None:
         print("[Error] Failed to load hashes from source.")
         return
-    elif not hashes:
+    elif not hash_results:
         print("[Warning] No hashes were found.")
         return
     
-    for count, index in enumerate(hashes, start=1):
+    for count, index in enumerate(hash_results, start=1):
         response = vt_requests.query_virustotal(index, "hash")
         process_vt_response(response, "hash")
-        print(f"\nProcessed {count} of {len(hashes)} records.")
+        print(f"\nProcessed {count} of {len(hash_results)} records.")
         print(f"{'-' * 60}")
         
     print("\nAll hash data processed successfully.")
@@ -83,17 +88,39 @@ def analyze_hash_data():
     #     print(f"Found {len(records)} record(s) matching the hash(es).")
 
     # Step 3: Process the hasheshandle_androguard_response
-    sample_type = "hash"
     for count, index in enumerate(hashes, start=1):
-        response = vt_requests.query_virustotal(index, sample_type)
-        process_vt_response(response, sample_type)
+        response = vt_requests.query_virustotal(index, "hash")
+        process_vt_response(response, "hash")
         print(f"\nProcessed {count} of {len(hashes)} records.")
         print(f"{'-' * 60}")
         
     print("\nAll hash data processed successfully.")
 
 def process_vt_response(response, sample_type):
-    print("Processing VirusTotal.com Response...")
+    print("Processing VirusTotal response...")
+
+    # Safely get data from the response
+    response_data = response.get('data', {})
+    if not response_data:
+        print("[Error] No data return...")
+        return None
+
+    # Get attributes, androguard data
+    data_attributes = response_data.get('attributes', {})
+    data_sha256= data_attributes.get('sha256', None)
+    data_type_description = data_attributes.get('type_description', None)
+
+    #utils_func.is_valid_sha256()
+
+    db_update_records.update_malware_type_description(data_sha256, data_type_description)
+
+    if "Win32 EXE" == data_type_description:
+        print("SAMPLE TYPE DESCRIPTION: Win32 EXE")
+        return
+    elif "Android" != data_type_description:
+        print(f"SAMPLE TYPE DESCRIPTION: {data_type_description}")
+        return
+    
     try:
         analysis_id = create_analysis_record(sample_type)
         andro_data = vt_androguard.handle_androguard_response(response)
@@ -108,11 +135,11 @@ def process_vt_response(response, sample_type):
 
             else:
                 db_update_records.update_hash_data_ioc_record(andro_data.get_md5(), andro_data.get_sha1(), andro_data.get_sha256())
+                db_update_records.update_analysis_status(analysis_id, "Completed")
    
         else:
             print("No Androguard data found in response.")
-
-        db_update_records.update_analysis_status(analysis_id, "Completed")
+            db_update_records.update_analysis_status(analysis_id, "Incompleted")
 
     except Exception as e:
         error_message = str(e)
@@ -121,49 +148,21 @@ def process_vt_response(response, sample_type):
         # Check if it's a database connection error or query failure
         if "Database connection failed" in error_message or "Failed to execute query" in error_message:
             print("Critical database error occurred. Exiting the program...")
-            sys.exit(1)  # Exit the program with status code 1 indicating failure
-
+            sys.exit(1)
         else:
             print(f"An unexpected error occurred: {error_message}")
 
 def process_virustotal_data(response, analysis_id, andro_data):
-    vt_data = parse_virustotal_response(response)
-    debug_save_json = False
-    
+    vt_data = parse_virustotal_response(response)    
     if vt_data:
         apk_id = get_and_update_apk_record(andro_data, vt_data)
-
-        # Create a record for VirusTotal engine detections
         db_create_records.create_vt_engine_record(analysis_id, apk_id)
-
         update_summary_and_detection_stats(analysis_id, vt_data)
-        
-        if debug_save_json:
-            save_virustotal_json(vt_data, andro_data)
 
     else:
         print("No VirusTotal data found in response.")
     
     return vt_data
-
-def save_virustotal_json(vt_data, andro_data):
-    # Prompt the user to decide whether to save the JSON response
-    while True:
-        save_json_prompt = input("Do you want to save the VirusTotal JSON response? (Y/N): ").strip().lower()
-        if save_json_prompt in ['y', 'n']:
-            save_json = save_json_prompt == 'y'
-            break
-        else:
-            print("Invalid input. Please enter 'Y' or 'N'.")
-    
-    # Save JSON response if the user chooses 'Y'
-    if save_json:
-        json_filename = f"output/{andro_data.get_md5()}_json_data.txt"
-        vt_utils.save_json_response(vt_data, json_filename)
-        print(f"Saved JSON response to {json_filename}")
-
-    else:
-        print("Processed VirusTotal data without saving the JSON response.")
 
 def malware_classification(analysis_id, andro_data):
     try:
@@ -183,7 +182,6 @@ def malware_classification(analysis_id, andro_data):
             return
         
         analysis_results = vendor_classifications.analyze_classifications(df)
-
         if not analysis_results:
             print("No analysis results to process for malware classification.")
             return
@@ -246,8 +244,6 @@ def update_summary_and_detection_stats(analysis_id, vt_data):
     #print("Added engine detection results.") # DEBUGGING
 
 def parse_virustotal_response(response):
-    # print("\nParsing VirusTotal response...") # DEBUGGING
-
     try:
         data = response.get('data', {})
         if not data:
@@ -286,7 +282,6 @@ def parse_engine_detection(attributes):
     return [[engine, data.get('result', 'N/A')] for engine, data in sorted(detailed_breakdown.items())]
 
 def create_vt_report(andro_data, vt_data):
-    # Generates and saves the VirusTotal analysis report.
     if vt_data and andro_data:
         try:
             vt_reports.generate_report(andro_data, vt_data)

@@ -2,47 +2,71 @@
 
 import mysql.connector
 from utils import logging_utils, app_display, user_prompts
-from . import db_conn, db_config, db_management, db_api_management
+from . import db_conn, db_management, db_api_management, orphaned_analysis_cleanup, db_util_func
 
 # Database menu
 def database_menu():
+    """
+    Displays the interactive Database Menu, allowing users to execute various database-related operations.
+    """
     while True:
-        print(app_display.format_menu_title("Database Menu"))
+        print(app_display.format_menu_title("Database Management Menu"))
+
         print(app_display.format_menu_option(1, "Test Database Connection"))
-        print(app_display.format_menu_option(2, "Check VirusTotal API Key"))
-        print(app_display.format_menu_option(3, "Display Table Information"))
-        print(app_display.format_menu_option(4, "Show Query Statistics"))
+        print(app_display.format_menu_option(2, "Display Table Information"))
+        print(app_display.format_menu_option(3, "Show Query Statistics"))
+        print(app_display.format_menu_option(4, "Check VirusTotal API Key"))
         print(app_display.format_menu_option(5, "Display Disk Usage"))
-        print(app_display.format_menu_option(6, "Clear analysis tables"))
-        print(app_display.format_menu_option(7, "Show Thread Information"))
+        print(app_display.format_menu_option(6, "Show Thread Information"))
+        print(app_display.format_menu_option(7, "Cleanup Orphaned Analysis Data"))
+        print(app_display.format_menu_option(8, "Clear Analysis Tables"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
 
-        menu_choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['1', '2', '3', '4', '5', '6', '7','0'])
+        menu_choice = user_prompts.user_menu_choice("\nEnter your choice (0-8): ", 
+                                                    ['0', '1', '2', '3', '4', '5', '6', '7', '8'])
+
         if menu_choice == '0':
+            print("\nReturning to Main Menu...\n")
             break
-        
+
         elif menu_choice == '1':
+            print("\n[INFO] Testing database connection...\n")
             db_conn.test_connection()
 
         elif menu_choice == '2':
-            db_api_management.vt_api_key_menu()
-
-        elif menu_choice == '3':
+            print("\n[INFO] Retrieving database table information...\n")
             show_table_information()
 
-        elif menu_choice == '4':
+        elif menu_choice == '3':
+            print("\n[INFO] Fetching database query execution statistics...\n")
             display_query_statistics()
 
+        elif menu_choice == '4':
+            print("\n[INFO] Checking VirusTotal API Key settings...\n")
+            db_api_management.vt_api_key_menu()
+
         elif menu_choice == '5':
-            disk_usage_report()
+            print("\n[INFO] Analyzing database disk usage...\n")
+            db_util_func.disk_usage_report()
 
         elif menu_choice == '6':
-            db_management.truncate_analysis_data_tables()
-
-        elif menu_choice == '7':
+            print("\n[INFO] Displaying database thread activity...\n")
             display_thread_information()
 
-        input("\nPress any key to continue.")
+        elif menu_choice == '7':
+            print("\n[INFO] Running orphaned analysis cleanup...\n")
+            orphaned_analysis_cleanup.run_orphaned_analysis_cleanup()
+
+        elif menu_choice == '8':
+            print("\n[WARNING] This will clear all analysis data. Proceed with caution.\n")
+            confirm = user_prompts.user_menu_choice("Are you sure you want to clear analysis tables? (yes/no): ", ['yes', 'no'])
+            if confirm == 'yes':
+                print("\n[INFO] Clearing analysis tables...\n")
+                db_management.truncate_analysis_data_tables()
+            else:
+                print("\nOperation canceled. Returning to the menu.\n")
+
+        input("\nPress Enter to continue...")
 
 def execute_query(query, params=None, fetch=False):
     try:
@@ -77,25 +101,6 @@ def thread_summary():
 def get_query_statistics():
     query = "SHOW STATUS LIKE 'Queries';"
     return execute_query(query, fetch=True)
-
-def tables_summary():
-    result = execute_query("SHOW TABLES;", fetch=True)
-    table_info = []
-    for (table_name,) in result:
-        num_columns = len(execute_query(f"SHOW COLUMNS FROM {table_name};", fetch=True))
-        num_rows = execute_query(f"SELECT COUNT(*) FROM {table_name};", fetch=True)[0][0]
-
-        size_query = """
-        SELECT table_schema 'Database', ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) 'Size in MB'
-        FROM information_schema.TABLES
-        WHERE table_schema = %s AND table_name = %s
-        GROUP BY table_schema, table_name;
-        """
-        size_result = execute_query(size_query, params=(db_config.DB_DATABASE, table_name), fetch=True)
-        size_mb = size_result[0][1] if size_result else 0.0
-
-        table_info.append((table_name, num_columns, num_rows, size_mb))
-    return table_info
 
 def show_table_information():
     database_tables_info = db_management.list_tables()
@@ -138,72 +143,6 @@ def display_query_statistics():
             print("No query statistics available.")
     except Exception as e:
         logging_utils.log_error("Error displaying query statistics", e)
-
-def disk_usage_report(min_size_mb: float = 0.0):
-    """
-    Retrieves and displays disk usage information for all tables in the database.
-    Filters tables by minimum size if specified. Provides a summary of total storage.
-    """
-    query = """
-    SELECT table_name AS 'Table',
-        ROUND(SUM(data_length) / 1024 / 1024, 2) AS 'Data Size in MB',
-        ROUND(SUM(index_length) / 1024 / 1024, 2) AS 'Index Size in MB',
-        ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS 'Total Size in MB'
-    FROM information_schema.TABLES
-    WHERE table_schema = %s
-    GROUP BY table_name
-    HAVING `Total Size in MB` >= %s
-    ORDER BY `Total Size in MB` DESC;
-    """
-    
-    try:
-        # Fetch disk usage data
-        disk_usage = execute_query(query, params=(db_config.DB_DATABASE, min_size_mb), fetch=True)
-
-        if not disk_usage:
-            print("\n[INFO] No disk usage data available.")
-            return
-        
-        # Compute total database usage
-        total_data_size = sum(row[1] for row in disk_usage)
-        total_index_size = sum(row[2] for row in disk_usage)
-        total_db_size = sum(row[3] for row in disk_usage)
-
-        # Identify the largest table (if available)
-        largest_table = max(disk_usage, key=lambda x: x[3]) if disk_usage else None
-
-        # Display summary
-        print("\n" + "=" * 60)
-        print(f" DATABASE DISK USAGE SUMMARY ({db_config.DB_DATABASE})")
-        print("=" * 60)
-        print(f" Total Tables: {len(disk_usage)}")
-        print(f" Largest Table: {largest_table[0]} ({largest_table[3]} MB)" if largest_table else " Largest Table: None")
-        print(f" Total Data Size: {total_data_size:.2f} MB")
-        print(f" Total Index Size: {total_index_size:.2f} MB")
-        print(f" Total Database Size: {total_db_size:.2f} MB")
-        print("=" * 60)
-
-        # Determine the longest table name for dynamic column sizing
-        max_table_name_length = max(len(row[0]) for row in disk_usage)
-        col_widths = [max(35, max_table_name_length), 15, 15, 15]
-
-        # Display Table Headers with Dynamic Column Width
-        header = f"{'Table':<{col_widths[0]}} | {'Data Size (MB)':>{col_widths[1]}} | {'Index Size (MB)':>{col_widths[2]}} | {'Total Size (MB)':>{col_widths[3]}}"
-        print("\nDisk Usage Details:")
-        print("-" * len(header))
-        print(header)
-        print("-" * len(header))
-
-        # Display Data Rows
-        for table, data_size, index_size, total_size in disk_usage:
-            print(f"{table:<{col_widths[0]}} | {data_size:>{col_widths[1]}.2f} | {index_size:>{col_widths[2]}.2f} | {total_size:>{col_widths[3]}.2f}")
-
-        # Footer
-        print("-" * len(header))
-
-    except Exception as e:
-        logging_utils.log_error("Error retrieving and displaying disk usage", e)
-
 
 # Display threat information
 def display_thread_information():
