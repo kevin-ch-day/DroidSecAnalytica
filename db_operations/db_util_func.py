@@ -1,9 +1,11 @@
 # db_util_func.py
 
-from . import db_conn, db_config
+from typing import Optional
+import mysql.connector
 
 from utils import logging_utils
-import mysql.connector
+
+from . import db_conn, db_config
 
 def execute_query(query, params=None, fetch=False):
     try:
@@ -11,6 +13,19 @@ def execute_query(query, params=None, fetch=False):
     except mysql.connector.Error as e:
         logging_utils.log_error("Database query failed", e)
         return []
+
+def get_table_row_count(table_name: str) -> Optional[int]:
+    try:
+        sql = f"SELECT COUNT(*) FROM {table_name}"
+        result = execute_query(sql)
+        if result:
+            # Access the first item of the first row
+            return result[0][0]
+        else:
+            return 0
+    except Exception as e:
+        print(f"[ERROR] Failed to retrieve row count for table {table_name}: {e}")
+        return None
 
 def check_column_value_by_id(table, column_name, record_id):
     # Checks if a specific column for a given record ID has a value.

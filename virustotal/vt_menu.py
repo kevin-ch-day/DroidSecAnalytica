@@ -1,74 +1,111 @@
 # vt_menu.py
 
 import os
-from . import vt_display, vt_androguard, vt_analysis, vt_requests, vt_utils
-from utils import user_prompts, app_display
+from . import vt_display, vt_androguard, vt_analysis, vt_requests, vt_utils, hash_xlsx_data_loader
+from utils import user_prompts, app_display, hash_preload
+
+import os
 
 def virustotal_menu():
     while True:
         menu_title = "VirusTotal Analysis Menu"
         menu_options = {
-            1: "Submit a sample",
-            2: "Read hash file data",
-            3: "Analyze database hash data",
-            4: "Check Virustotal.com",
-            5: "Check Virustotal API Keys",
-            6: "Ping 8.8.8.8"
+            1: "Submit an APK file for analysis",
+            2: "Submit a hash to VirusTotal",
+            3: "Analyze hash data from a text file (.txt)",
+            4: "Analyze hash data from an Excel file (.xlsx)",
+            5: "Check database for unanalyzed hash data",
+            6: "Test connection to VirusTotal",
+            7: "Validate VirusTotal API keys",
+            0: "Exit menu"
         }
+
         app_display.display_menu(menu_title, menu_options)
-        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(7)])
+        user_choice = user_prompts.user_menu_choice("\nEnter your choice: ", [str(i) for i in range(8)])
 
-        # exit
+        # Exit
         if user_choice == '0':
+            print("\nExiting VirusTotal Analysis Menu...\n")
             break
-        
-        # submit to virustotal.com
+
+        # Submit an APK file for analysis
         elif user_choice == '1':
-            menu_title = "VirusTotal Submission:"
-            menu_options = {1: "APK", 2: "Hash"}
-            app_display.display_menu(menu_title, menu_options)
-            choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2'])
+            print("\nSubmitting an APK file to VirusTotal...")
+            apk_file_path = user_prompts.user_enter_apk_path()
 
-            # Return to menu
-            if choice == '0':
-                return
-            
-            # Submit APK
-            elif choice == '1':
-                response = submit_apk()
-                if response:
-                    handle_response_data(response, "APK")
-            
-            # Submit Hash
-            elif choice == '2':
-                response = submit_hash()
-                if response:
-                    handle_response_data(response, "Hash")
+            if os.path.isfile(apk_file_path):
+                try:
+                    #response = vt_requests.query_apk(apk_file_path, 'hash')
+                    print("vt_requests.query_apk(apk_file_path, 'hash')")
+                    response = None
+                    if response:
+                        print("APK file successfully submitted for analysis.")
+                        handle_response_data(response, "APK")
+                    else:
+                        print("Submission failed. Please try again.")
+                except Exception as e:
+                    print(f"Error submitting the APK: {e}")
+            else:
+                print("Invalid APK file path. Please check the file location and try again.")
 
-        
-        # analysis hash data input
+        # Submit a hash to VirusTotal
         elif user_choice == '2':
-            vt_analysis.analyze_hash_data()
-        
-        # analysis hash data input
+            print("\nSubmitting a hash to VirusTotal...")
+            hash_value = user_prompts.user_enter_hash_ioc()
+
+            if hash_value:
+                try:
+                    response = vt_requests.query_virustotal(hash_value, 'hash')
+                    if response:
+                        print("Hash successfully submitted for analysis.")
+                        handle_response_data(response, "Hash")
+                    else:
+                        print("Submission failed. Please try again.")
+                except Exception as e:
+                    print(f"Error submitting the hash: {e}")
+            else:
+                print("Invalid hash input. Please enter a valid hash.")
+
+        # Analyze hash data from a text file
         elif user_choice == '3':
-            vt_analysis.analyze_database_hash_data()
+            print("\nLoading and analyzing hash data from a text file (.txt)...")
+            result = hash_preload.load_hashes_from_txt()
+            if result:
+                print("Hash data from the text file successfully analyzed.")
+            else:
+                print("No valid hash data found in the text file.")
 
-        # check connection to virustotal.com
+        # Analyze hash data from an Excel file
         elif user_choice == '4':
-            vt_utils.check_virustotal_access()
+            print("\nLoading and analyzing hash data from an Excel file (.xlsx)...")
+            hash_xlsx_data_loader.run_xlxs_data_loader()            
 
-        # analysis hash data input
+        # Check database for unanalyzed hash data
         elif user_choice == '5':
-            vt_utils.check_virustotal_api()
-        
-        # check 8.8.8.8
-        elif user_choice == '6':
-            vt_utils.check_ping()
-        
-        else:
-            print("Invalid choice. Please enter a number between 0 and 5.")
+            print("\nChecking the database for unanalyzed hash data...")
+            result = vt_analysis.check_unanalyzed_hashes()
+            if result:
+                print("Unanalyzed hash data found and ready for processing.")
+            else:
+                print("No unanalyzed hash data found in the database.")
 
+        # Test connection to VirusTotal
+        elif user_choice == '6':
+            print("\nTesting connection to VirusTotal.com...")
+            if vt_utils.check_virustotal_access():
+                print("Successfully connected to VirusTotal.")
+            else:
+                print("Unable to reach VirusTotal. Check your network connection.")
+
+        # Validate VirusTotal API keys
+        elif user_choice == '7':
+            print("\nValidating VirusTotal API keys...")
+            if vt_utils.check_virustotal_api():
+                print("API keys are valid and active.")
+            else:
+                print("Invalid or expired API keys. Please update your API key.")
+
+        # Pause before looping back
         user_prompts.pause_until_keypress()
 
 def handle_response_data(response, sample_type):
@@ -145,21 +182,3 @@ def display_androguard_data(response):
             
             else:
                 print("Invalid choice.")
-
-def submit_apk():
-    apk_file_path = user_prompts.user_enter_apk_path()
-    if os.path.isfile(apk_file_path):
-        try:
-            return vt_requests.query_apk(apk_file_path, 'hash')
-        except Exception as e:
-            print(f"Error submitting the APK: {e}")
-    else:
-        print("Invalid APK file path.")
-
-def submit_hash():
-    hash_value = user_prompts.user_enter_hash_ioc()
-    try:
-        return vt_requests.query_virustotal(hash_value, 'hash')
-    
-    except Exception as e:
-        print(f"Error submitting the hash: {e}")

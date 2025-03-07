@@ -82,7 +82,7 @@ def check_all_api_keys():
     Verifies that all API keys are working.
     If all fail, alerts the user.
     """
-    all_keys = db_vt_api_keys.get_all_api_keys()
+    all_keys = db_vt_api_keys.get_virustotal_api_keys()
     failed_keys = []
     valid_keys = []
     test_url = "https://www.virustotal.com/api/v3/users/me"  # Test endpoint
@@ -121,8 +121,8 @@ def get_request_details(data, query_type, headers):
     Determines the request URL, method, and file data based on the query type.
     """
     if query_type == 'hash':
-        print(f"Hash: {data}")
-        print(f"API key ending in {headers['x-apikey'][-8:]}\n")
+        #print(f"Hash: {data}") # DEBUGGING
+        print(f"API key ending in {headers['x-apikey'][-8:]}") # DEBUGGING
         return f"{BASE_URL}/{data}", "GET", None
 
     elif query_type == 'apk':
@@ -176,7 +176,6 @@ def query_virustotal(data, query_type):
         url, method, files = get_request_details(data, query_type, headers)
 
         response = https_request(method, url, headers=headers, files=files)
-
         if response == "INVALID_API_KEY":
             if not handle_invalid_api_key(headers, failed_keys):
                 return None  # No valid API keys left, exit

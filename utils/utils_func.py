@@ -2,6 +2,19 @@ import hashlib
 import os
 import re
 
+def format_size(bytes_value):
+    """
+    Converts a size in bytes to a human-readable format (KB, MB, GB).
+    """
+    if bytes_value < 1024:
+        return f"{bytes_value} B"
+    elif bytes_value < 1024 ** 2:
+        return f"{bytes_value / 1024:.2f} KB"
+    elif bytes_value < 1024 ** 3:
+        return f"{bytes_value / (1024 ** 2):.2f} MB"
+    else:
+        return f"{bytes_value / (1024 ** 3):.2f} GB"
+
 def read_hash_file_data(filepath):
     print(f"Reading hash data from {filepath}...")
     try:

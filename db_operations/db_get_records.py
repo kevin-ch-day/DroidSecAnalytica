@@ -11,9 +11,6 @@ def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
         logging_utils.log_error(f"Error executing SQL query: {sql}", e)
         return []
 
-def get_apk_samples() -> List[Dict]:
-    return run_query("SELECT * FROM apk_samples ORDER BY apk_id")
-
 def get_malware_hash_samples() -> List[Dict]:
     return run_query("SELECT * FROM malware_ioc_threats")
 
@@ -25,24 +22,6 @@ def get_apk_id_by_sha256(sha256: str) -> Optional[int]:
         return result[0][0]
     else:
         return None
-
-def get_apk_sample_record_by_sha256(sha256) -> List[Dict]:
-    return run_query(f"SELECT * FROM apk_samples where sha256 = '{sha256}' ORDER BY apk_id")
-
-def get_samples_id_sha256() -> List[Dict]:
-    return run_query("SELECT apk_id, sha256 FROM apk_samples ORDER BY apk_id")
-
-def get_apk_sha256_by_id(apk_id: int) -> Optional[Tuple[int, str]]:
-    return next(iter(run_query("SELECT apk_id, sha256 FROM apk_samples WHERE apk_id = %s", (apk_id,))), None)
-
-def get_apk_samples_by_sha256(sha256_list: List[str]) -> List[Dict]:
-    # Queries the apk_samples table for records matching a list of SHA256 hashes.
-    matching_records = []
-    for sha256 in sha256_list:
-        records = run_query("SELECT * FROM apk_samples WHERE sha256 = %s", (sha256,))
-        if records:
-            matching_records.extend(records)
-    return matching_records
 
 def get_apk_samples_by_md5(md5_hashes: List[str]) -> List[Dict]:
     # Queries the apk_samples table for records matching a list of MD5 hashes.
@@ -74,8 +53,8 @@ def get_malware_classification(sha256):
     # Retrieves malware classification information for a given SHA-256 hash.
     sql = """
         SELECT m.id,
-               m.name_1 AS Name,
-               m.name_2 AS Family,
+               m.malware_name AS Name,
+               m.malware_family AS Family,
                m.virustotal_label,
                s.AhnLab_V3,
                s.Alibaba,
@@ -101,19 +80,6 @@ def get_malware_classification(sha256):
         print(f"Error fetching malware classification: {e}")
         return []
     
-def get_table_row_count(table_name: str) -> Optional[int]:
-    try:
-        sql = f"SELECT COUNT(*) FROM {table_name}"
-        result = run_query(sql)
-        if result:
-            # Access the first item of the first row
-            return result[0][0]
-        else:
-            return 0
-    except Exception as e:
-        print(f"[ERROR] Failed to retrieve row count for table {table_name}: {e}")
-        return None
-
 def check_hash_exists(md5: Optional[str] = None, sha1: Optional[str] = None, sha256: Optional[str] = None) -> bool:
     # Checks if a hash (MD5, SHA1, or SHA256) exists in the 'hash_data_ioc' table.
     # Returns True if the hash is found, False otherwise.
@@ -167,11 +133,11 @@ from typing import List, Dict
 def get_unanalyzed_database_hashes() -> List[Dict]:
     try:
         sql = """
-            SELECT x.sha256
-            FROM hash_data_ioc x
-            LEFT JOIN analysis_metadata a
-                ON x.sha256 = a.sha256
-            WHERE a.sha256 IS NULL
+            SELECT ms.sha256
+            FROM malware_samples ms
+            WHERE ms.data_type_description IS NULL
+                OR ms.data_type_description = 'Android'
+                OR ms.data_type_description NOT IN ('Win32 EXE', 'ZIP', 'Text', 'Shell script', 'RAR', 'JAR', 'ELF')
         """
         
         records = db_conn.execute_query(sql, fetch=True)

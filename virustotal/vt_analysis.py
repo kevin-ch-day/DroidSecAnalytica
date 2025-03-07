@@ -6,7 +6,7 @@ import sys
 
 # Custom Libraries
 from db_operations import db_update_records, db_get_records, db_create_records, db_util_func, db_insert_records
-from utils import utils_func, hash_preload
+from utils import hash_preload
 from reporting import generate_vt_reports as vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
 
@@ -14,36 +14,6 @@ def test_hash_virustotal():
     hash = "fdb64ef888a0f1fe8c305453803b3ee7029dc0d4f42c70af34b6d4aaee4359b4"
     response = vt_requests.query_virustotal(hash, "hash")
     process_vt_response(response, "hash")
-
-def load_hashes_from_source():
-    print("\n" + "="*40)
-    print("          *** HASH LOADING MENU ***          ")
-    print("="*40)
-    print("\n [1] Load from file")
-    print(" [2] Load from database")
-    print("="*40)
-    
-    choice_prompt = input("\nEnter your choice (1 or 2): ")    
-    try:
-        user_choice = int(choice_prompt)
-    except ValueError:
-        print("[ERROR] Invalid input. Please enter 1 or 2.")
-        return load_hashes_from_source()
-
-    # load from file
-    if user_choice == 1:
-        FILE_PATH = "input\\Hash-Data-Small.txt"
-        hashes = utils_func.read_hash_file_data(FILE_PATH)
-    
-    # load from database
-    elif user_choice == 2:
-        hashes = hash_preload.get_all_hashes_list()
-    
-    else:
-        print("[ERROR] Invalid option chosen. Exiting...")
-        return None
-
-    return hashes
 
 def analyze_database_hash_data():
     hash_results = hash_preload.get_unanalyzed_hashes()
@@ -62,40 +32,6 @@ def analyze_database_hash_data():
         
     print("\nAll hash data processed successfully.")
 
-def analyze_hash_data():
-    # Step 1: Load the hashes from the file or source
-    hashes = load_hashes_from_source()
-
-    # Handle errors or empty hash file early
-    if hashes is None:
-        print("[Error] Failed to load hashes from source.")
-        return
-    elif not hashes:
-        print("[Warning] No hashes were found.")
-        return
-
-    # # Step 2: Query the database for records matching the hashes
-    # if not hashes:
-    #     records = db_get_records.get_all_sample_md5_to_analyze()
-    # else:
-    #     records = db_get_records.get_apk_samples_by_md5(hashes)
-    
-    # # Handle no matching records in the database
-    # if not records:
-    #     print("[Warning] No matching records found in the database.")
-    #     return
-    # else:
-    #     print(f"Found {len(records)} record(s) matching the hash(es).")
-
-    # Step 3: Process the hasheshandle_androguard_response
-    for count, index in enumerate(hashes, start=1):
-        response = vt_requests.query_virustotal(index, "hash")
-        process_vt_response(response, "hash")
-        print(f"\nProcessed {count} of {len(hashes)} records.")
-        print(f"{'-' * 60}")
-        
-    print("\nAll hash data processed successfully.")
-
 def process_vt_response(response, sample_type):
     print("Processing VirusTotal response...")
 
@@ -110,13 +46,12 @@ def process_vt_response(response, sample_type):
     data_sha256= data_attributes.get('sha256', None)
     data_type_description = data_attributes.get('type_description', None)
 
-    #utils_func.is_valid_sha256()
-
     db_update_records.update_malware_type_description(data_sha256, data_type_description)
 
     if "Win32 EXE" == data_type_description:
         print("SAMPLE TYPE DESCRIPTION: Win32 EXE")
         return
+    
     elif "Android" != data_type_description:
         print(f"SAMPLE TYPE DESCRIPTION: {data_type_description}")
         return
@@ -128,14 +63,6 @@ def process_vt_response(response, sample_type):
             vt_data = process_virustotal_data(response, analysis_id, andro_data) # JSON response from VirusTotal.com
             vt_processing.process_androguard_data(analysis_id, andro_data)
             malware_classification(analysis_id, andro_data)
-
-            # hash_data_ioc table
-            if not db_get_records.check_hash_exists(andro_data.get_md5(), andro_data.get_sha1(), andro_data.get_sha256()):
-                db_insert_records.insert_hash_data(andro_data.get_md5(), andro_data.get_sha1(), andro_data.get_sha256())
-
-            else:
-                db_update_records.update_hash_data_ioc_record(andro_data.get_md5(), andro_data.get_sha1(), andro_data.get_sha256())
-                db_update_records.update_analysis_status(analysis_id, "Completed")
    
         else:
             print("No Androguard data found in response.")

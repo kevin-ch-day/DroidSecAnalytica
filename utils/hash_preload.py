@@ -1,5 +1,5 @@
 import os
-import sys
+import pandas as pd
 from utils import utils_func
 from db_operations import db_insert_records, db_get_records
 
@@ -13,17 +13,6 @@ files_to_process = [
     "2021-Hash-Data.txt",
     "2022-Hash-Data.txt"
 ]
-
-# Function to check the row count of the hash_data_ioc table
-def check_hash_table():
-    row_count = db_get_records.get_table_row_count("hash_data_ioc")
-    if row_count is not None:
-        if row_count > 0:
-            print(f"Hash table has {row_count} row(s).")
-        else:
-            print(f"Hash table is currently empty.")
-    else:
-        print("[ERROR] Failed to retrieve row count for 'hash_data_ioc' table.")
 
 # Function to process a single file
 def process_file(file_path, file_name):
@@ -60,33 +49,6 @@ def process_file(file_path, file_name):
             print(f"[ERROR] Invalid hash format: {hash_str}. Skipping...")
 
     print(f"Finished processing {file_name}.\n")
-
-# Main function to process all hash files
-def process_hash_files():
-    # Check if input directory exists, and exit if it does not
-    if not os.path.exists(input_dir):
-        print(f"[ERROR] Input directory does not exist: {input_dir}")
-        sys.exit(1)
-
-    # Check row count before processing files
-    check_hash_table()
-
-    print(f"Starting the hash processing from files in {input_dir}...\n")
-
-    for file_name in files_to_process:
-        file_path = os.path.join(input_dir, file_name)
-
-        # Check if the file exists before processing
-        if not os.path.exists(file_path):
-            print(f"[ERROR] File not found: {file_name}. Skipping...")
-            continue
-
-        process_file(file_path, file_name)
-
-    # Check row count again after processing files
-    check_hash_table()
-
-    print("All files have been processed.\n")
 
 # Function to retrieve all hash data and put it into a list of strings
 def get_all_hashes_list():
@@ -136,3 +98,44 @@ def get_unanalyzed_hashes():
 
     print("=" * 80 + "\n")
     return hash_list
+
+def load_hashes_from_txt():
+    """List and load hashes from a selected text (.txt) file in the input directory."""
+    input_dir = "input"
+
+    # List available .txt files
+    txt_files = [f for f in os.listdir(input_dir) if f.endswith(".txt")]
+
+    if not txt_files:
+        print("\n[ERROR] No .txt files found in the 'input' directory.")
+        return None
+
+    print("\n" + "=" * 40)
+    print("      Load Hashes from Text File")
+    print("=" * 40)
+
+    # Display available files
+    options = {i + 1: os.path.join(input_dir, file) for i, file in enumerate(txt_files)}
+
+    for num, file in options.items():
+        print(f"  [{num}] {os.path.basename(file)}")
+
+    # Get user selection
+    while True:
+        try:
+            choice = int(input("\nEnter the number of the text file you want to load: "))
+            if choice in options:
+                file_path = options[choice]
+                print(f"\nLoading hashes from {file_path}.")
+                with open(file_path, "r") as f:
+                    hashes = [line.strip() for line in f if line.strip()]
+                if not hashes:
+                    print("No hashes found in the text file.")
+                else:
+                    print(f"Loaded {len(hashes)} hashes from {file_path}.")
+                return hashes
+            else:
+                print("[ERROR] Invalid selection. Please enter a valid number.")
+        except ValueError:
+            print("[ERROR] Invalid input. Please enter a number.")
+

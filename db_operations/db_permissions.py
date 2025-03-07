@@ -259,11 +259,17 @@ def get_apk_risk_profile() -> List[Tuple]:
 # Retrieve permissions that are deprecated as of the APK's target SDK version, indicating potential security risks
 def get_deprecated_permissions() -> List[Tuple]:
     sql = """
-        SELECT a.package_name, a.target_sdk_version, ap.permission_name, ap.deprecated_in_api
+        SELECT a.package_name,
+            a.target_sdk_version,
+            ap.permission_name,
+            ap.deprecated_in_api
         FROM apk_analysis a
-        INNER JOIN vt_permissions vp ON a.analysis_id = vp.analysis_id
-        INNER JOIN android_permissions ap ON vp.known_permission_id = ap.permission_id
-        WHERE ap.deprecated_in_api IS NOT NULL AND ap.deprecated_in_api <= a.target_sdk_version
+        INNER JOIN vt_permissions vp
+            ON a.analysis_id = vp.analysis_id
+        INNER JOIN android_permissions ap
+            ON vp.known_permission_id = ap.permission_id
+        WHERE ap.deprecated_in_api IS NOT NULL
+            AND ap.deprecated_in_api <= a.target_sdk_version
         ORDER BY a.target_sdk_version DESC, ap.permission_name;
     """
     return run_query(sql, is_select=True)
@@ -272,8 +278,8 @@ def get_deprecated_permissions() -> List[Tuple]:
 def get_malware_information() -> List[Tuple]:
     sql = """
         SELECT a.apk_id,
-                m.name_1 'Name',
-                m.name_2 AS Family,
+                m.malware_name as Name,
+                m.malware_family AS Family,
                 m.virustotal_label,
                 s.AhnLab_V3,
                 s.Alibaba,
@@ -283,8 +289,8 @@ def get_malware_information() -> List[Tuple]:
                 s.Tencent,
                 s.ZoneAlarm
         FROM malware_ioc_threats m
-        JOIN apk_samples a ON a.sha256 = m.sha256
-        JOIN vt_scan_analysis s ON s.apk_id = a.apk_id
+            JOIN vt_scan_analysis s
+                ON s.apk_id = a.apk_id
         ORDER BY a.apk_id;
     """
     return run_query(sql, is_select=True)

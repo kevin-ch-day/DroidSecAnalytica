@@ -12,8 +12,18 @@ logging.basicConfig(
 
 # List of required packages
 packages = [
-    "matplotlib", "seaborn", "plotly", "mysql-connector-python", "pandas",
-    "scikit-learn", "reportlab", "pycountry", "tabulate", "cryptography", "openpyxl"
+    "cryptography",
+    "matplotlib",
+    "mysql-connector-python",
+    "openpyxl",
+    "pandas",
+    "plotly",
+    "pycountry",
+    "reportlab",
+    "requests",
+    "scikit-learn",
+    "seaborn",
+    "tabulate"
 ]
 
 def run_command(command):
@@ -52,7 +62,7 @@ def install_packages():
         print("\nSome packages may have failed to install. Check the log for details.")
         logging.warning("Some packages may have failed to install.")
 
-    print(f"⏳ Installation completed in {elapsed_time} seconds.")
+    print(f"Installation completed in {elapsed_time} seconds.")
     logging.info(f"Installation completed in {elapsed_time} seconds.")
 
 if __name__ == "__main__":

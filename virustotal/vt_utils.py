@@ -1,29 +1,10 @@
 import requests
 import socket
-import subprocess
-import platform
 import json
 import os
 from datetime import datetime
 
 from db_operations import db_vt_api_keys
-
-def check_ping():
-    ip = "8.8.8.8"
-    param = '-n' if platform.system().lower() == 'windows' else '-c'
-    command = ["ping", param, "1", ip]
-
-    try:
-        response = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        if response.returncode == 0:
-            print(f"Successfully pinged {ip}.")
-            return True
-        else:
-            print(f"Failed to ping {ip}. Response: {response.stderr}")
-            return False
-    except Exception as e:
-        print(f"An error occurred while trying to ping: {e}")
-        return False
 
 def check_network_access():
     # Checks basic network connectivity to VirusTotal.
@@ -164,3 +145,64 @@ def format_file_size(size):
             return f"{size:.2f} {unit}"
         size /= 1024.0
     return f"{size:.2f} TB"
+
+def display_virustotal_api_full_response(data, indent=0):
+    """Displays VirusTotal API response data in a structured format without unnecessary clutter."""
+
+    indent_str = " " * indent
+
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if isinstance(value, dict):  # Nested dictionary
+                print(f"{indent_str}{key}:")
+                display_virustotal_api_full_response(value, indent + 4)
+            elif isinstance(value, list):  # List with elements
+                print(f"{indent_str}{key} [{len(value)}]:")
+                for item in value:
+                    if isinstance(item, dict):
+                        display_virustotal_api_full_response(item, indent + 4)
+                    else:
+                        print(f"{indent_str}    - {item}")
+            else:  # Simple key-value pair
+                print(f"{indent_str}{key}: {value}")
+
+    elif isinstance(data, list):  # Root is a list
+        print(f"{indent_str}List [{len(data)}]:")
+        for item in data:
+            if isinstance(item, dict):
+                display_virustotal_api_full_response(item, indent + 4)
+            else:
+                print(f"{indent_str}    - {item}")
+
+    else:  # Base case for non-dict/list types
+        print(f"{indent_str}{data}")
+
+
+def display_virustotal_api_summary(data):
+    """Summarizes key VirusTotal API response fields while keeping all data accessible."""
+    
+    attributes = data.get("attributes", {})
+
+    print("\nVirusTotal API Response Summary")
+    print("=" * 80)
+
+    # Display detected malware family first
+    threat_classification = attributes.get("popular_threat_classification", {})
+    threat_label = threat_classification.get("suggested_threat_label", "Unknown")
+    print(f"Detected Malware Family: {threat_label}")
+
+    # Display file hash values
+    print(f"\nMD5: {attributes.get('md5', 'N/A')}")
+    print(f"SHA1: {attributes.get('sha1', 'N/A')}")
+    print(f"SHA256: {attributes.get('sha256', 'N/A')}")
+
+    # Show detection statistics
+    analysis_stats = attributes.get("last_analysis_stats", {})
+    print("\nVirusTotal Detections:")
+    for key, value in analysis_stats.items():
+        print(f"  {key.capitalize()}: {value}")
+
+    print("\nFull API Response Data:")
+    print("=" * 80)
+    display_virustotal_api_full_response(attributes)
+    print("=" * 80)

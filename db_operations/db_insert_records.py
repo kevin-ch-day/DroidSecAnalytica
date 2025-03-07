@@ -59,7 +59,24 @@ def insert_vt_providers(analysis_id: int, provider_name: str, apk_id: int) -> Op
     params = (analysis_id, provider_name, apk_id)
     return execute_sql(query, params)
 
-from typing import Optional
+# Insert hash records into the hash_data_ioc table
+def add_hash_ioc_record(md5: str, sha1: str, sha256: str) -> Optional[bool]:
+    # Ensure all hash values are provided
+    if not md5 or not sha1 or not sha256:
+        print("[ERROR] All hash values (MD5, SHA1, SHA256) must be provided.")
+        return None
+
+    # Construct the query
+    query = "INSERT INTO hash_data_ioc (md5, sha1, sha256) VALUES (%s, %s, %s)"
+    params = (md5, sha1, sha256)
+
+    # Execute the query
+    try:
+        result = execute_sql(query, params)
+        return result
+    except Exception as e:
+        print(f"[ERROR] Error executing query: {e}")
+        return None
 
 # Insert hash data into the hash_data_ioc table
 def insert_hash_data(md5: Optional[str], sha1: Optional[str], sha256: Optional[str]) -> Optional[bool]:
@@ -99,3 +116,44 @@ def insert_hash_data(md5: Optional[str], sha1: Optional[str], sha256: Optional[s
         print(f"[ERROR] Error executing query: {e}")
         return None
 
+# Insert a malware sample record into the malware_samples table
+def store_malware_sample(
+    malware_name: str,
+    malware_family: str,
+    vt_threat_label: str,
+    md5_hash: str,
+    sha1_hash: str,
+    sha256_hash: str,
+    raw_size_bytes: int,
+    formatted_size: str,
+    first_seen_wild: str,
+    first_submission: str,
+    file_type_description: str,
+    vt_report_url: str
+) -> bool:
+    # Validate that all essential hash values are provided
+    if not (md5_hash and sha1_hash and sha256_hash):
+        print("[ERROR] Missing hash values. MD5, SHA1, and SHA256 are required.")
+        return False
+
+    # Define SQL query
+    query = """
+    INSERT INTO malware_samples (
+        malware_name, malware_family, virustotal_label, md5, sha1, sha256, sample_size, formatted_sample_size, 
+        vt_first_seen_wild, vt_first_submission, data_type_description, virustotal_url
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    # Prepare parameters
+    params = (
+        malware_name, malware_family, vt_threat_label, md5_hash, sha1_hash, sha256_hash,
+        raw_size_bytes, formatted_size, first_seen_wild, first_submission, file_type_description, vt_report_url
+    )
+
+    # Execute query
+    try:
+        result = execute_sql(query, params)
+        return bool(result)
+    except Exception as e:
+        print(f"[ERROR] Failed to insert malware sample: {e}")
+        return False
