@@ -7,12 +7,12 @@ from db_operations import db_update_records
 def analyze_classifications(df):
     results = {}
 
-    print("\n" + "="*60)
-    print("                *** ANALYZING CLASSIFICATIONS ***")
-    print("="*60)
+    print("=" * 60)
 
     # Process each row for vendor-specific data and update analysis results
     for index, row in df.iterrows():
+        #print(row)
+        
         apk_id = row['APK ID']
         print(f"{'Vendor':<25}{'Classification'}")
         print(f"{'-' * 60}")

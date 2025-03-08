@@ -36,6 +36,8 @@ def create_apk_record(filename: str, filesize: int, md5: str, sha1: str, sha256:
         logging_utils.log_info("APK record created successfully.")
 
 def truncate_analysis_data_tables() -> bool:
+    print("\nClearing analysis tables...\n")
+
     table_names = [
         "analysis_metadata",
         "vt_activities",
@@ -54,7 +56,7 @@ def truncate_analysis_data_tables() -> bool:
             execute_sql(f"TRUNCATE TABLE {table_name}")
             print(f"Truncated: {table_name}")
 
-        print("\nAll specified tables were successfully truncated.")
+        print("\nAnalysis tables were successfully truncated.")
         return True
     
     except Exception as e:

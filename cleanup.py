@@ -10,7 +10,7 @@ def delete_pycache_and_pyc_files(dry_run=False):
         dry_run (bool): If True, only prints what would be deleted (no actual deletion).
     """
     current_dir = os.path.dirname(os.path.abspath(__file__))  # Get the script's directory
-    print(f"\n[INFO] Scanning for '__pycache__' directories and .pyc files in: {current_dir}\n")
+    print(f"\nScanning for '__pycache__' directories and .pyc files in: {current_dir}\n")
 
     pycache_count = 0
     pyc_file_count = 0
@@ -45,12 +45,11 @@ def delete_pycache_and_pyc_files(dry_run=False):
                         print(f"[ERROR] Could not delete {pyc_file_path}: {e}")
 
     # Summary
-    print("\n===========================================")
-    print("[CLEANUP SUMMARY]")
+    print("\n*** CLEANUP SUMMARY ***")
+    print("===========================================")
     print(f" Removed {pycache_count} '__pycache__' directories.")
     print(f" Removed {pyc_file_count} '.pyc' files.")
-    print(" Cleanup Completed.")
-    print("===========================================\n")
+    print("\n Cleanup Completed.")
 
 # Run the cleanup script
 if __name__ == "__main__":

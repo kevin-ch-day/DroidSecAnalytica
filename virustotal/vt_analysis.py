@@ -1,13 +1,13 @@
 # vt_analysis.py
 
 # Python Libraries
+from typing import Any
 import pandas as pd
 import sys
 
 # Custom Libraries
-from db_operations import db_update_records, db_get_records, db_create_records, db_util_func, db_insert_records
-from utils import hash_preload
-from reporting import generate_vt_reports as vt_reports
+from db_operations import db_update_records, db_get_records, db_create_records, db_util_func, db_malware_classification
+from reporting import generate_vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
 
 def test_hash_virustotal():
@@ -15,97 +15,148 @@ def test_hash_virustotal():
     response = vt_requests.query_virustotal(hash, "hash")
     process_vt_response(response, "hash")
 
-def analyze_database_hash_data():
-    hash_results = hash_preload.get_unanalyzed_hashes()
-    if hash_results is None:
-        print("[Error] Failed to load hashes from source.")
-        return
-    elif not hash_results:
-        print("[Warning] No hashes were found.")
-        return
+def check_unanalyzed_hashes():
+    """Checks the database for unanalyzed hashes and processes them using VirusTotal."""
     
-    for count, index in enumerate(hash_results, start=1):
-        response = vt_requests.query_virustotal(index, "hash")
-        process_vt_response(response, "hash")
-        print(f"\nProcessed {count} of {len(hash_results)} records.")
-        print(f"{'-' * 60}")
-        
-    print("\nAll hash data processed successfully.")
+    print("Checking database for unanalyzed hashes...")
+    results = db_get_records.get_unanalyzed_database_hashes()
+
+    # Ensure results is a list or tuple before processing
+    if not isinstance(results, (list, tuple)):
+        print("Error: Failed to retrieve unanalyzed hashes or received invalid data.")
+        return
+
+    num_records = len(results)
+    if num_records == 0:
+        print("No unanalyzed hashes found.")
+        return
+
+    print(f"Number of unanalyzed records: {num_records}")
+
+    for index, sha256_hash in enumerate(results, start=1):
+        print(f"\nProcessing: {index} of {num_records} records.")
+        print(f"Hash: {sha256_hash}\n")
+        try:
+            response = vt_requests.query_virustotal(sha256_hash, "hash")
+            process_vt_response(response, "hash")
+
+        except Exception as e:
+            print(f"Error processing {sha256_hash}: {e}")
+
+    print("Finished processing unanalyzed hashes.")
 
 def process_vt_response(response, sample_type):
-    print("Processing VirusTotal response...")
 
-    # Safely get data from the response
-    response_data = response.get('data', {})
-    if not response_data:
-        print("[Error] No data return...")
-        return None
+    # Check if 'error' exists in the response
+    if 'error' in response:
+        error_code = response['error'].get('code', 'UnknownError')
+        error_message = response['error'].get('message', 'No error message provided.')
 
-    # Get attributes, androguard data
-    data_attributes = response_data.get('attributes', {})
-    data_sha256= data_attributes.get('sha256', None)
-    data_type_description = data_attributes.get('type_description', None)
-
-    db_update_records.update_malware_type_description(data_sha256, data_type_description)
-
-    if "Win32 EXE" == data_type_description:
-        print("SAMPLE TYPE DESCRIPTION: Win32 EXE")
-        return
-    
-    elif "Android" != data_type_description:
-        print(f"SAMPLE TYPE DESCRIPTION: {data_type_description}")
-        return
-    
-    try:
-        analysis_id = create_analysis_record(sample_type)
-        andro_data = vt_androguard.handle_androguard_response(response)
-        if andro_data:
-            vt_data = process_virustotal_data(response, analysis_id, andro_data) # JSON response from VirusTotal.com
-            vt_processing.process_androguard_data(analysis_id, andro_data)
-            malware_classification(analysis_id, andro_data)
-   
-        else:
-            print("No Androguard data found in response.")
-            db_update_records.update_analysis_status(analysis_id, "Incompleted")
-
-    except Exception as e:
-        error_message = str(e)
-        print(f"[Error] {error_message}")
-
-        # Check if it's a database connection error or query failure
-        if "Database connection failed" in error_message or "Failed to execute query" in error_message:
-            print("Critical database error occurred. Exiting the program...")
-            sys.exit(1)
-        else:
-            print(f"An unexpected error occurred: {error_message}")
-
-def process_virustotal_data(response, analysis_id, andro_data):
-    vt_data = parse_virustotal_response(response)    
-    if vt_data:
-        apk_id = get_and_update_apk_record(andro_data, vt_data)
-        db_create_records.create_vt_engine_record(analysis_id, apk_id)
-        update_summary_and_detection_stats(analysis_id, vt_data)
+        print(f"\n[!!] VirusTotal API Error")
+        print(f"Error [{error_code}]: {error_message}")
+        exit(1)  # Use exit(1) to indicate an error occurred
 
     else:
-        print("No VirusTotal data found in response.")
-    
-    return vt_data
+        print("Processing VirusTotal response...")
 
-def malware_classification(analysis_id, andro_data):
-    try:
-        results = db_get_records.get_malware_classification(andro_data.get_sha256())
-        if not results:
-            print("[Error] No results from database for malware classification.")
-            exit()
+        # Safely get data from the response
+        response_data = response.get('data', {})
+        if not response_data:
+            print("[Error] No data return...")
+            return None
+
+        # Get attributes, androguard data
+        data_attributes = response_data.get('attributes', {})
+        data_sha256= data_attributes.get('sha256', None)
+        data_type_description = data_attributes.get('type_description', None)
+
+        print(f"Malware type description: {data_type_description}")
+        db_update_records.update_malware_type_description(data_sha256, data_type_description)
+
+        if "Win32 EXE" == data_type_description:
+            print("SAMPLE TYPE DESCRIPTION: Win32 EXE")
             return
         
-        df = pd.DataFrame(results, columns=[
-            'APK ID', 'Name', 'Family',
-            'Virustotal', 'AhnLab_V3', 'Alibaba', 'Ikarus',
-            'Kaspersky', 'Microsoft', 'Tencent', 'ZoneAlarm'])
+        elif "Android" != data_type_description:
+            print(f"SAMPLE TYPE DESCRIPTION: {data_type_description}")
+            return
+        
+        try:
+            analysis_id = create_analysis_record(sample_type)
+            andro_data = vt_androguard.handle_androguard_response(response)
+            if andro_data:
+                vt_data = parse_virustotal_response(response)
+                if vt_data:
+                    apk_id = get_and_update_apk_record(andro_data, vt_data)
+                    
+                    print("Recording virustotal AV engine results.")
+                    db_malware_classification.create_vt_engine_record(analysis_id, apk_id)
+                    
+                    # Update the database with summary statistics and engine detection results from the VirusTotal data.
+                    summary_stat = vt_data["Analysis Result"]["summary_statistics"]
+                    db_malware_classification.update_vt_engine_detection_metadata(analysis_id, summary_stat)
+                    
+                    vendor_data = vt_data["Analysis Result"]["engine_detection"]
+                    db_malware_classification.update_vt_engine_column(analysis_id, vendor_data)
+                    
+                    malware_classification(analysis_id, andro_data)
+
+                    vt_processing.process_androguard_data(analysis_id, andro_data)
+                    db_update_records.update_analysis_status(analysis_id, "Completed")
+                    
+                else:
+                    print("No VirusTotal data found in response.")   
+
+            else:
+                print("No Androguard data found in response.")
+                db_update_records.update_analysis_status(analysis_id, "Incompleted")
+
+        except Exception as e:
+            error_message = str(e)
+            print(f"[Error] {error_message}")
+
+            # Check if it's a database connection error or query failure
+            if "Database connection failed" in error_message or "Failed to execute query" in error_message:
+                print("Critical database error occurred. Exiting the program...")
+                sys.exit(1)
+            else:
+                print(f"An unexpected error occurred: {error_message}")
+
+def malware_classification(analysis_id: int, andro_data: Any):
+    try:
+        print("\nStarting Malware Classification Process...")
+        sha256_hash = andro_data.get_sha256()
+        results = db_malware_classification.get_malware_classification_details(sha256_hash)
+
+        if not results:
+            print("[ERROR] No results from database for malware classification.")
+            exit(1)
+            return
+
+        # Define expected column names
+        expected_columns = [
+            'APK ID', 'Name', 'Family', 'Virustotal', 
+            'AhnLab_V3', 'Alibaba', 'Ikarus', 'Kaspersky', 
+            'Microsoft', 'Tencent', 'ZoneAlarm'
+        ]
+
+        # Convert tuple to dictionary with column mappings
+        if isinstance(results, tuple):
+            results = dict(zip(expected_columns, results))  # Map columns to tuple values
+            results = [results]  # Convert single dict to a list for Pandas DataFrame
+
+        elif isinstance(results, dict):
+            results = [results]  # Convert single dictionary to list
+
+        # Convert to DataFrame
+        df = pd.DataFrame(results)
+        if df.shape[1] != len(expected_columns):
+            print(f"[ERROR] DataFrame column mismatch! Expected {len(expected_columns)} columns, but got {df.shape[1]}")
+            print(f"[DEBUG] DataFrame contents:\n{df}")
+            exit(1)
         
         if df.empty:
-            print("\n[Error] Dataframe for malware classification is empty.")
+            print("\n[ERROR] DataFrame for malware classification is empty.")
             return
         
         analysis_results = vendor_classifications.analyze_classifications(df)
@@ -113,35 +164,30 @@ def malware_classification(analysis_id, andro_data):
             print("No analysis results to process for malware classification.")
             return
 
-        # Iterate over the items in analysis_results
-        for result in analysis_results.items(): 
-            # Check if the result has two elements before unpacking
-            if isinstance(result, tuple) and len(result) == 2:
-                apk_id, vt_engine_data = result
-                classification = vendor_classifications.data_classification(vt_engine_data)
-                
-                print(f"\n{'DroidSecAnalytica:':<26}{classification}")
-                db_update_records.update_analysis_classification(analysis_id, classification)
-            
-            else:
-                print(f"\n[Error] Unexpected result structure or number of values: {result}")
 
+        # Iterate over the items in analysis_results
+        for apk_id, vt_engine_data in analysis_results.items(): 
+            classification = vendor_classifications.data_classification(vt_engine_data)
+            
+            print(f"\nDroidSecAnalytica: {classification}")
+            db_update_records.update_analysis_classification(analysis_id, classification)
+        
     except Exception as e:
-        print(f"[Error] Malware classification failed: {e}")
+        print(f"[ERROR] Malware classification failed: {e}")
         exit(1)
 
 def generate_vt_report_if_applicable(andro_data, vt_data):
     if vt_data and andro_data:
         try:
             print("\n** Generating Virustotal.com Report **")
-            vt_reports.generate_report(andro_data, vt_data)
+            generate_vt_reports.generate_report(andro_data, vt_data)
             print("VirusTotal analysis report generated successfully.")
         except Exception as e:
             print(f"[Error] Failed to generate VirusTotal analysis report: {e}")
 
 def create_analysis_record(sample_type):
     analysis_id = db_create_records.create_analysis_record(sample_type)
-    print(f"Analysis ID: {analysis_id}")
+    print(f"\nCreating new analysis ID: {analysis_id}")
     return analysis_id
 
 def get_and_update_apk_record(andro_data, vt_data):
@@ -159,16 +205,6 @@ def update_if_missing(check_func, update_func, apk_id, new_value, data_descripti
     if not check_func(apk_id):
         update_func(apk_id, new_value)
         print(f"Updated {data_description}.")
-
-def update_summary_and_detection_stats(analysis_id, vt_data):
-    # Update the database with summary statistics and engine detection results from the VirusTotal data.
-    summary_stat = vt_data["Analysis Result"]["summary_statistics"]
-    db_update_records.update_vt_engine_detection_metadata(analysis_id, summary_stat)
-    #print("Added summary stats results.") # DEBUGGING
-
-    vendor_data = vt_data["Analysis Result"]["engine_detection"]
-    db_update_records.update_vt_engine_column(analysis_id, vendor_data)
-    #print("Added engine detection results.") # DEBUGGING
 
 def parse_virustotal_response(response):
     try:
@@ -211,7 +247,7 @@ def parse_engine_detection(attributes):
 def create_vt_report(andro_data, vt_data):
     if vt_data and andro_data:
         try:
-            vt_reports.generate_report(andro_data, vt_data)
+            generate_vt_reports.generate_report(andro_data, vt_data)
             print("VirusTotal analysis report generated successfully.")
         except Exception as e:
             print(f"Error generating VirusTotal analysis report: {e}")

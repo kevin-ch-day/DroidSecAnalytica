@@ -26,46 +26,6 @@ def update_analysis_status(analysis_id: int, status: str):
     query = "UPDATE analysis_metadata SET analysis_status = %s WHERE analysis_id = %s"
     run_query(query, (status, analysis_id))
 
-# Function to create vt_scan_analysis record
-def update_vt_engine_column(analysis_id: int, detections: list):
-    column_names = db_get_records.get_vt_scan_analysis_columns()
-    valid_columns = {col.replace('_', '-'): col for col in column_names}
-
-    for detection in detections:
-        av_vendor, result = detection
-        column_name = valid_columns.get(av_vendor)
-
-        if column_name:
-            sql = f"UPDATE vt_scan_analysis SET `{column_name}` = %s WHERE analysis_id = %s"
-            params = (result, analysis_id)
-            try:
-                with db_conn.database_connection() as conn:
-                    cursor = conn.cursor()
-                    cursor.execute(sql, params)
-                    conn.commit()
-            except Exception as e:
-                logging_utils.log_error(f"Error updating record for {av_vendor} in analysis {analysis_id}", e)
-        
-        else:
-            # add new vendor
-            print(f"Missing AV vendor name: {av_vendor}")
-            db_create_records.create_vt_engine_column(av_vendor)
-
-def update_vt_engine_detection_metadata(analysis_id: int, summary_stat: dict):
-    with db_conn.database_connection() as conn:
-        cursor = conn.cursor()
-        for key, value in summary_stat.items():
-            # Replace hyphens in key names with underscores to match column names
-            column_name = key.replace('-', '_')
-            # Construct the SQL UPDATE statement for each modified key-value pair
-            sql = f"UPDATE vt_scan_analysis SET `{column_name}` = %s WHERE analysis_id = %s"
-            params = (value, analysis_id)
-            try:
-                cursor.execute(sql, params)
-                conn.commit()
-            except Exception as e:
-                logging_utils.log_error(f"Error updating {column_name} for analysis_id {analysis_id}", e)
-
 def update_analysis_metadata(id: int, sha256: str, package_name: str, main_activity: str, min_sdk: int, target_sdk: int) -> Optional[bool]:
     query = """
     UPDATE analysis_metadata

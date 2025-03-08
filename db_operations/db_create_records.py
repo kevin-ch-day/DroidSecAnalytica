@@ -39,39 +39,6 @@ def create_analysis_record(sample_type: str):
     
     return next_id
 
-
-# Function to create vt_scan_analysis record
-def create_vt_engine_record(analysis_id: int, apk_id: int) -> Optional[bool]:
-    query = "INSERT INTO vt_scan_analysis (analysis_id, apk_id)"
-    query += " VALUES (%s, %s)"
-    params = (analysis_id, apk_id)
-    return run_query(query, params)
-
-def create_vt_engine_column(new_vt_engine, data_type="VARCHAR(100)"):
-    # Ensure the new column name is valid: it must be a non-empty string
-    if not isinstance(new_vt_engine, str) or not new_vt_engine.strip():
-        raise ValueError("Invalid vt engine name. The name must be a non-empty string.")
-    
-    try:
-        # Check if the column already exists in the `vt_scan_analysis` table
-        existing_columns = run_query("SHOW COLUMNS FROM vt_scan_analysis", query_type="select")
-        
-        # If the new column name matches any existing column name, raise an error
-        if any(col[0] == new_vt_engine for col in existing_columns):
-            raise ValueError(f"Column: '{new_vt_engine}' already exists.")
-        
-        # Prepare the SQL query to add the new column with the specified data type
-        # The new column is added after the `type_unsupported` column in the table
-        sql = f"ALTER TABLE vt_scan_analysis ADD COLUMN {new_vt_engine} {data_type} AFTER type_unsupported;"
-        run_query(sql)
-        
-        print(f"New vt_engine column \"{new_vt_engine}\" added successfully.")
-    
-    except Exception as e:
-        # If an error occurs, print an error message with the details
-        print(f"Failed to add new vt_engine column \"{new_vt_engine}\": {e}")
-
-
 def create_malware_project_mapping(malware_id, droidsecanalytica, family, md5):
     report_id = 0
     classification = droidsecanalytica

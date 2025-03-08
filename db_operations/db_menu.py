@@ -26,7 +26,7 @@ def database_menu():
                                                     ['0', '1', '2', '3', '4', '5', '6', '7', '8'])
 
         if menu_choice == '0':
-            print("\nReturning to Main Menu...\n")
+            print("\nReturning to Main Menu...")
             break
 
         elif menu_choice == '1':
@@ -61,7 +61,6 @@ def database_menu():
             print("\n[WARNING] This will clear all analysis data. Proceed with caution.\n")
             confirm = user_prompts.user_menu_choice("Are you sure you want to clear analysis tables? (yes/no): ", ['yes', 'no'])
             if confirm == 'yes':
-                print("\n[INFO] Clearing analysis tables...\n")
                 db_management.truncate_analysis_data_tables()
             else:
                 print("\nOperation canceled. Returning to the menu.\n")

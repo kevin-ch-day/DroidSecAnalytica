@@ -28,25 +28,31 @@ def virustotal_menu():
             print("\nExiting VirusTotal Analysis Menu...\n")
             break
 
-        # Submit an APK file for analysis
+                # Submit an APK file for analysis
         elif user_choice == '1':
-            print("\nSubmitting an APK file to VirusTotal...")
+            print("[!!] NOT DONE [!!]")
+            print("\nSubmit an APK file to VirusTotal.")
+            exit()
+
+            # Placeholder for future APK file submission
             apk_file_path = user_prompts.user_enter_apk_path()
 
             if os.path.isfile(apk_file_path):
                 try:
-                    #response = vt_requests.query_apk(apk_file_path, 'hash')
-                    print("vt_requests.query_apk(apk_file_path, 'hash')")
+                    print("TODO: vt_requests.query_apk(apk_file_path, 'hash')")
                     response = None
+
                     if response:
                         print("APK file successfully submitted for analysis.")
                         handle_response_data(response, "APK")
                     else:
                         print("Submission failed. Please try again.")
+
                 except Exception as e:
                     print(f"Error submitting the APK: {e}")
             else:
                 print("Invalid APK file path. Please check the file location and try again.")
+
 
         # Submit a hash to VirusTotal
         elif user_choice == '2':
@@ -77,17 +83,11 @@ def virustotal_menu():
 
         # Analyze hash data from an Excel file
         elif user_choice == '4':
-            print("\nLoading and analyzing hash data from an Excel file (.xlsx)...")
             hash_xlsx_data_loader.run_xlxs_data_loader()            
 
         # Check database for unanalyzed hash data
         elif user_choice == '5':
-            print("\nChecking the database for unanalyzed hash data...")
-            result = vt_analysis.check_unanalyzed_hashes()
-            if result:
-                print("Unanalyzed hash data found and ready for processing.")
-            else:
-                print("No unanalyzed hash data found in the database.")
+            vt_analysis.check_unanalyzed_hashes()
 
         # Test connection to VirusTotal
         elif user_choice == '6':

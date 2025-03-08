@@ -5,7 +5,6 @@ from permissions_analysis import record_permissions
 
 def process_androguard_data(analysis_id, andro_data):
     apk_id = db_get_records.get_apk_id_by_sha256(andro_data.get_sha256())
-    print(f"Sample ID: {apk_id}")
     process_metadata(analysis_id, andro_data)
     process_permissions(analysis_id, apk_id, andro_data.get_permissions())  
     process_activities(analysis_id, apk_id, andro_data.get_activities())
@@ -24,22 +23,22 @@ def process_metadata(analysis_id, andro_data):
     
     # Display the retrieved hash information
     print("\n" + "="*45)
-    print("          *** HASH DATA GENERATED ***          ")
+    print("          *** HASH DATA ***          ")
     print("="*45)
     print(f"{'MD5:':<15} {md5}")
     print(f"{'SHA1:':<15} {sha1}")
     print(f"{'SHA256:':<15} {sha256}")
-    print("="*45 + "\n")
+    print("="*45)
 
     # Display the retrieved metadata information
     print("\n" + "="*45)
-    print("          *** METADATA FOUND ***          ")
+    print("          *** METADATA ***          ")
     print("="*45)
     print(f"{'Package Name:':<15} {package_name}")
     print(f"{'Main Activity:':<15} {main_activity}")
     print(f"{'Minimum SDK:':<15} {min_sdk}")
     print(f"{'Target SDK:':<15} {target_sdk}")
-    print("="*45 + "\n")
+    print("="*45)
 
     try:
         # Insert the record into the database
