@@ -1,7 +1,7 @@
 # vt_menu.py
 
 import os
-from . import vt_display, vt_androguard, vt_analysis, vt_requests, vt_utils, hash_xlsx_data_loader
+from . import vt_display, vt_androguard, vt_malware_classification, vt_requests, vt_utils, hash_xlsx_data_loader, vt_hash_processing
 from utils import user_prompts, app_display, hash_preload
 
 def virustotal_menu():
@@ -85,7 +85,7 @@ def virustotal_menu():
 
         # Check database for unanalyzed hash data
         elif user_choice == '5':
-            vt_analysis.check_unanalyzed_hashes()
+            vt_hash_processing.check_unanalyzed_hashes()
 
         # Test connection to VirusTotal
         elif user_choice == '6':
@@ -107,7 +107,7 @@ def virustotal_menu():
         user_prompts.pause_until_keypress()
 
 def handle_response_data(response, sample_type):
-    report_data = vt_analysis.process_vt_response(response, sample_type)
+    report_data = vt_malware_classification.process_vt_response(response, sample_type)
 
     while True:
         menu_title = "Data Results"

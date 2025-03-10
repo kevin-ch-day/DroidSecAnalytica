@@ -1,3 +1,5 @@
+# hash_xlsx_data_loader.py
+
 import pandas as pd
 import datetime
 import time
@@ -6,14 +8,14 @@ from . import vt_requests
 from utils import utils_func
 from database import db_get_records, db_insert_records
 
+# Hardcoded file path
+FILE_PATH = "input\\new_malware_samples.xlsx"
+
 def format_timestamp(ts):
     """Converts Unix timestamp to human-readable date format (YYYY-MM-DD)."""
     if isinstance(ts, (int, float)) and ts > 0:
         return datetime.datetime.utcfromtimestamp(ts).strftime("%Y-%m-%d")
     return ts  # Return as is if it's not a valid timestamp
-
-# Hardcoded file path
-FILE_PATH = "input\\new_malware_samples.xlsx"
 
 def read_excel_file():
 # Reads hash data from the Excel file and returns it as a DataFrame.
@@ -29,12 +31,8 @@ def read_excel_file():
         print(f"[ERROR] Failed to read the Excel file: {e}")
         return None
 
-
 def extract_hashes(df):
-    """
-    Extracts and structures hash data from the DataFrame.
-    Returns a list of hash records.
-    """
+# Extracts and structures hash data from the DataFrame.
     if df is None or df.empty:
         print("[WARNING] No valid data found in the Excel file.")
         return []
@@ -115,7 +113,6 @@ def process_hash_records(hash_records):
             time.sleep(60)  # Pause execution for 60 seconds
             batch_counter = 0  # Reset counter after pause
 
-
 def extract_hash_info(record):
     # Extracts basic hash details from the record
     family = record.get("Family", "Unknown")
@@ -123,12 +120,10 @@ def extract_hash_info(record):
     hash_value = record.get("Hash")
     return hash_value, family, name
 
-
 def fetch_virustotal_data(hash_value):
     # Queries the VirusTotal API and returns the response data
     response = vt_requests.query_virustotal(hash_value, "hash")
     return response.get("data", {})
-
 
 def parse_virustotal_response(data):
     # Extracts relevant attributes from the VirusTotal API response
