@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import datetime
-from db_operations import db_vt_api_keys
+from db_operations import db_api_management
 
 # Constants
 BASE_URL = "https://www.virustotal.com/api/v3/files"
@@ -19,7 +19,7 @@ def get_available_api_key():
     Retrieves an available API key from the database and checks for stale keys.
     If no API key is available, it returns None.
     """
-    api_key_data = db_vt_api_keys.get_available_api_key()
+    api_key_data = db_api_management.get_available_api_key()
     
     if not api_key_data or 'api_key' not in api_key_data:
         log_event("[WARNING] No API keys available. Exiting.")
@@ -71,9 +71,6 @@ def https_request(method, url, headers=None, files=None):
             print(f"[ERROR] Unexpected error: {e}")
             return None
 
-        print(f"[INFO] Retrying ({attempt}/{MAX_RETRIES}) in {RETRY_DELAY} seconds...")
-        time.sleep(RETRY_DELAY)
-    
     print("[ERROR] Max retries reached. Request failed.")
     return None
 
@@ -82,7 +79,7 @@ def check_all_api_keys():
     Verifies that all API keys are working.
     If all fail, alerts the user.
     """
-    all_keys = db_vt_api_keys.get_virustotal_api_keys()
+    all_keys = db_api_management.get_virustotal_api_keys()
     failed_keys = []
     valid_keys = []
     test_url = "https://www.virustotal.com/api/v3/users/me"  # Test endpoint
@@ -155,7 +152,7 @@ def process_response(response, api_key_id, data, query_type):
         return None
 
     # Update API key usage after a successful request
-    db_vt_api_keys.update_api_key_usage(api_key_id)
+    db_api_management.update_api_key_usage(api_key_id)
     return response.json()
 
 def query_virustotal(data, query_type):
@@ -182,10 +179,3 @@ def query_virustotal(data, query_type):
             continue  
 
         return process_response(response, api_key_id, data, query_type)
-
-def reset_all_api_keys():
-    """
-    Resets the request count for all API keys at the end of the day or as needed.
-    """
-    log_event("[INFO] Resetting all API key request counts.")
-    db_vt_api_keys.reset_api_key_usage()

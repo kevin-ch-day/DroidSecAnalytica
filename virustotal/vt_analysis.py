@@ -54,7 +54,7 @@ def process_vt_response(response, sample_type):
 
         print(f"\n[!!] VirusTotal API Error")
         print(f"Error [{error_code}]: {error_message}")
-        exit(1)  # Use exit(1) to indicate an error occurred
+        return
 
     else:
         print("Processing VirusTotal response...")

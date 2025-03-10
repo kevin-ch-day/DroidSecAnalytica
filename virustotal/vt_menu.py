@@ -4,8 +4,6 @@ import os
 from . import vt_display, vt_androguard, vt_analysis, vt_requests, vt_utils, hash_xlsx_data_loader
 from utils import user_prompts, app_display, hash_preload
 
-import os
-
 def virustotal_menu():
     while True:
         menu_title = "VirusTotal Analysis Menu"
@@ -25,10 +23,10 @@ def virustotal_menu():
 
         # Exit
         if user_choice == '0':
-            print("\nExiting VirusTotal Analysis Menu...\n")
+            print("\nExiting VirusTotal Analysis Menu.")
             break
 
-                # Submit an APK file for analysis
+        # Submit an APK file for analysis
         elif user_choice == '1':
             print("[!!] NOT DONE [!!]")
             print("\nSubmit an APK file to VirusTotal.")

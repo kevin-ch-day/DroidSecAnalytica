@@ -85,9 +85,11 @@ def process_hash_records(hash_records):
             continue
 
         # Fetch data from VirusTotal API
+        print("Fetch data from VirusTotal API")
         data = fetch_virustotal_data(hash_value)
 
         if not data:
+            print("[Error] No data returned..")
             batch_counter += 1
             continue  # Skip to the next hash
 

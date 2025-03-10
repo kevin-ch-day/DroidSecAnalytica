@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime
 
-from db_operations import db_vt_api_keys
+from db_operations import db_api_management
 
 def check_network_access():
     # Checks basic network connectivity to VirusTotal.
@@ -48,7 +48,7 @@ def check_virustotal_api():
     print("=" * 90)
 
     # Fetch all available API keys from the database
-    api_keys = db_vt_api_keys.get_virustotal_api_keys()
+    api_keys = db_api_management.get_virustotal_api_keys()
     
     if not api_keys:
         print("[ERROR] No available API keys found. Cannot check VirusTotal API.")

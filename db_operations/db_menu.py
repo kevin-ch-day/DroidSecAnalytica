@@ -2,7 +2,7 @@
 
 import mysql.connector
 from utils import logging_utils, app_display, user_prompts
-from . import db_conn, db_management, db_api_management, orphaned_analysis_cleanup, db_util_func
+from . import db_conn, db_management, orphaned_analysis_cleanup, db_util_func
 
 # Database menu
 def database_menu():
@@ -15,15 +15,14 @@ def database_menu():
         print(app_display.format_menu_option(1, "Test Database Connection"))
         print(app_display.format_menu_option(2, "Display Table Information"))
         print(app_display.format_menu_option(3, "Show Query Statistics"))
-        print(app_display.format_menu_option(4, "Check VirusTotal API Key"))
-        print(app_display.format_menu_option(5, "Display Disk Usage"))
-        print(app_display.format_menu_option(6, "Show Thread Information"))
-        print(app_display.format_menu_option(7, "Cleanup Orphaned Analysis Data"))
-        print(app_display.format_menu_option(8, "Clear Analysis Tables"))
+        print(app_display.format_menu_option(4, "Display Disk Usage"))
+        print(app_display.format_menu_option(5, "Show Thread Information"))
+        print(app_display.format_menu_option(6, "Cleanup Orphaned Analysis Data"))
+        print(app_display.format_menu_option(7, "Clear Analysis Tables"))
         print(app_display.format_menu_option(0, "Return to Main Menu"))
 
-        menu_choice = user_prompts.user_menu_choice("\nEnter your choice (0-8): ", 
-                                                    ['0', '1', '2', '3', '4', '5', '6', '7', '8'])
+        menu_choice = user_prompts.user_menu_choice("\nEnter your choice (0-7): ", 
+                                                    ['0', '1', '2', '3', '4', '5', '6', '7'])
 
         if menu_choice == '0':
             print("\nReturning to Main Menu...")
@@ -42,22 +41,18 @@ def database_menu():
             display_query_statistics()
 
         elif menu_choice == '4':
-            print("\n[INFO] Checking VirusTotal API Key settings...\n")
-            db_api_management.vt_api_key_menu()
-
-        elif menu_choice == '5':
             print("\n[INFO] Analyzing database disk usage...\n")
             db_util_func.disk_usage_report()
 
-        elif menu_choice == '6':
+        elif menu_choice == '5':
             print("\n[INFO] Displaying database thread activity...\n")
             display_thread_information()
 
-        elif menu_choice == '7':
+        elif menu_choice == '6':
             print("\n[INFO] Running orphaned analysis cleanup...\n")
             orphaned_analysis_cleanup.run_orphaned_analysis_cleanup()
 
-        elif menu_choice == '8':
+        elif menu_choice == '7':
             print("\n[WARNING] This will clear all analysis data. Proceed with caution.\n")
             confirm = user_prompts.user_menu_choice("Are you sure you want to clear analysis tables? (yes/no): ", ['yes', 'no'])
             if confirm == 'yes':

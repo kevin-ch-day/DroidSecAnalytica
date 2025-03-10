@@ -87,8 +87,3 @@ def user_for_input_with_validation(prompt, validation_func, error_msg):
             return user_input
         else:
             print(error_msg)
-
-# Example usage of prompt_user_for_input_with_validation
-# def is_valid_example(input):
-#     return len(input) > 0  # Example validation: non-empty string
-# user_input = prompt_user_for_input_with_validation("Enter something: ", is_valid_example, "Input cannot be empty.")
