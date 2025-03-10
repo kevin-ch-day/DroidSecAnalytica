@@ -1,6 +1,6 @@
 # vt_processing.py
 
-from db_operations import db_update_records, db_get_records, db_insert_records
+from database import db_update_records, db_get_records, db_insert_records
 from permissions_analysis import record_permissions
 
 def process_androguard_data(analysis_id, andro_data):

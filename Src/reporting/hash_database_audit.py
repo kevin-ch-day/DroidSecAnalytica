@@ -1,4 +1,4 @@
-from db_operations import malware_audit_queries
+from database import malware_audit_queries
 import pandas as pd
 from datetime import datetime
 

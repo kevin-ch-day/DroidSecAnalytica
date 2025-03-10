@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from utils import utils_func
-from db_operations import db_insert_records, db_get_records
+from database import db_insert_records, db_get_records
 
 # Directory containing the hash files to process
 input_dir = "input\\Preload-Hashes"

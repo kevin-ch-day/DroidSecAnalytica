@@ -2,7 +2,7 @@ import requests
 import time
 import json
 import datetime
-from db_operations import db_api_management
+from database import db_api_management
 
 # Constants
 BASE_URL = "https://www.virustotal.com/api/v3/files"

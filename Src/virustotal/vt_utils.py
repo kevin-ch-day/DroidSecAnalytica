@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime
 
-from db_operations import db_api_management
+from database import db_api_management
 
 def check_network_access():
     # Checks basic network connectivity to VirusTotal.

@@ -1,7 +1,7 @@
 # reporting_menu.py
 
 import pandas as pd
-from db_operations import db_analysis_func
+from database import db_analysis_func
 from . import report_data_func, hash_database_audit
 from utils import user_prompts, app_display, file_output_func, statistical_visuals
 

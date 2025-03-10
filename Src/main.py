@@ -10,7 +10,7 @@ from static_analysis import static_analysis_menu
 from virustotal import vt_menu
 from reporting import reporting_menu
 from utils import app_display, user_prompts, logging_utils
-from db_operations import db_menu, db_api_management
+from database import db_menu, db_api_management
 from permissions_analysis import process_unknown_permissions
 
 # Create logs directory if it doesn't exist
@@ -21,11 +21,11 @@ if not os.path.exists('logs'):
 logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
 
 # Main menu
-def main_menu():
+def app_main_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
-    print(app_display.format_menu_option(2, "VirusTotal Analysis"))
-    print(app_display.format_menu_option(3, "VirusTotal API Key Managment"))
+    print(app_display.format_menu_option(2, "VirusTotal API Analysis"))
+    print(app_display.format_menu_option(3, "VirusTotal API Keys Managment"))
     print(app_display.format_menu_option(4, "Report Generation"))
     print(app_display.format_menu_option(5, "Database Management"))
     print(app_display.format_menu_option(6, "Permission Management"))
@@ -34,7 +34,7 @@ def main_menu():
 # Main
 def main():
     while True:
-        main_menu()
+        app_main_menu()
         choice = user_prompts.user_menu_choice("\nEnter your choice: ", ['0', '1', '2', '3', '4', '5', '6'])
 
         try:
@@ -57,7 +57,7 @@ def main():
                 process_unknown_permissions.main()
             
             elif choice == '0':
-                print("\nExiting. Goodbye!\n")
+                print("\nExiting...\n")
                 exit()
 
             user_prompts.pause_until_keypress()
@@ -88,9 +88,6 @@ def vt_api_key_menu():
             db_api_management.delete_api_key_prompt()
         elif menu_choice == '4':
             db_api_management.check_and_reset_api_keys()
-        
-        input("\nPress any key to continue.")
-
 
 if __name__ == "__main__":
     try:

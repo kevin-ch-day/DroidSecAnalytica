@@ -1,5 +1,4 @@
-import json
-from . import AndroguardADT, AndroPermissionADT, vt_utils
+from . import AndroguardADT, AndroPermissionADT
 
 def handle_androguard_response(api_response):
     # Main entry point for handling the VirusTotal androguard response.

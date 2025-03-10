@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 
 # Custom Libraries
-from db_operations import db_update_records, db_get_records, db_create_records, db_util_func, db_malware_classification
+from database import db_update_records, db_get_records, db_create_records, db_util_func, db_malware_classification
 from reporting import generate_vt_reports
 from . import vendor_classifications, vt_androguard, vt_requests, vt_processing, vt_utils
 

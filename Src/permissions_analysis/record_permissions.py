@@ -1,4 +1,4 @@
-from db_operations import db_insert_records, db_permissions, db_permission_2
+from database import db_insert_records, db_permissions, db_permission_2
 from utils import logging_utils, user_prompts
 
 # Setup logging

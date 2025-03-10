@@ -2,7 +2,7 @@
 
 from typing import Tuple, Dict
 
-from db_operations import db_update_records
+from database import db_update_records
 
 def analyze_classifications(df):
     results = {}

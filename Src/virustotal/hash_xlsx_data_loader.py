@@ -4,7 +4,7 @@ import time
 
 from . import vt_requests
 from utils import utils_func
-from db_operations import db_get_records, db_insert_records
+from database import db_get_records, db_insert_records
 
 def format_timestamp(ts):
     """Converts Unix timestamp to human-readable date format (YYYY-MM-DD)."""

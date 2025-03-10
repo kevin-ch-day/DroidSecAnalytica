@@ -1,7 +1,7 @@
 # report_data_func.py
 
 import pandas as pd
-from db_operations import db_conn, db_permissions
+from database import db_conn, db_permissions
 
 def calculate_family_averages(df):
     # Prepare the data for calculations
