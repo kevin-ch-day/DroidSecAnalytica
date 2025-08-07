@@ -7,7 +7,7 @@ DB_HOST = "localhost"
 #DB_PASSWORD = "Password01"
 
 DB_USER = "root"
-DB_PASSWORD = "Password01"
+DB_PASSWORD = ""
 
-#DB_DATABASE = "droidsecanalytica_prod"
-DB_DATABASE = "droidsecanalytica_dev"
+#DB_DATABASE = "droid_threat_intel_db_prod"
+DB_DATABASE = "droid_threat_intel_db_dev"

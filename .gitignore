@@ -1,23 +1,63 @@
-# Compiled Python files
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
 
 # Logs
 *.log
+logs/
 
-# Virtual environment
+# Output
+output/
+*.out
+*.tmp
+
+# Environment
 venv/
+.env
+.env.*
 
-# IDE files and directories
-.idea/
+# IDE and editor folders/files
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# Compiled files and directories
-*.pyc
-*.pyo
-__pycache__/
+# Build and distribution
+build/
+dist/
+*.egg-info/
 
-# Project-specific files (customize as needed)
+# Installer files
+*.sh
+*.bat
+
+# Jupyter Notebook checkpoints (if any)
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python test cache
+.pytest_cache/
+
+# Project-specific exclusions
 data/
-
-# Ignore encryption key
 db_operations/encryption.key
+
+# Optional: compiled test results or pytest outputs
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.cache/
+
+# Ignore personal files
+*.bak
+*.old
+*.orig

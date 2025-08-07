@@ -1,29 +1,32 @@
+# cleanup.py
 import os
 import shutil
 
 def delete_pycache_and_pyc_files(dry_run=False):
     """
     Recursively deletes all __pycache__ directories and .pyc files
-    within the current project directory (DroidSecAnalytica).
+    within the root project directory (DroidSecAnalytica).
 
     Args:
         dry_run (bool): If True, only prints what would be deleted (no actual deletion).
     """
-    current_dir = os.path.dirname(os.path.abspath(__file__))  # Get the script's directory
-    print(f"\nScanning for '__pycache__' directories and .pyc files in: {current_dir}\n")
+    # Start from the project root (one level up from this script)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(script_dir, ".."))
+
+    print(f"\nScanning for '__pycache__' directories and .pyc files in: {project_root}\n")
 
     pycache_count = 0
     pyc_file_count = 0
 
-    # Walk through all directories
-    for foldername, subfolders, filenames in os.walk(current_dir):
+    for foldername, subfolders, filenames in os.walk(project_root):
 
         # Delete __pycache__ directories
         for subfolder in subfolders:
             if subfolder == "__pycache__":
                 pycache_path = os.path.join(foldername, subfolder)
                 print(f"[DELETING] Removing directory: {pycache_path}")
-                
+
                 if not dry_run:
                     try:
                         shutil.rmtree(pycache_path, ignore_errors=True)
