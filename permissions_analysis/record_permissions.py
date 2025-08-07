@@ -1,8 +1,7 @@
 from database import db_insert_records, db_permissions, db_permission_2
 from utils import logging_utils, user_prompts
 
-# Setup logging
-logging_utils.setup_logger()
+logger = logging_utils.get_logger(__name__)
 
 # Process permissions extracted from the APK
 def save_detected_permission(analysis_id, apk_id, permission_adt):
@@ -22,7 +21,7 @@ def save_detected_permission(analysis_id, apk_id, permission_adt):
                 process_unknown_permission(analysis_id, apk_id, permission_adt)
 
     except Exception as e:
-        logging_utils.log_error(f"Error processing [{permission_adt.name}]: {e}")
+        logger.exception("Error processing [%s]", permission_adt.name)
 
 def process_unknown_permission(analysis_id, apk_id, perm_name):
     try:
@@ -38,7 +37,7 @@ def process_unknown_permission(analysis_id, apk_id, perm_name):
             save_unknown_permission(analysis_id, apk_id, permission_id, perm_name)
 
     except Exception as e:
-        logging_utils.log_error(f"An error occurred while processing unknown permission '{perm_name}': {e}")
+        logger.exception("An error occurred while processing unknown permission '%s'", perm_name)
 
 def prompt_and_insert_new_permission(perm_adt, analysis_id, apk_id):
     record = db_permissions.insert_unknown_permission_record(perm_adt.name, perm_adt.short_desc, perm_adt.long_desc, perm_adt.permission_type)
@@ -48,5 +47,10 @@ def prompt_and_insert_new_permission(perm_adt, analysis_id, apk_id):
 
 def save_unknown_permission(analysis_id, apk_id, unknown_perm_id, perm_name):
     if not db_insert_records.insert_vt_permission(analysis_id, apk_id, None, unknown_perm_id, None):
-        logging_utils.log_error(f"[!!] Failed to insert Analysis ID: {analysis_id} APK ID: {apk_id} Permission: {perm_name}")
+        logger.error(
+            "[!!] Failed to insert Analysis ID: %s APK ID: %s Permission: %s",
+            analysis_id,
+            apk_id,
+            perm_name,
+        )
         user_prompts.pause_until_keypress()

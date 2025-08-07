@@ -4,12 +4,14 @@ from typing import Optional, Dict, List
 from utils import logging_utils
 from . import db_conn as dbConnect
 
+logger = logging_utils.get_logger(__name__)
+
 # Executes a SQL query and returns the results or None if should_fetch is False
 def execute_sql(query: str, params: tuple = None, should_fetch: bool = False):
     try:
         return dbConnect.execute_query(query, params, fetch=should_fetch)
-    except Exception as e:
-        logging_utils.log_error(f"Error executing query: {query}", e)
+    except Exception:
+        logger.exception("Error executing query: %s", query)
         return None if should_fetch else False
 
 # Checks if a specific table exists in the database
@@ -33,7 +35,7 @@ def list_tables() -> list:
 def create_apk_record(filename: str, filesize: int, md5: str, sha1: str, sha256: str):
     sql = "INSERT INTO malware_samples (filename, filesize, md5, sha1, sha256) VALUES (%s, %s, %s, %s, %s)"
     if execute_sql(sql, (filename, filesize, md5, sha1, sha256)):
-        logging_utils.log_info("APK record created successfully.")
+        logger.info("APK record created successfully.")
 
 def truncate_analysis_data_tables() -> bool:
     print("\nClearing analysis tables...\n")
@@ -59,8 +61,8 @@ def truncate_analysis_data_tables() -> bool:
         print("\nAnalysis tables were successfully truncated.")
         return True
     
-    except Exception as e:
-        logging_utils.log_error("An error occurred while truncating tables.", e)
+    except Exception:
+        logger.exception("An error occurred while truncating tables.")
         return False
 
 # Updates a user's information based on the provided keyword arguments
@@ -72,8 +74,8 @@ def update_user(user_id: int, **kwargs) -> bool:
         sql = f"UPDATE droidsec_users SET {update_values} WHERE user_id = %s"
         dbConnect.execute_query(sql, tuple(values), fetch=False)
         return True
-    except Exception as e:
-        logging_utils.log_error(f"Error updating user with ID {user_id}", e)
+    except Exception:
+        logger.exception("Error updating user with ID %s", user_id)
         return False
 
 # Deletes a user from the droidsec_users table
@@ -82,8 +84,8 @@ def delete_user(user_id: int) -> bool:
         sql = "DELETE FROM droidsec_users WHERE user_id = %s"
         dbConnect.execute_query(sql, (user_id,), fetch=False)
         return True
-    except Exception as e:
-        logging_utils.log_error(f"Error deleting user with ID {user_id}", e)
+    except Exception:
+        logger.exception("Error deleting user with ID %s", user_id)
         return False
 
 # Retrieves a user's information by their ID
@@ -92,8 +94,8 @@ def get_user_by_id(user_id: int) -> Optional[Dict]:
         sql = "SELECT * FROM droidsec_users WHERE user_id = %s"
         result = dbConnect.execute_query(sql, (user_id,), fetch=True)
         return result[0] if result else None
-    except Exception as e:
-        logging_utils.log_error(f"Error fetching user with ID {user_id}", e)
+    except Exception:
+        logger.exception("Error fetching user with ID %s", user_id)
         return None
 
 # Retrieves all users from the droidsec_users table
@@ -101,8 +103,8 @@ def get_all_users() -> List[Dict]:
     try:
         sql = "SELECT * FROM droidsec_users"
         return dbConnect.execute_query(sql, fetch=True)
-    except Exception as e:
-        logging_utils.log_error("Error fetching all users", e)
+    except Exception:
+        logger.exception("Error fetching all users")
         return []
 
 # Authenticates a user based on their username and password
@@ -113,8 +115,8 @@ def user_login(username: str, password: str) -> bool:
             update_last_login(user['user_id'])
             return True
         return False
-    except Exception as e:
-        logging_utils.log_error("Error in user login", e)
+    except Exception:
+        logger.exception("Error in user login")
         return False
 
 # Retrieves a user's information by their username
@@ -123,8 +125,8 @@ def get_user_by_username(username: str) -> Optional[Dict]:
         sql = "SELECT * FROM droidsec_users WHERE username = %s"
         result = dbConnect.execute_query(sql, (username,), fetch=True)
         return result[0] if result else None
-    except Exception as e:
-        logging_utils.log_error(f"Error fetching user with username {username}", e)
+    except Exception:
+        logger.exception("Error fetching user with username %s", username)
         return None
 
 # Updates the last login timestamp for a user
@@ -133,16 +135,21 @@ def update_last_login(user_id: int) -> bool:
         sql = "UPDATE droidsec_users SET last_login = CURRENT_TIMESTAMP WHERE user_id = %s"
         dbConnect.execute_query(sql, (user_id,), fetch=False)
         return True
-    except Exception as e:
-        logging_utils.log_error(f"Error updating last login for user ID {user_id}", e)
+    except Exception:
+        logger.exception("Error updating last login for user ID %s", user_id)
         return False
 
 # Adds a new user to the droidsec_users table
 def add_user(username: str, first_name: str, last_name: str, password: str, is_admin: bool = False) -> bool:
     try:
-        sql = "INSERT INTO droidsec_users (username, first_name, last_name, password, is_admin) VALUES (%s, %s, %s, %s, %s)"
-        dbConnect.execute_query(sql, (username, first_name, last_name, password, int(is_admin)), fetch=False)
+        sql = (
+            "INSERT INTO droidsec_users (username, first_name, last_name, password, is_admin) "
+            "VALUES (%s, %s, %s, %s, %s)"
+        )
+        dbConnect.execute_query(
+            sql, (username, first_name, last_name, password, int(is_admin)), fetch=False
+        )
         return True
-    except Exception as e:
-        logging_utils.log_error("Error adding new user", e)
+    except Exception:
+        logger.exception("Error adding new user")
         return False

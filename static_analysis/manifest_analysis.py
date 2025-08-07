@@ -3,9 +3,7 @@
 import os
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional
-
-from utils import logging_utils
-from permissions_analysis import permission_catorgies_data as pc_data
+from permissions_analysis import permission_categories_data as pc_data
 from . import display_manifest_elements
 
 def analyze_manifest(manifest_data: Dict):
@@ -22,9 +20,10 @@ def analyze_manifest(manifest_data: Dict):
     #display_manifest_elements.print_meta_data(manifest_data.get('meta-data', []))
     #display_manifest_elements.print_actions(manifest_data.get('action', []))
     ##display_manifest_elements.print_categories(manifest_data.get('category', []))
-    
+
     analyze_suspicious_permissions(manifest_data.get('uses-permission', []), manifest_data.get('service', []))
     categorize_permissions(manifest_data.get('uses-permission', []))
+    analyze_exported_components(manifest_data)
 
 
 def categorize_permissions(permissions: List[Dict]):
@@ -134,6 +133,26 @@ def analyze_suspicious_permissions(permissions: List[Dict], services: List[Dict]
         print("--- No Suspicious Permissions Found ---")
     print()
 
+
+def analyze_exported_components(manifest_data: Dict):
+    """Warn about exported components that lack permission protection."""
+    component_types = ["activity", "service", "receiver", "provider"]
+    print("--- Exported Components Without Permissions ---")
+    found = False
+
+    for comp_type in component_types:
+        for component in manifest_data.get(comp_type, []):
+            exported = component.get("exported", "").lower()
+            permission = component.get("permission")
+            if exported == "true" and not permission:
+                name = component.get("name", "Unknown")
+                print(f"{comp_type.capitalize()}: {name}")
+                found = True
+
+    if not found:
+        print("None detected.")
+    print()
+
 def parse_manifest(manifest_path: str) -> Optional[Dict]:
     """Parse the AndroidManifest.xml file."""
 
@@ -161,7 +180,7 @@ def parse_manifest(manifest_path: str) -> Optional[Dict]:
                 print("Permission: " + attributes['permission'] + "\n")
                 attributes['permission'] = permission
 
-                permission_buffer.append({'name', attributes['permission']})
+                permission_buffer.append({'name': attributes['permission']})
 
             manifest_data[tag].append(attributes)
         

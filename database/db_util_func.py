@@ -5,13 +5,15 @@ import mysql.connector
 
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 from . import db_conn, db_config
 
 def execute_query(query, params=None, fetch=False):
     try:
         return db_conn.execute_query(query, params=params, fetch=fetch)
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Database query failed", e)
+    except mysql.connector.Error:
+        logger.exception("Database query failed")
         return []
 
 def get_table_row_count(table_name: str) -> Optional[int]:
@@ -133,5 +135,5 @@ def disk_usage_report(min_size_mb: float = 0.0):
         # Footer
         print("-" * len(header))
 
-    except Exception as e:
-        logging_utils.log_error("Error retrieving and displaying disk usage", e)
+    except Exception:
+        logger.exception("Error retrieving and displaying disk usage")

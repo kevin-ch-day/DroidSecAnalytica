@@ -1,6 +1,8 @@
 
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 def display_main_activity(androguard_data):
     print("\n-- Main Analysis --")
     print(f"Main Activity: {androguard_data.get_main_activity()}")
@@ -26,14 +28,14 @@ def display_manifest_components(androguard_data):
     except AttributeError as e:
         print(f"Attribute Error: {str(e)} - Check if the method exists in androguard_data.")
     
-    except Exception as e:
-        logging_utils.log_error(f"Error processing sections: {str(e)}")
+    except Exception:
+        logger.exception("Error processing sections")
 
 def display_certificate_details(androguard_data):
     try:
         print("\n-- Certificate Details --")
         if not androguard_data or not hasattr(androguard_data, 'get_certificate_data'):
-            logging_utils.log_error("Invalid or no androguard data provided for certificate details.")
+            logger.error("Invalid or no androguard data provided for certificate details.")
             return
 
         certificate_data = androguard_data.get_certificate_data()
@@ -49,15 +51,15 @@ def display_certificate_details(androguard_data):
             else:
                 print(f"{section}:  {section_data}")
 
-    except Exception as e:
-        logging_utils.log_error(f"Error processing certificate details: {str(e)}")
+    except Exception:
+        logger.exception("Error processing certificate details")
 
 def display_permissions(androguard_data):
     try:
         permissions = androguard_data.get_permissions()
         print("\n-- Permissions --")
         if not permissions:
-            logging_utils.log_warning("No permissions data provided to display.")
+            logger.warning("No permissions data provided to display.")
             return
 
         # Sort permissions by name
@@ -82,8 +84,8 @@ def display_permissions(androguard_data):
             # Add line separator after each permission for better readability
             print(f"{permission_name}{permission_type}{permission_desc}")
 
-    except Exception as e:
-        logging_utils.log_error(f"Error processing permissions: {str(e)}")
+    except Exception:
+        logger.exception("Error processing permissions")
 
 def display_intent_filters(androguard_data):
     print("\nIntent Filters:")

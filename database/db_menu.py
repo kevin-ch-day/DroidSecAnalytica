@@ -4,6 +4,8 @@ import mysql.connector
 from utils import logging_utils, app_display, user_prompts
 from . import db_conn, db_management, orphaned_analysis_cleanup, db_util_func
 
+logger = logging_utils.get_logger(__name__)
+
 # Database menu
 def database_menu():
     """
@@ -65,8 +67,8 @@ def database_menu():
 def execute_query(query, params=None, fetch=False):
     try:
         return db_conn.execute_query(query, params=params, fetch=fetch)
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Database query failed", e)
+    except mysql.connector.Error:
+        logger.exception("Database query failed")
         return []
 
 def database_summary():
@@ -80,8 +82,8 @@ def database_summary():
             cursor.execute("SHOW STATUS LIKE 'Threads_connected';")
             connections = cursor.fetchone()
             return version, uptime, connections
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error fetching database information", e)
+    except mysql.connector.Error:
+        logger.exception("Error fetching database information")
         return None
 
 def thread_summary():
@@ -135,8 +137,8 @@ def display_query_statistics():
                 print(f"{stat[0]}: {stat[1]}")
         else:
             print("No query statistics available.")
-    except Exception as e:
-        logging_utils.log_error("Error displaying query statistics", e)
+    except Exception:
+        logger.exception("Error displaying query statistics")
 
 # Display threat information
 def display_thread_information():
@@ -153,5 +155,5 @@ def display_thread_information():
         else:
             print("No thread information available.")
 
-    except Exception as e:
-        logging_utils.log_error("Error displaying thread information", e)
+    except Exception:
+        logger.exception("Error displaying thread information")
