@@ -1,27 +1,24 @@
 # Python Modules
-import pytz
-from datetime import datetime
 from typing import Optional, List, Dict
 
 # Custom Libraries
 from . import db_conn
-from utils import app_display, user_prompts
+from utils import user_prompts, logging_utils
 
-# Define timezone objects
-utc_tz = pytz.utc
-central_tz = pytz.timezone("America/Chicago")  # Central Time (CT)
+logger = logging_utils.get_logger(__name__)
 
-# Function to execute SQL queries
-def run_query(sql: str, params: Optional[tuple] = None, fetch: bool = False) -> List[tuple]:
+
+def run_query(sql: str, params: Optional[tuple] = None, fetch: bool = False):
+    """Execute an SQL statement with optional parameters.
+
+    Returns query results when ``fetch`` is True and a boolean status otherwise.
+    """
     try:
-        if fetch:
-            return db_conn.execute_query(sql, params, fetch=True) or []
-        else:
-            db_conn.execute_query(sql, params, fetch=False)
-            return []
-    except Exception as e:
-        print(f"[ERROR] SQL Execution Failed: {sql} | Params: {params} | Error: {e}")
-        return []
+        result = db_conn.execute_query(sql, params, fetch=fetch)
+        return result if fetch else True
+    except Exception:
+        logger.exception("SQL Execution Failed: %s | Params: %s", sql, params)
+        return [] if fetch else False
 
 # Reset API keys at UTC midnight
 def reset_api_keys_at_utc_midnight():
@@ -34,7 +31,7 @@ def reset_api_keys_at_utc_midnight():
     stale_keys = run_query(sql, fetch=True)
     
     if stale_keys:
-        print("\nResetting API keys at UTC midnight...\n")
+        logger.info("Resetting API keys at UTC midnight...")
         sql_reset = """
         UPDATE vt_api_keys
         SET current_requests = 0, last_reset = UTC_TIMESTAMP()
@@ -43,10 +40,10 @@ def reset_api_keys_at_utc_midnight():
 
         for key in stale_keys:
             key_id = key[0]
-            run_query(sql_reset, (key_id,))
-            print(f"API Key ID: {key_id} has been reset.")
+            if run_query(sql_reset, (key_id,)):
+                logger.info("API Key ID %s has been reset.", key_id)
     else:
-        print("No keys needed resetting at this time.")
+        logger.info("No keys needed resetting at this time.")
 
 # Reset API keys that have not been reset in the past 24 hours
 def check_and_reset_api_keys():
@@ -58,10 +55,10 @@ def check_and_reset_api_keys():
     stale_keys = run_query(sql, fetch=True)
 
     if stale_keys:
-        print("[INFO] Resetting API keys that have not been reset in the past 24 hours:")
+        logger.info("Resetting API keys that have not been reset in the past 24 hours")
         reset_api_keys_at_utc_midnight()
     else:
-        print("[INFO] All API keys are up-to-date.\n")
+        logger.info("All API keys are up-to-date")
 
 # Update API key usage after a request
 def update_api_key_usage(key_id: int) -> bool:
@@ -94,9 +91,8 @@ def get_available_api_key() -> Optional[Dict]:
             "current_requests": result[0][4],
             "last_used": result[0][5]
         }
-    else:
-        print("[ERROR] No available API keys found (all have reached their request limit).")
-        return None
+    logger.error("No available API keys found (all have reached their request limit)")
+    return None
 
 # Retrieve all API keys
 def get_virustotal_api_keys() -> List[Dict]:
@@ -132,8 +128,10 @@ def add_api_key():
     """
     
     if run_query(sql, (api_key, api_type)):
-        print(f"The key was successfully added.")
+        logger.info("API key added successfully")
+        print("The key was successfully added.")
     else:
+        logger.error("Failed to add the new API key")
         print("Failed to add the new API key.")
 
 # Prompts user to delete an API key
@@ -144,6 +142,8 @@ def delete_api_key_prompt():
     sql = "DELETE FROM vt_api_keys WHERE id = %s;"
     
     if run_query(sql, (api_key_id,)):
+        logger.info("API key %s deleted", api_key_id)
         print(f"API key {api_key_id} deleted successfully.")
     else:
+        logger.error("Failed to delete API key %s", api_key_id)
         print(f"Failed to delete API key {api_key_id}.")

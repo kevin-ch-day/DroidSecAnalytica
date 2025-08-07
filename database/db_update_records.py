@@ -4,11 +4,13 @@ from typing import Optional, List, Dict
 from . import db_conn, db_get_records, db_create_records
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
     try:
         return db_conn.execute_query(sql, params, fetch=True) or []
-    except Exception as e:
-        logging_utils.log_error(f"Error executing SQL query: {sql}", e)
+    except Exception:
+        logger.exception("Error executing SQL query: %s", sql)
         return []
 
 def update_apk_record(record_id: int, data: Dict) -> None:
@@ -155,6 +157,6 @@ def update_malware_type_description(sha256: str, data_type_description: str) -> 
     try:
         result = run_query(query, params)
         return True if result else False  # Return True if updated, False if no rows were affected
-    except Exception as e:
-        logging_utils.log_error(f"Error updating data_type_description for SHA256 {sha256}", e)
+    except Exception:
+        logger.exception("Error updating data_type_description for SHA256 %s", sha256)
         return None

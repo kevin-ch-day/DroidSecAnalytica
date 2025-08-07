@@ -1,17 +1,22 @@
 # logging_utils.py
 
 import logging
+import os
 from logging.handlers import RotatingFileHandler
-import traceback
 from typing import Optional
 
-# Initialize logger
-logger = logging.getLogger(__name__)
 logger_initialized = False
 
 DEFAULT_LOG_LEVEL = logging.INFO  # Default logging level
 
-def setup_logger(level: Optional[int] = DEFAULT_LOG_LEVEL, log_file: Optional[str] = None, max_log_size: int = 10485760, backup_count: int = 3):
+
+def setup_logger(
+    level: Optional[int] = DEFAULT_LOG_LEVEL,
+    log_file: Optional[str] = None,
+    max_log_size: int = 10485760,
+    backup_count: int = 3,
+):
+    """Configure the root application logger once."""
     global logger_initialized
     if logger_initialized:
         return
@@ -19,47 +24,50 @@ def setup_logger(level: Optional[int] = DEFAULT_LOG_LEVEL, log_file: Optional[st
 
     if isinstance(level, str):
         level = getattr(logging, level.upper(), DEFAULT_LOG_LEVEL)
-    logger.setLevel(level)
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
 
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    ch = logging.StreamHandler()
-    ch.setLevel(level)
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(level)
+    stream_handler.setFormatter(formatter)
+    root_logger.addHandler(stream_handler)
 
     if log_file:
-        fh = RotatingFileHandler(log_file, maxBytes=max_log_size, backupCount=backup_count)
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        file_handler = RotatingFileHandler(
+            log_file, maxBytes=max_log_size, backupCount=backup_count
+        )
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
 
-def log_warning(message: str):
-    try:
-        logger.warning(message)
-    except Exception as e:
-        print(f"Error logging warning: {e}\n{traceback.format_exc()}")
 
-def log_error(message: str, error: Optional[Exception] = None):
-    try:
-        log_message = f"{message}: {error}" if error else message
-        logger.error(log_message)
-    except Exception as e:
-        print(f"Error logging error: {e}\n{traceback.format_exc()}")
+def get_logger(
+    name: Optional[str] = None,
+    log_file: Optional[str] = None,
+    max_log_size: int = 10485760,
+    backup_count: int = 3,
+) -> logging.Logger:
+    """Return a module-specific logger and attach a file handler if requested."""
+    logger = logging.getLogger(name)
 
-def log_info(message: str):
-    try:
-        logger.info(message)
-    except Exception as e:
-        print(f"Error logging info: {e}\n{traceback.format_exc()}")
+    if log_file:
+        log_file = os.path.abspath(log_file)
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        handler_exists = any(
+            isinstance(h, RotatingFileHandler) and getattr(h, "baseFilename", "") == log_file
+            for h in logger.handlers
+        )
+        if not handler_exists:
+            formatter = logging.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            )
+            file_handler = RotatingFileHandler(
+                log_file, maxBytes=max_log_size, backupCount=backup_count
+            )
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
 
-def log_debug(message: str):
-    try:
-        logger.debug(message)
-    except Exception as e:
-        print(f"Error logging debug: {e}\n{traceback.format_exc()}")
-
-def log_critical(message: str):
-    try:
-        logger.critical(message)
-    except Exception as e:
-        print(f"Error logging critical: {e}\n{traceback.format_exc()}")
+    return logger
