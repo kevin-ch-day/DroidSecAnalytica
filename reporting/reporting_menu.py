@@ -3,10 +3,12 @@
 import pandas as pd
 from database import db_analysis_func
 from . import report_data_func, hash_database_audit
-from utils import user_prompts, app_display, file_output_func, statistical_visuals
+from utils import user_prompts, app_display, file_output_func, statistical_visuals, logging_utils
 
 # Set up logging
 REPORTING_LOG_PATH = 'logs/reporting.log'
+logging_utils.setup_logger()
+logger = logging_utils.get_logger(__name__, log_file=REPORTING_LOG_PATH)
 
 def report_generation_menu():
     while True:
@@ -42,7 +44,7 @@ def report_generation_menu():
 
         # Invalid choice
         else:
-            print("Invalid choice.")
+            logger.warning("Invalid choice.")
 
         user_prompts.pause_until_keypress()
 
@@ -77,7 +79,7 @@ def virusTotalDetectionResults():
 
     # Write the DataFrame to an Excel file
     df.to_excel(excel_path, index=False, engine='openpyxl')
-    print(f"Data written to {excel_path} successfully.")
+    logger.info("Data written to %s successfully.", excel_path)
 
 def permission_reports_alpha():
     try:
@@ -86,11 +88,11 @@ def permission_reports_alpha():
         unknown_permissions_analysis = report_data_func.analyze_unknown_permissions()
 
         if known_permissions_analysis is None:
-            print("Data analysis failed. Please check the logs for details.")
+            logger.error("Data analysis failed. Please check the logs for details.")
             return
 
         # Generating visualizations
-        print("\nGenerating Permission Charts...")
+        logger.info("Generating Permission Charts...")
         try:
             if known_permissions_analysis:
                 # Generate pie chart for known permissions analysis
@@ -107,10 +109,10 @@ def permission_reports_alpha():
                 statistical_visuals.generate_bar_chart(unknown_permissions_analysis, title, xlabel, ylabel, filename)
 
         except Exception as e:
-            print(f"An error occurred during visualization generation: {str(e)}")
+            logger.exception("An error occurred during visualization generation: %s", e)
 
         # Generating text and Excel outputs
-        print("\nGenerating Permission Data...")
+        logger.info("Generating Permission Data...")
         try:
             # Known permissions
             if known_permissions_analysis is not None:
@@ -123,18 +125,18 @@ def permission_reports_alpha():
                 file_output_func.generate_excel_output(unknown_permissions_analysis, "unknown_permissions_analysis.xlsx")
 
         except Exception as e:
-            print(f"An error occurred during output generation: {str(e)}")
+            logger.exception("An error occurred during output generation: %s", e)
 
     except Exception as e:
-        print(f"An error occurred during data analysis: {str(e)}")
+        logger.exception("An error occurred during data analysis: %s", e)
 
 def permission_reports_beta():
-    print("Starting Android Permissions Analysis...")
+    logger.info("Starting Android Permissions Analysis...")
     #md5_hashes = read_md5_hashes()
     #df = fetch_and_analyze_permissions(md5_hashes)
     df = report_data_func.fetch_and_analyze_permissions(None)
     if df is None:
-        print("No data..")
+        logger.warning("No data..")
     
     else:
         report_data_func.generate_permission_matrices_by_level(df)

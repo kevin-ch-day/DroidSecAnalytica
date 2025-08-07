@@ -1,16 +1,20 @@
 import os
 import xml.etree.ElementTree as ET
-from static_analysis import apk_decompilation
+from static_analysis import static_analysis
 from utils import logging_utils
 
-# Setup logging
-logging_utils.setup_logging()
+logger = logging_utils.get_logger(__name__)
+
 
 # Handle APK permission detection process
 def handle_apk_permission_detection(analysis_id, apk_path):
-    decompiled_apk_path = apk_decompilation.decompile_apk(apk_path)
+    """Decompile an APK and extract its declared permissions."""
+    decompiled_apk_path = static_analysis.decompile_apk(apk_path)
+    if not decompiled_apk_path:
+        return []
     permissions = extract_apk_permissions(decompiled_apk_path)
-    #return process_permissions(analysis_id, permissions)
+    return permissions
+
 
 # Extract permissions from the decompiled APK's manifest
 def extract_apk_permissions(decompiled_apk_path):
@@ -22,11 +26,11 @@ def extract_apk_permissions(decompiled_apk_path):
         tree = ET.parse(manifest_path)
         root = tree.getroot()
         permissions = [perm.attrib[f'{{{ns["android"]}}}name'] for perm in root.findall(".//uses-permission", ns)]
-    except ET.ParseError as e:
-        logging_utils.log_error(f"Error parsing the manifest file: {e}")
+    except ET.ParseError:
+        logger.exception("Error parsing the manifest file")
         return []
-    except KeyError as e:
-        logging_utils.log_error(f"Missing expected attribute in manifest: {e}")
+    except KeyError:
+        logger.exception("Missing expected attribute in manifest")
         return []
 
     return permissions

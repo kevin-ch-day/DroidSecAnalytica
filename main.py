@@ -4,7 +4,6 @@
 import os
 import sys
 import logging
-
 # Custom libraries
 from static_analysis import static_analysis_menu
 from virustotal import vt_menu
@@ -19,13 +18,14 @@ if not os.path.exists('logs'):
 
 # Configure Logging using logging_utils
 logging_utils.setup_logger(level=logging.INFO, log_file='logs/main.log')
+logger = logging_utils.get_logger(__name__)
 
 # Main menu
 def app_main_menu():
     print(app_display.format_menu_title("Main Menu", 24))
     print(app_display.format_menu_option(1, "Static Analysis"))
     print(app_display.format_menu_option(2, "VirusTotal API Analysis"))
-    print(app_display.format_menu_option(3, "VirusTotal API Keys Managment"))
+    print(app_display.format_menu_option(3, "VirusTotal API Keys Management"))
     print(app_display.format_menu_option(4, "Report Generation"))
     print(app_display.format_menu_option(5, "Database Management"))
     print(app_display.format_menu_option(6, "Permission Management"))
@@ -63,7 +63,7 @@ def main():
             user_prompts.pause_until_keypress()
 
         except Exception as e:
-            logging_utils.log_critical(f"An error occurred: {e}", exc_info=True)
+            logger.critical("An error occurred", exc_info=e)
             print("An error occurred. Please check the logs for more details.")
 
 # VirusTotal API Key Management Menu
@@ -96,10 +96,10 @@ if __name__ == "__main__":
         main()
 
     except KeyboardInterrupt:
-        logging_utils.log_info("Program interrupted by the user. Exiting...")
+        logger.info("Program interrupted by the user. Exiting...")
         print("\nProgram interrupted by the user. Exiting...")
 
     except Exception as e:
-        logging_utils.log_critical(f"Critical error on startup: {e}", exc_info=True)
+        logger.critical("Critical error on startup", exc_info=e)
         print("A critical error occurred on startup. Please check the logs for more details.")
         sys.exit(1)

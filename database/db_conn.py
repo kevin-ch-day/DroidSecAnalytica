@@ -6,14 +6,16 @@ from utils import logging_utils
 from database.db_config import DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE
 import pandas as pd
 
+logger = logging_utils.get_logger(__name__)
+
 @contextmanager
 def database_connection():
     conn = None
     try:
         conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=False)
         yield conn
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Database connection failed", e)
+    except mysql.connector.Error:
+        logger.exception("Database connection failed")
         if conn:
             conn.rollback()
         raise
@@ -27,8 +29,8 @@ def get_database_connection():
     conn = None
     try:
         conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE)
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Database connection failed", e)
+    except mysql.connector.Error:
+        logger.exception("Database connection failed")
     return conn
 
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
@@ -46,26 +48,26 @@ def execute_insert(table, data):
         placeholders = ', '.join(['%s'] * len(data))
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
         execute_query(query, tuple(data.values()), fetch=False)
-        logging_utils.log_info("Insertion successful")
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error executing insert query", e)
+        logger.info("Insertion successful")
+    except mysql.connector.Error:
+        logger.exception("Error executing insert query")
 
 def execute_update(table, data, condition):
     try:
         update_values = ', '.join([f"{key} = %s" for key in data.keys()])
         query = f"UPDATE {table} SET {update_values} WHERE {condition}"
         execute_query(query, tuple(data.values()), fetch=False)
-        logging_utils.log_info("Update successful")
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error executing update query", e)
+        logger.info("Update successful")
+    except mysql.connector.Error:
+        logger.exception("Error executing update query")
 
 def execute_delete(table, condition):
     try:
         query = f"DELETE FROM {table} WHERE {condition}"
         execute_query(query, fetch=False)
-        logging_utils.log_info("Deletion successful")
-    except mysql.connector.Error as e:
-        logging_utils.log_error("Error executing delete query", e)
+        logger.info("Deletion successful")
+    except mysql.connector.Error:
+        logger.exception("Error executing delete query")
 
 def test_connection():
     conn = None
@@ -83,25 +85,25 @@ def empty_table(table_name):
         execute_query("SET FOREIGN_KEY_CHECKS = 0;", fetch=False)
         execute_query(f"TRUNCATE TABLE {table_name};", fetch=False)
         execute_query("SET FOREIGN_KEY_CHECKS = 1;", fetch=False)
-        logging_utils.log_info(f"Table '{table_name}' has been successfully emptied.")
-    except Exception as e:
-        logging_utils.log_error(f"Error emptying table '{table_name}'", e)
+        logger.info("Table '%s' has been successfully emptied.", table_name)
+    except Exception:
+        logger.exception("Error emptying table '%s'", table_name)
 
 def create_table(table_name, columns):
     try:
         query = f"CREATE TABLE IF NOT EXISTS {table_name} ({columns})"
         execute_query(query, fetch=False)
-        logging_utils.log_info(f"Table '{table_name}' created successfully.")
-    except Exception as e:
-        logging_utils.log_error(f"Error creating table '{table_name}'", e)
+        logger.info("Table '%s' created successfully.", table_name)
+    except Exception:
+        logger.exception("Error creating table '%s'", table_name)
 
 def drop_table(table_name):
     try:
         query = f"DROP TABLE IF EXISTS {table_name}"
         execute_query(query, fetch=False)
-        logging_utils.log_info(f"Table '{table_name}' dropped successfully.")
-    except Exception as e:
-        logging_utils.log_error(f"Error dropping table '{table_name}'", e)
+        logger.info("Table '%s' dropped successfully.", table_name)
+    except Exception:
+        logger.exception("Error dropping table '%s'", table_name)
 
 def execute_query_with_params(query, params):
     try:

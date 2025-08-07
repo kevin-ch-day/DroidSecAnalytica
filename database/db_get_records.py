@@ -4,6 +4,8 @@ from typing import Optional, List, Dict
 from . import db_conn
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
     """Executes a query and returns results as a list of dictionaries."""
     try:
@@ -12,8 +14,8 @@ def run_query(sql: str, params: Optional[tuple] = None) -> List[Dict]:
             column_names = [desc[0] for desc in db_conn.execute_query("SHOW COLUMNS FROM malware_samples", fetch=True)]
             return [dict(zip(column_names, row)) for row in results]
         return []
-    except Exception as e:
-        logging_utils.log_error(f"Error executing SQL query: {sql}", e)
+    except Exception:
+        logger.exception("Error executing SQL query: %s", sql)
         return []
 
 def get_apk_id_by_sha256(sha256: str) -> Optional[int]:
@@ -58,7 +60,7 @@ def check_hash_exists(md5: Optional[str] = None, sha1: Optional[str] = None, sha
         params.append(sha256)
 
     if not conditions:
-        logging_utils.log_error("No valid hash provided to check.")
+        logger.error("No valid hash provided to check.")
         return False
 
     sql = f"SELECT id FROM hash_data_ioc WHERE {' OR '.join(conditions)}"

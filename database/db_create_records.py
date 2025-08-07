@@ -4,6 +4,8 @@ from typing import Optional, List, Dict
 from . import db_conn as dbConnect
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 # Execute SQL queries with optional parameters and distinguish query types
 def run_query(sql: str, params: Optional[tuple] = None, query_type: str = "select"):
     try:
@@ -13,8 +15,8 @@ def run_query(sql: str, params: Optional[tuple] = None, query_type: str = "selec
         else:
             dbConnect.execute_query(sql, params, fetch=False)
             return [{"status": "success"}]
-    except Exception as e:
-        logging_utils.log_error(f"Failed to execute query: {sql} with params: {params}", e)
+    except Exception:
+        logger.exception("Failed to execute query: %s with params: %s", sql, params)
         return []
 
 def create_malware_record(file_name, family, md5, sha1, sha256, file_size):

@@ -4,13 +4,15 @@ from typing import Optional
 from database import db_conn as dbConnect
 from utils import logging_utils
 
+logger = logging_utils.get_logger(__name__)
+
 # Execute SQL queries
 def execute_sql(query: str, params: Optional[tuple] = None, should_fetch: bool = False) -> Optional[any]:
     try:
         result = dbConnect.execute_query(query, params, fetch=should_fetch)
         return result if should_fetch else True
-    except Exception as e:
-        logging_utils.log_error(f"Error executing query: {query}", e)
+    except Exception:
+        logger.exception("Error executing query: %s", query)
         return None
 
 # Function to insert data into vt_permissions table
