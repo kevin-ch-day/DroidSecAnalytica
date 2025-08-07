@@ -25,8 +25,8 @@ def get_table_row_count(table_name: str) -> Optional[int]:
             return result[0][0]
         else:
             return 0
-    except Exception as e:
-        print(f"[ERROR] Failed to retrieve row count for table {table_name}: {e}")
+    except Exception:
+        logger.exception("Failed to retrieve row count for table %s", table_name)
         return None
 
 def check_column_value_by_id(table, column_name, record_id):
@@ -40,8 +40,8 @@ def check_column_value_by_id(table, column_name, record_id):
             return True
         else:
             return False
-    except Exception as e:
-        print(f"Failed to check column value for {column_name}: {e}")
+    except Exception:
+        logger.exception("Failed to check column value for %s", column_name)
         return False
 
 def update_column_value_by_id(table, column_name, value, record_id):
@@ -51,9 +51,9 @@ def update_column_value_by_id(table, column_name, value, record_id):
 
     try:
         db_conn.execute_query(sql, params=params, fetch=False)
-        print(f"Successfully updated {column_name} for record ID {record_id}.")
-    except Exception as e:
-        print(f"Failed to update {column_name} for record ID {record_id}: {e}")
+        logger.info("Successfully updated %s for record ID %s", column_name, record_id)
+    except Exception:
+        logger.exception("Failed to update %s for record ID %s", column_name, record_id)
 
 def check_vt_malware_size(id):
     return check_column_value_by_id("malware_samples", "sample_size", id)
@@ -95,6 +95,7 @@ def disk_usage_report(min_size_mb: float = 0.0):
         disk_usage = execute_query(query, params=(db_config.DB_DATABASE, min_size_mb), fetch=True)
 
         if not disk_usage:
+            logger.info("No disk usage data available")
             print("\n[INFO] No disk usage data available.")
             return
         

@@ -35,12 +35,10 @@ def get_database_connection():
 
 def execute_query(query: str, params: tuple = None, fetch: bool = False):
     with database_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(query, params or ())
-        if fetch:
-            return cursor.fetchall()
-        
-        conn.commit()
+        with conn.cursor() as cursor:
+            cursor.execute(query, params or ())
+            if fetch:
+                return cursor.fetchall()
 
 def execute_insert(table, data):
     try:
@@ -73,9 +71,9 @@ def test_connection():
     conn = None
     try:
         conn = mysql.connector.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE)
-        print("Database connection successful.")
-    except mysql.connector.Error as e:
-        print("Database connection failed")
+        logger.info("Database connection successful.")
+    except mysql.connector.Error:
+        logger.exception("Database connection failed")
     finally:
         if conn and conn.is_connected():
             conn.close()
@@ -108,20 +106,20 @@ def drop_table(table_name):
 def execute_query_with_params(query, params):
     try:
         return pd.DataFrame(execute_query(query, params=params, fetch=True))
-    except Exception as e:
-        print(f"An error occurred during query execution: {str(e)}")
+    except Exception:
+        logger.exception("An error occurred during query execution")
         return None
 
 def handle_errors(e):
-    print(f"An error occurred during query execution: {str(e)}")
+    logger.exception("An error occurred during query execution: %s", e)
 
 def generate_df_from_query(query, params=None, debugging=False):
     try:
         df = execute_query_with_params(query, params)
 
-        if df.empty:
+        if df is None or df.empty:
             if debugging:
-                print(f"No data available for query: {query}.")
+                logger.debug("No data available for query: %s.", query)
             return None
 
         return df
