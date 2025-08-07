@@ -107,7 +107,7 @@ def virustotal_menu():
         user_prompts.pause_until_keypress()
 
 def handle_response_data(response, sample_type):
-    report_data = vt_malware_classification.process_vt_response(response, sample_type)
+    report_data = vt_malware_classification.run_malware_classification(response, sample_type)
 
     while True:
         menu_title = "Data Results"
