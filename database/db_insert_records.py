@@ -1,6 +1,6 @@
 # db_insert_records.py
 
-from typing import Optional
+from typing import Optional, List
 from database import db_conn as dbConnect
 from utils import logging_utils
 
@@ -65,7 +65,7 @@ def insert_vt_providers(analysis_id: int, provider_name: str, apk_id: int) -> Op
 def add_hash_ioc_record(md5: str, sha1: str, sha256: str) -> Optional[bool]:
     # Ensure all hash values are provided
     if not md5 or not sha1 or not sha256:
-        print("[ERROR] All hash values (MD5, SHA1, SHA256) must be provided.")
+        logger.error("All hash values (MD5, SHA1, SHA256) must be provided.")
         return None
 
     # Construct the query
@@ -76,19 +76,21 @@ def add_hash_ioc_record(md5: str, sha1: str, sha256: str) -> Optional[bool]:
     try:
         result = execute_sql(query, params)
         return result
-    except Exception as e:
-        print(f"[ERROR] Error executing query: {e}")
+    except Exception:
+        logger.exception("Error executing query: %s", query)
         return None
 
 # Insert hash data into the hash_data_ioc table
 def insert_hash_data(md5: Optional[str], sha1: Optional[str], sha256: Optional[str]) -> Optional[bool]:
     # Ensure at least one hash value is provided
     if not (md5 or sha1 or sha256):
-        print("[ERROR] No valid hash provided for insertion.")
+        logger.error("No valid hash provided for insertion.")
         return None
 
     # Prepare query and parameters dynamically based on the hash values provided
-    values = params = columns = []
+    columns: List[str] = []
+    values: List[str] = []
+    params: List[str] = []
 
     if md5:
         columns.append("md5")
@@ -114,8 +116,8 @@ def insert_hash_data(md5: Optional[str], sha1: Optional[str], sha256: Optional[s
     try:
         result = execute_sql(query, tuple(params))
         return result
-    except Exception as e:
-        print(f"[ERROR] Error executing query: {e}")
+    except Exception:
+        logger.exception("Error executing query: %s", query)
         return None
 
 # Insert a malware sample record into the malware_samples table
@@ -135,7 +137,7 @@ def store_malware_sample(
 ) -> bool:
     # Validate that all essential hash values are provided
     if not (md5_hash and sha1_hash and sha256_hash):
-        print("[ERROR] Missing hash values. MD5, SHA1, and SHA256 are required.")
+        logger.error("Missing hash values. MD5, SHA1, and SHA256 are required.")
         return False
 
     # Define SQL query
@@ -156,6 +158,6 @@ def store_malware_sample(
     try:
         result = execute_sql(query, params)
         return bool(result)
-    except Exception as e:
-        print(f"[ERROR] Failed to insert malware sample: {e}")
+    except Exception:
+        logger.exception("Failed to insert malware sample: %s", malware_name)
         return False
