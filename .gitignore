@@ -28,13 +28,6 @@ build/
 dist/
 *.egg-info/
 
-# Installer files
-*.sh
-*.bat
-
-# Jupyter Notebook checkpoints (if any)
-.ipynb_checkpoints/
-
 # macOS
 .DS_Store
 
